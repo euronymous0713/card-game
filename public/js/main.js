@@ -66,18 +66,24 @@ window.onload = () => {
     };
 
     // =========================
-    // 退出
+    // 解散 / 退出
     // =========================
 
     leaveRoomButton.onclick = () => {
 
-        socket.emit("leaveRoom", currentRoomId);
+        if (isHost) {
 
-        // タイトルへ戻る
-        lobbyScreen.style.display = "none";
-        titleScreen.style.display = "block";
+            socket.emit("disbandRoom", currentRoomId);
 
-        // 名前保持される
+        } else {
+
+            socket.emit("leaveRoom", currentRoomId);
+
+            lobbyScreen.style.display = "none";
+            titleScreen.style.display = "block";
+
+        }
+
     };
 
     // =========================
@@ -109,6 +115,8 @@ window.onload = () => {
         currentRoomId = roomId;
         isHost = true;
 
+        leaveRoomButton.textContent = "ルーム解散";
+
         titleScreen.style.display = "none";
         lobbyScreen.style.display = "block";
 
@@ -125,6 +133,9 @@ window.onload = () => {
     socket.on("joinSuccess", (roomId) => {
 
         currentRoomId = roomId;
+        isHost = false;
+
+        leaveRoomButton.textContent = "退出する";
 
         titleScreen.style.display = "none";
         lobbyScreen.style.display = "block";
@@ -166,7 +177,6 @@ window.onload = () => {
 
         });
 
-        // ホストのみゲーム開始表示
         if (isHost && players.length >= 2 && allReady) {
 
             startButton.style.display = "block";
@@ -176,6 +186,21 @@ window.onload = () => {
             startButton.style.display = "none";
 
         }
+
+    });
+
+    // =========================
+    // ルーム解散
+    // =========================
+
+    socket.on("roomDisbanded", () => {
+
+        alert("ルームが解散されました");
+
+        currentRoomId = "";
+
+        lobbyScreen.style.display = "none";
+        titleScreen.style.display = "block";
 
     });
 

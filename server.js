@@ -33,7 +33,8 @@ io.on("connection", (socket) => {
         rooms[roomId].push({
             id: socket.id,
             name: playerName,
-            ready: false
+            ready: false,
+            host: true
         });
 
         socket.join(roomId);
@@ -67,7 +68,8 @@ io.on("connection", (socket) => {
         rooms[roomId].push({
             id: socket.id,
             name: playerName,
-            ready: false
+            ready: false,
+            host: false
         });
 
         socket.join(roomId);
@@ -137,12 +139,31 @@ io.on("connection", (socket) => {
 
         io.to(roomId).emit("updateRoom", rooms[roomId]);
 
-        // 空部屋削除
-        if (rooms[roomId].length === 0) {
+    });
 
-            delete rooms[roomId];
+    // =========================
+    // ルーム解散
+    // =========================
+
+    socket.on("disbandRoom", (roomId) => {
+
+        if (!rooms[roomId]) return;
+
+        io.to(roomId).emit("roomDisbanded");
+
+        const clients = io.sockets.adapter.rooms.get(roomId);
+
+        if (clients) {
+
+            clients.forEach(clientId => {
+
+                io.sockets.sockets.get(clientId)?.leave(roomId);
+
+            });
 
         }
+
+        delete rooms[roomId];
 
     });
 
@@ -154,17 +175,31 @@ io.on("connection", (socket) => {
 
         for (const roomId in rooms) {
 
-            rooms[roomId] = rooms[roomId].filter(
+            const room = rooms[roomId];
+
+            const disconnectedPlayer = room.find(
+                player => player.id === socket.id
+            );
+
+            if (!disconnectedPlayer) continue;
+
+            // ホスト切断 → 解散
+            if (disconnectedPlayer.host) {
+
+                io.to(roomId).emit("roomDisbanded");
+
+                delete rooms[roomId];
+
+                continue;
+
+            }
+
+            // 通常プレイヤー退出
+            rooms[roomId] = room.filter(
                 player => player.id !== socket.id
             );
 
             io.to(roomId).emit("updateRoom", rooms[roomId]);
-
-            if (rooms[roomId].length === 0) {
-
-                delete rooms[roomId];
-
-            }
 
         }
 

@@ -131,6 +131,24 @@ button:hover {
     background: #ff2a6d;
 }
 
+.lobby-buttons {
+
+    display: flex;
+
+    justify-content: center;
+
+    gap: 20px;
+
+    margin-top: 25px;
+
+    flex-wrap: wrap;
+}
+
+#startButton {
+
+    margin-top: 25px;
+}
+
 /* =========================
    ロビー
 ========================= */
