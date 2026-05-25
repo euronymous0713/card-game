@@ -247,28 +247,11 @@ window.onload = () => {
 
     readyButton.onclick = () => {
 
-        isReady = !isReady;
-
-        socket.on("toggleReady", ({ roomId, ready }) => {
-
-            const room = rooms[roomId];
-
-            if (!room) return;
-
-            const player = room.find(
-                p => p.id === socket.id
-            );
-
-            if (!player) return;
-
-            player.ready = ready;
-
-            io.to(roomId).emit(
-                "updateRoom",
-                room
-            );
-
+        socket.emit("toggleReady", {
+            roomId: currentRoomId
         });
+
+        isReady = !isReady;
 
         // 文言変更
         if (isReady) {

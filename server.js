@@ -20,10 +20,6 @@ io.on("connection", (socket) => {
 
     console.log("接続");
 
-    // =========================
-    // ルーム作成
-    // =========================
-
     socket.on("createRoom", (playerName) => {
 
         const roomId = generateRoomId();
@@ -45,24 +41,16 @@ io.on("connection", (socket) => {
 
     });
 
-    // =========================
-    // ルーム参加
-    // =========================
-
     socket.on("joinRoom", ({ roomId, playerName }) => {
 
         if (!rooms[roomId]) {
-
             socket.emit("errorMessage", "ルームが存在しません");
             return;
-
         }
 
         if (rooms[roomId].length >= 4) {
-
             socket.emit("errorMessage", "満員です");
             return;
-
         }
 
         rooms[roomId].push({
@@ -80,36 +68,18 @@ io.on("connection", (socket) => {
 
     });
 
-    // =========================
-    // 準備完了
-    // =========================
-
-    socket.on("toggleReady", (roomId) => {
+    socket.on("toggleReady", ({ roomId }) => {
 
         const room = rooms[roomId];
-
-        // ルームが存在しない
         if (!room) return;
 
-        // プレイヤー取得
-        const player = room.find(
-            p => p.id === socket.id
-        );
-
-        // プレイヤーが存在しない
+        const player = room.find(p => p.id === socket.id);
         if (!player) return;
 
-        // ready切り替え
         player.ready = !player.ready;
 
-        // 全員へ更新送信
         io.to(roomId).emit("updateRoom", room);
-
     });
-
-    // =========================
-    // ゲーム開始
-    // =========================
 
     socket.on("startGame", (roomId) => {
 
@@ -130,10 +100,6 @@ io.on("connection", (socket) => {
 
     });
 
-    // =========================
-    // 退出
-    // =========================
-
     socket.on("leaveRoom", (roomId) => {
 
         if (!rooms[roomId]) return;
@@ -147,10 +113,6 @@ io.on("connection", (socket) => {
         io.to(roomId).emit("updateRoom", rooms[roomId]);
 
     });
-
-    // =========================
-    // ルーム解散
-    // =========================
 
     socket.on("disbandRoom", (roomId) => {
 
@@ -174,10 +136,6 @@ io.on("connection", (socket) => {
 
     });
 
-    // =========================
-    // 切断
-    // =========================
-
     socket.on("disconnect", () => {
 
         for (const roomId in rooms) {
@@ -190,7 +148,6 @@ io.on("connection", (socket) => {
 
             if (!disconnectedPlayer) continue;
 
-            // ホスト切断 → 解散
             if (disconnectedPlayer.host) {
 
                 io.to(roomId).emit("roomDisbanded");
@@ -201,7 +158,6 @@ io.on("connection", (socket) => {
 
             }
 
-            // 通常プレイヤー退出
             rooms[roomId] = room.filter(
                 player => player.id !== socket.id
             );
