@@ -1,0 +1,72 @@
+body {
+    margin: 0;
+    font-family: "Arial", sans-serif;
+    background: linear-gradient(135deg, #120018, #220033);
+    color: white;
+    overflow: hidden;
+}
+
+/* タイトル画面 */
+.title-screen {
+    height: 100vh;
+
+    display: flex;
+    flex-direction: column;
+
+    justify-content: center;
+    align-items: center;
+
+    text-align: center;
+}
+
+/* タイトル */
+.game-title {
+    font-size: 72px;
+    font-weight: bold;
+
+    color: #ff4fd8;
+
+    text-shadow:
+        0 0 10px #ff4fd8,
+        0 0 30px #ff4fd8,
+        0 0 60px #ff4fd8;
+
+    margin-bottom: 20px;
+}
+
+/* サブタイトル */
+.subtitle {
+    font-size: 20px;
+    color: #cccccc;
+    margin-bottom: 50px;
+}
+
+/* ボタン */
+.menu-button {
+    width: 260px;
+
+    padding: 18px;
+    margin: 10px;
+
+    border: none;
+    border-radius: 14px;
+
+    font-size: 24px;
+    font-weight: bold;
+
+    cursor: pointer;
+
+    background: linear-gradient(90deg, #ff00cc, #3333ff);
+
+    color: white;
+
+    transition: 0.2s;
+}
+
+.menu-button:hover {
+    transform: scale(1.05);
+
+    box-shadow:
+        0 0 15px #ff00cc,
+        0 0 30px #3333ff;
+}

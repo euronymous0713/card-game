@@ -5,155 +5,34 @@
   <meta charset="UTF-8">
   <title>インターネット世紀末</title>
 
-  <style>
-    body {
-      margin: 0;
-      background: black;
-      color: #00ff88;
-      font-family: sans-serif;
-      text-align: center;
-      overflow: hidden;
-    }
-
-    h1 {
-      margin-top: 120px;
-      font-size: 64px;
-      text-shadow: 0 0 20px #00ff88;
-    }
-
-    .subtitle {
-      margin-bottom: 60px;
-      color: #999;
-    }
-
-    .menu {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-      width: 300px;
-      margin: auto;
-    }
-
-    button {
-      padding: 18px;
-      font-size: 24px;
-      border: none;
-      background: #111;
-      color: #00ff88;
-      cursor: pointer;
-      border: 2px solid #00ff88;
-      transition: 0.2s;
-    }
-
-    button:hover {
-      background: #00ff88;
-      color: black;
-    }
-
-    .footer {
-      position: absolute;
-      bottom: 20px;
-      width: 100%;
-      color: #666;
-      font-size: 14px;
-    }
-
-    .hidden {
-      display: none;
-    }
-
-    input {
-      padding: 15px;
-      width: 300px;
-      margin-bottom: 20px;
-      background: #111;
-      color: #00ff88;
-      border: 2px solid #00ff88;
-      font-size: 20px;
-    }
-
-    #playerList {
-      margin-top: 30px;
-      font-size: 24px;
-    }
-  </style>
+  <!-- CSS読み込み -->
+  <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
 
-  <div id="titleScreen">
+  <div class="title-screen">
 
-    <h1>インターネット世紀末</h1>
+    <h1 class="game-title">
+      インターネット世紀末
+    </h1>
 
-    <div class="subtitle">
-      「伏せ・ブラフ・読み合い」
+    <p class="subtitle">
+      伏せ・ブラフ・読み合いカードゲーム
       <br>
       インターネットが崩壊した世界で、最後のネットゲームをプレイせよ。
-    </div>
+    </p>
 
-    <div class="menu">
-      <button onclick="showCreateRoom()">
-        ルーム作成
-      </button>
-
-      <button onclick="showJoinRoom()">
-        ルーム参加
-      </button>
-    </div>
-
-  </div>
-
-  <div id="createRoomScreen" class="hidden">
-
-    <h1>ルーム作成</h1>
-
-    <input id="playerName" placeholder="名前を入力">
-
-    <button onclick="createRoom()">
-      作成
+    <button class="menu-button">
+      ルーム作成
     </button>
 
-    <button onclick="backToTitle()">
-      戻る
+    <button class="menu-button">
+      ルーム参加
     </button>
 
   </div>
-
-  <div id="joinRoomScreen" class="hidden">
-
-    <h1>ルーム参加</h1>
-
-    <input id="joinName" placeholder="名前">
-
-    <input id="roomCode" placeholder="ルームコード">
-
-    <button onclick="joinRoom()">
-      参加
-    </button>
-
-    <button onclick="backToTitle()">
-      戻る
-    </button>
-
-  </div>
-
-  <div id="roomScreen" class="hidden">
-
-    <h1>待機ルーム</h1>
-
-    <div id="roomInfo"></div>
-
-    <div id="playerList"></div>
-
-    <button>
-      ゲーム開始
-    </button>
-
-  </div>
-
-  <script src="/socket.io/socket.io.js"></script>
-  <script src="main.js"></script>
-
+  <script src="js/main.js"></script>
 </body>
 
 </html>
