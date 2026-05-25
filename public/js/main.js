@@ -37,7 +37,7 @@ window.onload = () => {
         document.getElementById("nameInput");
 
     // =========================
-    // 状態管理
+    // 状態
     // =========================
 
     let currentRoomId = "";
@@ -45,7 +45,8 @@ window.onload = () => {
     let isReady = false;
 
     // 名前保持
-    const savedName = localStorage.getItem("playerName");
+    const savedName =
+        localStorage.getItem("playerName");
 
     if (savedName) {
         nameInput.value = savedName;
@@ -57,16 +58,23 @@ window.onload = () => {
 
     createRoomButton.onclick = () => {
 
-        const playerName = nameInput.value.trim();
+        const playerName =
+            nameInput.value.trim();
 
         if (!playerName) {
             alert("名前を入力してください");
             return;
         }
 
-        localStorage.setItem("playerName", playerName);
+        localStorage.setItem(
+            "playerName",
+            playerName
+        );
 
-        socket.emit("createRoom", playerName);
+        socket.emit(
+            "createRoom",
+            playerName
+        );
 
     };
 
@@ -76,7 +84,8 @@ window.onload = () => {
 
     joinRoomButton.onclick = () => {
 
-        const playerName = nameInput.value.trim();
+        const playerName =
+            nameInput.value.trim();
 
         if (!playerName) {
             alert("名前を入力してください");
@@ -88,7 +97,10 @@ window.onload = () => {
 
         if (!roomId) return;
 
-        localStorage.setItem("playerName", playerName);
+        localStorage.setItem(
+            "playerName",
+            playerName
+        );
 
         socket.emit("joinRoom", {
             roomId,
@@ -104,6 +116,7 @@ window.onload = () => {
     socket.on("roomCreated", (roomId) => {
 
         currentRoomId = roomId;
+
         isRoomOwner = true;
 
         titleScreen.style.display = "none";
@@ -112,9 +125,11 @@ window.onload = () => {
         roomIdText.innerText =
             `ルームID : ${roomId}`;
 
-        leaveRoomButton.innerText = "ルーム解散";
+        leaveRoomButton.innerText =
+            "ルーム解散";
 
-        startGameButton.style.display = "block";
+        startGameButton.style.display =
+            "block";
 
     });
 
@@ -125,6 +140,7 @@ window.onload = () => {
     socket.on("joinSuccess", (roomId) => {
 
         currentRoomId = roomId;
+
         isRoomOwner = false;
 
         titleScreen.style.display = "none";
@@ -133,9 +149,11 @@ window.onload = () => {
         roomIdText.innerText =
             `ルームID : ${roomId}`;
 
-        leaveRoomButton.innerText = "退出";
+        leaveRoomButton.innerText =
+            "退出";
 
-        startGameButton.style.display = "none";
+        startGameButton.style.display =
+            "none";
 
     });
 
@@ -149,6 +167,38 @@ window.onload = () => {
 
         let allReady = true;
 
+        // 自分の状態取得
+        const me = players.find(
+            p => p.id === socket.id
+        );
+
+        if (me) {
+
+            isReady = me.ready;
+
+            // ボタン見た目同期
+            if (isReady) {
+
+                readyButton.innerText =
+                    "準備解除";
+
+                readyButton.classList.add(
+                    "cancel-ready"
+                );
+
+            } else {
+
+                readyButton.innerText =
+                    "準備完了";
+
+                readyButton.classList.remove(
+                    "cancel-ready"
+                );
+
+            }
+
+        }
+
         players.forEach(player => {
 
             if (!player.ready) {
@@ -157,77 +207,117 @@ window.onload = () => {
 
             playerList.innerHTML += `
 
-                <div class="
-                    player-card
-                    ${player.ready ? "ready" : "not-ready"}
-                ">
+            <div class="
+                player-card
+                ${player.ready
+                    ? "ready"
+                    : "not-ready"}
+            ">
 
-                    <span class="player-name">
-                        ${player.name}
-                    </span>
+                <span class="player-name">
+                    ${player.name}
+                </span>
 
-                    <span class="player-status">
-                        ${player.ready ? "準備完了" : "準備中"}
-                    </span>
+                <span class="player-status">
+                    ${player.ready
+                    ? "準備完了"
+                    : "待機中"}
+                </span>
 
-                </div>
+            </div>
 
-            `;
+        `;
 
         });
 
-        // 全員準備完了で開始可能
-        if (isRoomOwner && players.length >= 2) {
+        // 開始ボタン制御
+        if (isRoomOwner &&
+            players.length >= 2) {
 
-            startGameButton.disabled = !allReady;
+            startGameButton.disabled =
+                !allReady;
 
         }
 
     });
 
     // =========================
-    // 準備完了
+    // 準備ボタン
     // =========================
 
     readyButton.onclick = () => {
 
         isReady = !isReady;
 
-        socket.emit("toggleReady", {
-            roomId: currentRoomId,
-            ready: isReady
+        socket.on("toggleReady", ({ roomId, ready }) => {
+
+            const room = rooms[roomId];
+
+            if (!room) return;
+
+            const player = room.find(
+                p => p.id === socket.id
+            );
+
+            if (!player) return;
+
+            player.ready = ready;
+
+            io.to(roomId).emit(
+                "updateRoom",
+                room
+            );
+
         });
 
-        // ボタン変更
+        // 文言変更
         if (isReady) {
 
-            readyButton.innerText = "準備中に戻す";
-            readyButton.classList.add("cancel-ready");
+            readyButton.innerText =
+                "準備解除";
+
+            readyButton.classList.add(
+                "cancel-ready"
+            );
 
         } else {
 
-            readyButton.innerText = "準備完了";
-            readyButton.classList.remove("cancel-ready");
+            readyButton.innerText =
+                "準備完了";
+
+            readyButton.classList.remove(
+                "cancel-ready"
+            );
 
         }
 
     };
 
     // =========================
-    // 退出 / 解散
+    // 退出
     // =========================
 
     leaveRoomButton.onclick = () => {
 
-        socket.emit("leaveRoom", currentRoomId);
+        socket.emit(
+            "leaveRoom",
+            currentRoomId
+        );
 
-        titleScreen.style.display = "flex";
-        lobbyScreen.style.display = "none";
+        titleScreen.style.display =
+            "flex";
+
+        lobbyScreen.style.display =
+            "none";
 
         isReady = false;
 
-        readyButton.innerText = "準備完了";
-        readyButton.classList.remove("cancel-ready");
+        readyButton.innerText =
+            "準備完了";
+
+        readyButton.classList.remove(
+            "cancel-ready"
+        );
 
     };
 
@@ -235,17 +325,26 @@ window.onload = () => {
     // ルーム解散
     // =========================
 
-    socket.on("roomClosed", () => {
+    socket.on("roomDisbanded", () => {
 
-        alert("ルームが解散されました");
+        alert(
+            "ルームが解散されました"
+        );
 
-        titleScreen.style.display = "flex";
-        lobbyScreen.style.display = "none";
+        titleScreen.style.display =
+            "flex";
+
+        lobbyScreen.style.display =
+            "none";
 
         isReady = false;
 
-        readyButton.innerText = "準備完了";
-        readyButton.classList.remove("cancel-ready");
+        readyButton.innerText =
+            "準備完了";
+
+        readyButton.classList.remove(
+            "cancel-ready"
+        );
 
     });
 
@@ -263,10 +362,13 @@ window.onload = () => {
     // エラー
     // =========================
 
-    socket.on("errorMessage", (message) => {
+    socket.on(
+        "errorMessage",
+        (message) => {
 
-        alert(message);
+            alert(message);
 
-    });
+        }
+    );
 
 };

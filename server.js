@@ -84,18 +84,25 @@ io.on("connection", (socket) => {
     // 準備完了
     // =========================
 
-    socket.on("playerReady", (roomId) => {
+    socket.on("toggleReady", (roomId) => {
 
         const room = rooms[roomId];
 
+        // ルームが存在しない
         if (!room) return;
 
-        const player = room.find(p => p.id === socket.id);
+        // プレイヤー取得
+        const player = room.find(
+            p => p.id === socket.id
+        );
 
+        // プレイヤーが存在しない
         if (!player) return;
 
+        // ready切り替え
         player.ready = !player.ready;
 
+        // 全員へ更新送信
         io.to(roomId).emit("updateRoom", room);
 
     });
