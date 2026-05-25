@@ -5,58 +5,80 @@ const { Server } = require("socket.io");
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
-const rooms = {};
 
+// publicフォルダ公開
 app.use(express.static("public"));
 
+const rooms = {};
+
+// 接続時
 io.on("connection", (socket) => {
+
     console.log("接続:", socket.id);
 
-    socket.on("attack", () => {
-        io.emit("message", "攻撃！");
-    });
-    socket.on("createRoom", ({ roomCode, name }) => {
+    // ルーム作成
+    socket.on("createRoom", () => {
 
-        rooms[roomCode] = {
-            roomCode,
-            players: []
-        };
+        const roomId = Math.floor(1000 + Math.random() * 9000).toString();
 
-        rooms[roomCode].players.push({
-            id: socket.id,
-            name
-        });
+        rooms[roomId] = [];
 
-        socket.join(roomCode);
+        rooms[roomId].push(socket.id);
 
-        io.to(roomCode).emit(
-            "roomJoined",
-            rooms[roomCode]
-        );
+        socket.join(roomId);
 
+        socket.emit("roomCreated", roomId);
+
+        io.to(roomId).emit("updatePlayers", rooms[roomId]);
+
+        console.log("ルーム作成:", roomId);
     });
 
-    socket.on("joinRoom", ({ roomCode, name }) => {
+    // ルーム参加
+    socket.on("joinRoom", (roomId) => {
 
-        const room = rooms[roomCode];
+        if (!rooms[roomId]) {
+            socket.emit("joinError", "ルームが存在しません");
+            return;
+        }
 
-        if (!room) return;
+        if (rooms[roomId].length >= 4) {
+            socket.emit("joinError", "ルームが満員です");
+            return;
+        }
 
-        room.players.push({
-            id: socket.id,
-            name
-        });
+        rooms[roomId].push(socket.id);
 
-        socket.join(roomCode);
+        socket.join(roomId);
 
-        io.to(roomCode).emit(
-            "roomJoined",
-            room
-        );
+        io.to(roomId).emit("updatePlayers", rooms[roomId]);
 
+        console.log("参加:", roomId);
+    });
+
+    // 切断
+    socket.on("disconnect", () => {
+
+        console.log("切断:", socket.id);
+
+        for (const roomId in rooms) {
+
+            rooms[roomId] =
+                rooms[roomId].filter(id => id !== socket.id);
+
+            io.to(roomId).emit("updatePlayers", rooms[roomId]);
+
+            // 空なら削除
+            if (rooms[roomId].length === 0) {
+                delete rooms[roomId];
+            }
+        }
     });
 });
 
-server.listen(3000, () => {
+// Render対応
+const PORT = process.env.PORT || 3000;
+
+server.listen(PORT, () => {
     console.log("サーバー起動");
 });

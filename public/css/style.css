@@ -1,72 +1,126 @@
 body {
     margin: 0;
-    font-family: "Arial", sans-serif;
-    background: linear-gradient(135deg, #120018, #220033);
+    font-family: sans-serif;
+
+    background:
+        linear-gradient(135deg, #0f0018, #210033);
+
     color: white;
+
     overflow: hidden;
 }
 
-/* タイトル画面 */
 .title-screen {
+
     height: 100vh;
 
     display: flex;
+
     flex-direction: column;
 
     justify-content: center;
+
     align-items: center;
 
     text-align: center;
 }
 
-/* タイトル */
 .game-title {
+
     font-size: 72px;
-    font-weight: bold;
 
     color: #ff4fd8;
+
+    margin-bottom: 10px;
 
     text-shadow:
         0 0 10px #ff4fd8,
         0 0 30px #ff4fd8,
         0 0 60px #ff4fd8;
-
-    margin-bottom: 20px;
 }
 
-/* サブタイトル */
 .subtitle {
-    font-size: 20px;
+
+    font-size: 22px;
+
     color: #cccccc;
-    margin-bottom: 50px;
+
+    margin-bottom: 40px;
 }
 
-/* ボタン */
 .menu-button {
+
     width: 260px;
 
     padding: 18px;
+
     margin: 10px;
 
     border: none;
+
     border-radius: 14px;
 
     font-size: 24px;
+
     font-weight: bold;
 
     cursor: pointer;
 
-    background: linear-gradient(90deg, #ff00cc, #3333ff);
-
     color: white;
+
+    background:
+        linear-gradient(90deg, #ff00cc, #3333ff);
 
     transition: 0.2s;
 }
 
 .menu-button:hover {
+
     transform: scale(1.05);
 
     box-shadow:
         0 0 15px #ff00cc,
         0 0 30px #3333ff;
+}
+
+.join-area {
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+}
+
+#roomInput {
+
+    width: 240px;
+
+    padding: 12px;
+
+    border-radius: 10px;
+
+    border: none;
+
+    margin-top: 10px;
+
+    text-align: center;
+
+    font-size: 20px;
+}
+
+#roomInfo {
+
+    margin-top: 30px;
+
+    font-size: 28px;
+
+    color: #00ffe1;
+}
+
+#playerList {
+
+    margin-top: 20px;
+
+    font-size: 22px;
 }
