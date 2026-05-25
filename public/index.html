@@ -1,19 +1,81 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <title>カードゲーム</title>
+  <meta charset="UTF-8">
+  <title>インターネット世紀末</title>
+
+  <style>
+    body {
+      margin: 0;
+      background: black;
+      color: #00ff88;
+      font-family: sans-serif;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    h1 {
+      margin-top: 120px;
+      font-size: 64px;
+      text-shadow: 0 0 20px #00ff88;
+    }
+
+    .subtitle {
+      margin-bottom: 60px;
+      color: #999;
+    }
+
+    .menu {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      width: 300px;
+      margin: auto;
+    }
+
+    button {
+      padding: 18px;
+      font-size: 24px;
+      border: none;
+      background: #111;
+      color: #00ff88;
+      cursor: pointer;
+      border: 2px solid #00ff88;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      background: #00ff88;
+      color: black;
+    }
+
+    .footer {
+      position: absolute;
+      bottom: 20px;
+      width: 100%;
+      color: #666;
+      font-size: 14px;
+    }
+  </style>
 </head>
+
 <body>
 
-<h1>カードゲーム</h1>
+  <h1>インターネット世紀末</h1>
 
-<button id="attack">攻撃</button>
+  <div class="subtitle">
+    「お前、まだROMってんの？」
+  </div>
 
-<div id="log"></div>
+  <div class="menu">
+    <button>ゲーム開始</button>
+    <button>ルーム作成</button>
+    <button>ルーム参加</button>
+  </div>
 
-<script src="/socket.io/socket.io.js"></script>
-<script src="main.js"></script>
+  <div class="footer">
+    Internet Apocalypse
+  </div>
 
 </body>
 </html>
