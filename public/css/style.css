@@ -1,8 +1,178 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+
+    background:
+        linear-gradient(135deg,
+            #0f0f1a,
+            #1a1a2e,
+            #16213e);
+
+    color: white;
+
+    font-family:
+        "Segoe UI",
+        sans-serif;
+
+    min-height: 100vh;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    padding: 20px;
+}
+
+/* =========================
+   タイトル画面
+========================= */
+
+.title-screen {
+
+    width: 100%;
+    max-width: 700px;
+
+    text-align: center;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.game-title {
+
+    font-size: clamp(42px, 8vw, 72px);
+
+    font-weight: bold;
+
+    background:
+        linear-gradient(90deg,
+            #ff00c8,
+            #00ffe1);
+
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+
+    margin-bottom: 20px;
+
+    text-shadow:
+        0 0 20px rgba(255, 255, 255, 0.2);
+}
+
+.subtitle {
+
+    font-size: clamp(14px, 2vw, 20px);
+
+    line-height: 1.8;
+
+    opacity: 0.85;
+
+    margin-bottom: 30px;
+}
+
+/* =========================
+   名前入力
+========================= */
+
+#nameInput {
+
+    width: 100%;
+    max-width: 320px;
+
+    padding: 14px;
+
+    border: none;
+    border-radius: 12px;
+
+    font-size: 18px;
+
+    margin-bottom: 24px;
+
+    outline: none;
+
+    background:
+        rgba(255, 255, 255, 0.1);
+
+    color: white;
+}
+
+/* =========================
+   メニューボタン
+========================= */
+
+.menu-buttons {
+
+    display: flex;
+    gap: 20px;
+
+    flex-wrap: wrap;
+
+    justify-content: center;
+}
+
+button {
+
+    padding:
+        14px 28px;
+
+    border: none;
+    border-radius: 14px;
+
+    font-size: 18px;
+    font-weight: bold;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+
+    color: white;
+
+    background:
+        linear-gradient(135deg,
+            #ff00c8,
+            #7a00ff);
+}
+
+button:hover {
+
+    transform: scale(1.05);
+
+    opacity: 0.9;
+}
+
+/* =========================
+   ロビー画面
+========================= */
+
+#lobbyScreen {
+
+    width: 100%;
+    max-width: 700px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#roomIdText {
+
+    margin-top: 12px;
+    margin-bottom: 18px;
+
+    font-size: 20px;
+    font-weight: bold;
+}
+
 /* =========================
    プレイヤーカード
 ========================= */
 
 .player-card {
+
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -11,7 +181,9 @@
     max-width: 420px;
 
     margin-top: 12px;
-    padding: 14px 18px;
+
+    padding:
+        14px 18px;
 
     border-radius: 12px;
 
@@ -24,41 +196,57 @@
 /* 未準備 */
 
 .not-ready {
-    background: rgba(255, 255, 255, 0.08);
-    border: 2px solid rgba(255, 255, 255, 0.1);
+
+    background:
+        rgba(255, 255, 255, 0.08);
+
+    border:
+        2px solid rgba(255, 255, 255, 0.1);
 }
 
 /* 準備完了 */
 
 .ready {
-    background: rgba(0, 255, 170, 0.18);
-    border: 2px solid #00ffaa;
+
+    background:
+        rgba(0, 255, 170, 0.18);
+
+    border:
+        2px solid #00ffaa;
 
     box-shadow:
         0 0 10px rgba(0, 255, 170, 0.4);
 }
 
 .player-status {
+
     font-size: 14px;
 }
 
 /* =========================
-   ボタン間隔
+   ロビーボタン
 ========================= */
 
 .lobby-buttons {
+
     display: flex;
     gap: 16px;
 
-    margin-top: 20px;
+    margin-top: 24px;
+
+    flex-wrap: wrap;
+
+    justify-content: center;
 }
 
 /* =========================
-   準備キャンセル
+   準備キャンセルボタン
 ========================= */
 
 .cancel-ready {
-    background: linear-gradient(135deg,
+
+    background:
+        linear-gradient(135deg,
             #ff7b7b,
             #ff3c3c) !important;
 }
@@ -69,7 +257,7 @@
 
 #startGameButton {
 
-    margin-top: 24px;
+    margin-top: 28px;
 
     padding:
         16px 42px;
@@ -77,36 +265,72 @@
     font-size: 22px;
     font-weight: bold;
 
-    border: none;
     border-radius: 14px;
-
-    cursor: pointer;
-
-    color: white;
 
     background:
         linear-gradient(135deg,
-            #ff00c8,
-            #7a00ff);
+            #00ffd5,
+            #0099ff);
 
     box-shadow:
-        0 0 18px rgba(255, 0, 200, 0.5);
-
-    transition: 0.2s;
+        0 0 18px rgba(0, 255, 213, 0.5);
 }
 
 #startGameButton:hover {
 
-    transform: scale(1.05);
+    transform: scale(1.08);
 
     box-shadow:
-        0 0 28px rgba(255, 0, 200, 0.8);
+        0 0 30px rgba(0, 255, 213, 0.9);
 }
 
 #startGameButton:disabled {
 
     opacity: 0.4;
+
     cursor: not-allowed;
 
     transform: none;
+}
+
+/* =========================
+   スマホ対応
+========================= */
+
+@media screen and (max-width: 768px) {
+
+    .game-title {
+
+        font-size: 48px;
+    }
+
+    .subtitle {
+
+        font-size: 15px;
+    }
+
+    button {
+
+        width: 100%;
+        max-width: 300px;
+    }
+
+    .menu-buttons {
+
+        width: 100%;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .lobby-buttons {
+
+        width: 100%;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .player-card {
+
+        font-size: 16px;
+    }
 }
