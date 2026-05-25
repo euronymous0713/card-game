@@ -1,90 +1,183 @@
+* {
+    box-sizing: border-box;
+}
+
 body {
+
     margin: 0;
     padding: 0;
 
-    background: linear-gradient(135deg, #0f0f0f, #1a1a2e);
+    min-height: 100vh;
 
+    background: #0f1117;
     color: white;
 
     font-family: sans-serif;
 
-    height: 100vh;
-
     display: flex;
     justify-content: center;
     align-items: center;
+
+    overflow-x: hidden;
 }
+
+/* =========================
+   タイトル画面
+========================= */
 
 .title-screen {
+
+    width: 90%;
+    max-width: 800px;
+
     text-align: center;
+
+    padding: 40px 20px;
 }
 
+/* =========================
+   タイトル
+========================= */
+
 .game-title {
-    font-size: 64px;
+
+    font-size: 72px;
+
+    margin-bottom: 20px;
 
     color: #ff2a6d;
 
     text-shadow:
         0 0 10px #ff2a6d,
-        0 0 20px #ff2a6d;
-
-    margin-bottom: 10px;
+        0 0 30px #ff2a6d;
 }
 
-.sub-title {
-    color: #aaa;
+/* =========================
+   サブタイトル
+========================= */
+
+.subtitle {
+
+    font-size: 18px;
+
+    line-height: 1.8;
+
+    color: #cfcfcf;
 
     margin-bottom: 40px;
-
-    font-size: 20px;
 }
 
+/* =========================
+   名前入力
+========================= */
+
 #nameInput {
-    width: 300px;
-    padding: 12px;
+
+    width: 100%;
+    max-width: 320px;
+
+    padding: 14px;
 
     border: none;
     border-radius: 10px;
 
     font-size: 18px;
 
-    margin-bottom: 20px;
+    margin-bottom: 30px;
 }
 
+/* =========================
+   ボタンエリア
+========================= */
+
 .menu-buttons {
+
     display: flex;
+
+    justify-content: center;
 
     gap: 20px;
 
-    justify-content: center;
+    flex-wrap: wrap;
 }
 
-button {
-    padding: 15px 40px;
+/* =========================
+   ボタン
+========================= */
 
-    font-size: 20px;
+button {
+
+    width: 220px;
+
+    padding: 15px;
 
     border: none;
-
     border-radius: 12px;
+
+    font-size: 18px;
 
     cursor: pointer;
 
-    background: #ff2a6d;
-
+    background: #1f2330;
     color: white;
 
     transition: 0.2s;
 }
 
 button:hover {
+
     transform: scale(1.05);
 
-    background: #ff4d88;
+    background: #ff2a6d;
 }
 
-#roomInfo {
-    margin-top: 30px;
+/* =========================
+   ロビー
+========================= */
 
-    font-size: 20px;
+#lobbyScreen {
+
+    width: 90%;
+    max-width: 700px;
+
+    text-align: center;
+}
+
+/* =========================
+   プレイヤーカード
+========================= */
+
+.player-card {
+
+    background: #1a1d29;
+
+    padding: 15px;
+
+    margin-top: 10px;
+
+    border-radius: 10px;
+}
+
+/* =========================
+   スマホ対応
+========================= */
+
+@media screen and (max-width: 600px) {
+
+    .game-title {
+
+        font-size: 42px;
+    }
+
+    .subtitle {
+
+        font-size: 14px;
+    }
+
+    button {
+
+        width: 100%;
+        max-width: 300px;
+    }
+
 }
