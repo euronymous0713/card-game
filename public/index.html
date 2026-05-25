@@ -3,15 +3,16 @@
 
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>インターネット世紀末</title>
 
-  <!-- CSS読み込み -->
   <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
 
-  <div class="title-screen">
+  <!-- タイトル画面 -->
+  <div class="title-screen" id="titleScreen">
 
     <h1 class="game-title">
       インターネット世紀末
@@ -20,19 +21,47 @@
     <p class="subtitle">
       伏せ・ブラフ・読み合いカードゲーム
       <br>
-      インターネットが崩壊した世界で、最後のネットゲームをプレイせよ。
+      インターネットが崩壊した世界で、
+      最後のネットゲームをプレイせよ。
     </p>
 
-    <button class="menu-button">
-      ルーム作成
-    </button>
+    <input type="text" id="nameInput" placeholder="名前を入力" maxlength="12">
 
-    <button class="menu-button">
-      ルーム参加
+    <div class="menu-buttons">
+
+      <button id="createRoomButton">
+        ルーム作成
+      </button>
+
+      <button id="joinRoomButton">
+        ルーム参加
+      </button>
+
+    </div>
+
+  </div>
+
+  <!-- ロビー画面 -->
+  <div id="lobbyScreen" style="display:none;">
+
+    <h2>待機画面</h2>
+
+    <p id="roomIdText"></p>
+
+    <div id="playerList"></div>
+
+    <button id="readyButton">
+      準備完了
     </button>
 
   </div>
+
+  <!-- Socket.IO -->
+  <script src="/socket.io/socket.io.js"></script>
+
+  <!-- JS -->
   <script src="js/main.js"></script>
+
 </body>
 
 </html>

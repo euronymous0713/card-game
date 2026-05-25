@@ -1,51 +1,125 @@
 const socket = io();
 
-const createRoomButton =
-    document.getElementById("createRoomButton");
+window.onload = () => {
 
-const joinRoomButton =
-    document.getElementById("joinRoomButton");
+    // =========================
+    // 要素取得
+    // =========================
 
-const roomInput =
-    document.getElementById("roomInput");
+    const titleScreen = document.getElementById("titleScreen");
+    const lobbyScreen = document.getElementById("lobbyScreen");
 
-const roomInfo =
-    document.getElementById("roomInfo");
+    const createRoomButton = document.getElementById("createRoomButton");
+    const joinRoomButton = document.getElementById("joinRoomButton");
 
-const playerList =
-    document.getElementById("playerList");
+    const roomIdText = document.getElementById("roomIdText");
+    const playerList = document.getElementById("playerList");
 
-// ルーム作成
-createRoomButton.onclick = () => {
+    const nameInput = document.getElementById("nameInput");
 
-    socket.emit("createRoom");
+    // =========================
+    // ルーム作成
+    // =========================
+
+    createRoomButton.onclick = () => {
+
+        const playerName = nameInput.value.trim();
+
+        if (playerName === "") {
+            alert("名前を入力してください");
+            return;
+        }
+
+        socket.emit("createRoom", playerName);
+
+    };
+
+    // =========================
+    // ルーム参加
+    // =========================
+
+    joinRoomButton.onclick = () => {
+
+        const playerName = nameInput.value.trim();
+
+        if (playerName === "") {
+            alert("名前を入力してください");
+            return;
+        }
+
+        const roomId = prompt("ルームIDを入力してください");
+
+        if (!roomId) return;
+
+        socket.emit("joinRoom", {
+            roomId,
+            playerName
+        });
+
+    };
+
+    // =========================
+    // ルーム作成成功
+    // =========================
+
+    socket.on("roomCreated", (roomId) => {
+
+        // タイトル画面を消す
+        titleScreen.style.display = "none";
+
+        // ロビー画面表示
+        lobbyScreen.style.display = "block";
+
+        roomIdText.innerHTML = `
+            ルームID : ${roomId}
+        `;
+
+    });
+
+    // =========================
+    // 参加成功
+    // =========================
+
+    socket.on("joinSuccess", (roomId) => {
+
+        titleScreen.style.display = "none";
+
+        lobbyScreen.style.display = "block";
+
+        roomIdText.innerHTML = `
+            参加ルーム : ${roomId}
+        `;
+
+    });
+
+    // =========================
+    // プレイヤー一覧更新
+    // =========================
+
+    socket.on("updateRoom", (players) => {
+
+        playerList.innerHTML = "";
+
+        players.forEach(player => {
+
+            playerList.innerHTML += `
+                <div class="player-card">
+                    ${player.name}
+                </div>
+            `;
+
+        });
+
+    });
+
+    // =========================
+    // エラー
+    // =========================
+
+    socket.on("errorMessage", (message) => {
+
+        alert(message);
+
+    });
+
 };
-
-// ルーム参加
-joinRoomButton.onclick = () => {
-
-    const roomId = roomInput.value;
-
-    socket.emit("joinRoom", roomId);
-};
-
-// 作成成功
-socket.on("roomCreated", (roomId) => {
-
-    roomInfo.innerHTML =
-        `ルーム番号: ${roomId}`;
-});
-
-// エラー
-socket.on("joinError", (message) => {
-
-    alert(message);
-});
-
-// プレイヤー更新
-socket.on("updatePlayers", (players) => {
-
-    playerList.innerHTML = `
-        参加人数: ${players.length}/4
-    `;
-});
