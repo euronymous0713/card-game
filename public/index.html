@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
   <meta charset="UTF-8">
   <title>インターネット世紀末</title>
@@ -56,26 +57,102 @@
       color: #666;
       font-size: 14px;
     }
+
+    .hidden {
+      display: none;
+    }
+
+    input {
+      padding: 15px;
+      width: 300px;
+      margin-bottom: 20px;
+      background: #111;
+      color: #00ff88;
+      border: 2px solid #00ff88;
+      font-size: 20px;
+    }
+
+    #playerList {
+      margin-top: 30px;
+      font-size: 24px;
+    }
   </style>
 </head>
 
 <body>
 
-  <h1>インターネット世紀末</h1>
+  <div id="titleScreen">
 
-  <div class="subtitle">
-    「お前、まだROMってんの？」
+    <h1>インターネット世紀末</h1>
+
+    <div class="subtitle">
+      「伏せ・ブラフ・読み合い」
+      インターネットが崩壊した世界で、最後のネットゲームをプレイせよ。
+    </div>
+
+    <div class="menu">
+      <button onclick="showCreateRoom()">
+        ルーム作成
+      </button>
+
+      <button onclick="showJoinRoom()">
+        ルーム参加
+      </button>
+    </div>
+
   </div>
 
-  <div class="menu">
-    <button>ゲーム開始</button>
-    <button>ルーム作成</button>
-    <button>ルーム参加</button>
+  <div id="createRoomScreen" class="hidden">
+
+    <h1>ルーム作成</h1>
+
+    <input id="playerName" placeholder="名前を入力">
+
+    <button onclick="createRoom()">
+      作成
+    </button>
+
+    <button onclick="backToTitle()">
+      戻る
+    </button>
+
   </div>
 
-  <div class="footer">
-    Internet Apocalypse
+  <div id="joinRoomScreen" class="hidden">
+
+    <h1>ルーム参加</h1>
+
+    <input id="joinName" placeholder="名前">
+
+    <input id="roomCode" placeholder="ルームコード">
+
+    <button onclick="joinRoom()">
+      参加
+    </button>
+
+    <button onclick="backToTitle()">
+      戻る
+    </button>
+
   </div>
+
+  <div id="roomScreen" class="hidden">
+
+    <h1>待機ルーム</h1>
+
+    <div id="roomInfo"></div>
+
+    <div id="playerList"></div>
+
+    <button>
+      ゲーム開始
+    </button>
+
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="main.js"></script>
 
 </body>
+
 </html>
