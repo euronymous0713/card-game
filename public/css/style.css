@@ -63,6 +63,8 @@ body {
         0 0 20px rgba(255, 255, 255, 0.2);
 
     white-space: nowrap;
+
+    font-size: clamp(32px, 8vw, 72px);
 }
 
 .subtitle {
