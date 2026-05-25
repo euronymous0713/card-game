@@ -6,23 +6,50 @@ window.onload = () => {
     // 要素取得
     // =========================
 
-    const titleScreen = document.getElementById("titleScreen");
-    const lobbyScreen = document.getElementById("lobbyScreen");
+    const titleScreen =
+        document.getElementById("titleScreen");
 
-    const createRoomButton = document.getElementById("createRoomButton");
-    const joinRoomButton = document.getElementById("joinRoomButton");
+    const lobbyScreen =
+        document.getElementById("lobbyScreen");
 
-    const readyButton = document.getElementById("readyButton");
-    const leaveRoomButton = document.getElementById("leaveRoomButton");
-    const startButton = document.getElementById("startButton");
+    const createRoomButton =
+        document.getElementById("createRoomButton");
 
-    const roomIdText = document.getElementById("roomIdText");
-    const playerList = document.getElementById("playerList");
+    const joinRoomButton =
+        document.getElementById("joinRoomButton");
 
-    const nameInput = document.getElementById("nameInput");
+    const readyButton =
+        document.getElementById("readyButton");
+
+    const leaveRoomButton =
+        document.getElementById("leaveRoomButton");
+
+    const startGameButton =
+        document.getElementById("startGameButton");
+
+    const roomIdText =
+        document.getElementById("roomIdText");
+
+    const playerList =
+        document.getElementById("playerList");
+
+    const nameInput =
+        document.getElementById("nameInput");
+
+    // =========================
+    // 状態管理
+    // =========================
 
     let currentRoomId = "";
-    let isHost = false;
+    let isRoomOwner = false;
+    let isReady = false;
+
+    // 名前保持
+    const savedName = localStorage.getItem("playerName");
+
+    if (savedName) {
+        nameInput.value = savedName;
+    }
 
     // =========================
     // ルーム作成
@@ -32,10 +59,12 @@ window.onload = () => {
 
         const playerName = nameInput.value.trim();
 
-        if (playerName === "") {
+        if (!playerName) {
             alert("名前を入力してください");
             return;
         }
+
+        localStorage.setItem("playerName", playerName);
 
         socket.emit("createRoom", playerName);
 
@@ -49,60 +78,22 @@ window.onload = () => {
 
         const playerName = nameInput.value.trim();
 
-        if (playerName === "") {
+        if (!playerName) {
             alert("名前を入力してください");
             return;
         }
 
-        const roomId = prompt("ルームIDを入力してください");
+        const roomId =
+            prompt("ルームIDを入力してください");
 
         if (!roomId) return;
+
+        localStorage.setItem("playerName", playerName);
 
         socket.emit("joinRoom", {
             roomId,
             playerName
         });
-
-    };
-
-    // =========================
-    // 解散 / 退出
-    // =========================
-
-    leaveRoomButton.onclick = () => {
-
-        if (isHost) {
-
-            socket.emit("disbandRoom", currentRoomId);
-
-        } else {
-
-            socket.emit("leaveRoom", currentRoomId);
-
-            lobbyScreen.style.display = "none";
-            titleScreen.style.display = "block";
-
-        }
-
-    };
-
-    // =========================
-    // 準備完了
-    // =========================
-
-    readyButton.onclick = () => {
-
-        socket.emit("playerReady", currentRoomId);
-
-    };
-
-    // =========================
-    // ゲーム開始
-    // =========================
-
-    startButton.onclick = () => {
-
-        socket.emit("startGame", currentRoomId);
 
     };
 
@@ -113,36 +104,38 @@ window.onload = () => {
     socket.on("roomCreated", (roomId) => {
 
         currentRoomId = roomId;
-        isHost = true;
-
-        leaveRoomButton.textContent = "ルーム解散";
+        isRoomOwner = true;
 
         titleScreen.style.display = "none";
-        lobbyScreen.style.display = "block";
+        lobbyScreen.style.display = "flex";
 
-        roomIdText.innerHTML = `
-            ルームID : ${roomId}
-        `;
+        roomIdText.innerText =
+            `ルームID : ${roomId}`;
+
+        leaveRoomButton.innerText = "ルーム解散";
+
+        startGameButton.style.display = "block";
 
     });
 
     // =========================
-    // 参加成功
+    // ルーム参加成功
     // =========================
 
     socket.on("joinSuccess", (roomId) => {
 
         currentRoomId = roomId;
-        isHost = false;
-
-        leaveRoomButton.textContent = "退出する";
+        isRoomOwner = false;
 
         titleScreen.style.display = "none";
-        lobbyScreen.style.display = "block";
+        lobbyScreen.style.display = "flex";
 
-        roomIdText.innerHTML = `
-            参加ルーム : ${roomId}
-        `;
+        roomIdText.innerText =
+            `ルームID : ${roomId}`;
+
+        leaveRoomButton.innerText = "退出";
+
+        startGameButton.style.display = "none";
 
     });
 
@@ -163,44 +156,96 @@ window.onload = () => {
             }
 
             playerList.innerHTML += `
-                <div class="player-card">
 
-                    ${player.name}
+                <div class="
+                    player-card
+                    ${player.ready ? "ready" : "not-ready"}
+                ">
 
-                    ${player.ready
-                    ? "<span class='ready-text'>準備完了</span>"
-                    : "<span class='not-ready-text'>待機中</span>"
-                }
+                    <span class="player-name">
+                        ${player.name}
+                    </span>
+
+                    <span class="player-status">
+                        ${player.ready ? "準備完了" : "準備中"}
+                    </span>
 
                 </div>
+
             `;
 
         });
 
-        if (isHost && players.length >= 2 && allReady) {
+        // 全員準備完了で開始可能
+        if (isRoomOwner && players.length >= 2) {
 
-            startButton.style.display = "block";
-
-        } else {
-
-            startButton.style.display = "none";
+            startGameButton.disabled = !allReady;
 
         }
 
     });
 
     // =========================
+    // 準備完了
+    // =========================
+
+    readyButton.onclick = () => {
+
+        isReady = !isReady;
+
+        socket.emit("toggleReady", {
+            roomId: currentRoomId,
+            ready: isReady
+        });
+
+        // ボタン変更
+        if (isReady) {
+
+            readyButton.innerText = "準備中に戻す";
+            readyButton.classList.add("cancel-ready");
+
+        } else {
+
+            readyButton.innerText = "準備完了";
+            readyButton.classList.remove("cancel-ready");
+
+        }
+
+    };
+
+    // =========================
+    // 退出 / 解散
+    // =========================
+
+    leaveRoomButton.onclick = () => {
+
+        socket.emit("leaveRoom", currentRoomId);
+
+        titleScreen.style.display = "flex";
+        lobbyScreen.style.display = "none";
+
+        isReady = false;
+
+        readyButton.innerText = "準備完了";
+        readyButton.classList.remove("cancel-ready");
+
+    };
+
+    // =========================
     // ルーム解散
     // =========================
 
-    socket.on("roomDisbanded", () => {
+    socket.on("roomClosed", () => {
 
         alert("ルームが解散されました");
 
-        currentRoomId = "";
-
+        titleScreen.style.display = "flex";
         lobbyScreen.style.display = "none";
-        titleScreen.style.display = "block";
+
+        isReady = false;
+
+        readyButton.innerText = "準備完了";
+        readyButton.classList.remove("cancel-ready");
 
     });
 
@@ -208,11 +253,11 @@ window.onload = () => {
     // ゲーム開始
     // =========================
 
-    socket.on("gameStarted", () => {
+    startGameButton.onclick = () => {
 
         alert("ゲーム開始！");
 
-    });
+    };
 
     // =========================
     // エラー
