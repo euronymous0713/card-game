@@ -11,7 +11,9 @@
 
 <body>
 
-  <!-- タイトル画面 -->
+  <!-- =========================
+       タイトル画面
+  ========================= -->
   <div class="title-screen" id="titleScreen">
 
     <h1 class="game-title">
@@ -41,7 +43,9 @@
 
   </div>
 
-  <!-- ロビー画面 -->
+  <!-- =========================
+       ロビー画面
+  ========================= -->
   <div id="lobbyScreen" style="display:none;">
 
     <h2>待機画面</h2>
@@ -50,8 +54,20 @@
 
     <div id="playerList"></div>
 
-    <button id="readyButton">
-      準備完了
+    <div class="lobby-buttons">
+
+      <button id="readyButton">
+        準備完了
+      </button>
+
+      <button id="leaveRoomButton">
+        退出する
+      </button>
+
+    </div>
+
+    <button id="startButton" style="display:none;">
+      ゲーム開始
     </button>
 
   </div>

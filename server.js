@@ -3,26 +3,22 @@ const http = require("http");
 const { Server } = require("socket.io");
 
 const app = express();
-
 const server = http.createServer(app);
-
 const io = new Server(server);
 
-// publicフォルダ公開
 app.use(express.static("public"));
 
-console.log("サーバー起動");
-
-// ルーム保存
 const rooms = {};
 
-// =========================
-// 接続
-// =========================
+function generateRoomId() {
+
+    return Math.floor(1000 + Math.random() * 9000).toString();
+
+}
 
 io.on("connection", (socket) => {
 
-    console.log("ユーザー接続");
+    console.log("接続");
 
     // =========================
     // ルーム作成
@@ -30,8 +26,7 @@ io.on("connection", (socket) => {
 
     socket.on("createRoom", (playerName) => {
 
-        const roomId =
-            Math.floor(1000 + Math.random() * 9000).toString();
+        const roomId = generateRoomId();
 
         rooms[roomId] = [];
 
@@ -43,14 +38,9 @@ io.on("connection", (socket) => {
 
         socket.join(roomId);
 
-        socket.roomId = roomId;
-
         socket.emit("roomCreated", roomId);
 
-        io.to(roomId).emit(
-            "updateRoom",
-            rooms[roomId]
-        );
+        io.to(roomId).emit("updateRoom", rooms[roomId]);
 
     });
 
@@ -58,32 +48,20 @@ io.on("connection", (socket) => {
     // ルーム参加
     // =========================
 
-    socket.on("joinRoom", (data) => {
+    socket.on("joinRoom", ({ roomId, playerName }) => {
 
-        const roomId = data.roomId;
-
-        const playerName = data.playerName;
-
-        // 存在確認
         if (!rooms[roomId]) {
 
-            socket.emit(
-                "errorMessage",
-                "ルームが存在しません"
-            );
-
+            socket.emit("errorMessage", "ルームが存在しません");
             return;
+
         }
 
-        // 最大4人
         if (rooms[roomId].length >= 4) {
 
-            socket.emit(
-                "errorMessage",
-                "ルームが満員です"
-            );
-
+            socket.emit("errorMessage", "満員です");
             return;
+
         }
 
         rooms[roomId].push({
@@ -94,40 +72,77 @@ io.on("connection", (socket) => {
 
         socket.join(roomId);
 
-        socket.roomId = roomId;
-
         socket.emit("joinSuccess", roomId);
 
-        io.to(roomId).emit(
-            "updateRoom",
-            rooms[roomId]
-        );
+        io.to(roomId).emit("updateRoom", rooms[roomId]);
 
     });
 
     // =========================
-    // Ready
+    // 準備完了
     // =========================
 
-    socket.on("playerReady", () => {
+    socket.on("playerReady", (roomId) => {
 
-        const roomId = socket.roomId;
+        const room = rooms[roomId];
 
-        if (!roomId) return;
+        if (!room) return;
 
-        const player =
-            rooms[roomId].find(
-                p => p.id === socket.id
-            );
+        const player = room.find(p => p.id === socket.id);
 
         if (!player) return;
 
-        player.ready = true;
+        player.ready = !player.ready;
 
-        io.to(roomId).emit(
-            "updateRoom",
-            rooms[roomId]
+        io.to(roomId).emit("updateRoom", room);
+
+    });
+
+    // =========================
+    // ゲーム開始
+    // =========================
+
+    socket.on("startGame", (roomId) => {
+
+        const room = rooms[roomId];
+
+        if (!room) return;
+
+        const allReady = room.every(player => player.ready);
+
+        if (!allReady) {
+
+            socket.emit("errorMessage", "全員準備完了していません");
+            return;
+
+        }
+
+        io.to(roomId).emit("gameStarted");
+
+    });
+
+    // =========================
+    // 退出
+    // =========================
+
+    socket.on("leaveRoom", (roomId) => {
+
+        if (!rooms[roomId]) return;
+
+        rooms[roomId] = rooms[roomId].filter(
+            player => player.id !== socket.id
         );
+
+        socket.leave(roomId);
+
+        io.to(roomId).emit("updateRoom", rooms[roomId]);
+
+        // 空部屋削除
+        if (rooms[roomId].length === 0) {
+
+            delete rooms[roomId];
+
+        }
 
     });
 
@@ -137,34 +152,28 @@ io.on("connection", (socket) => {
 
     socket.on("disconnect", () => {
 
-        const roomId = socket.roomId;
+        for (const roomId in rooms) {
 
-        if (!roomId) return;
-
-        if (!rooms[roomId]) return;
-
-        rooms[roomId] =
-            rooms[roomId].filter(
-                p => p.id !== socket.id
+            rooms[roomId] = rooms[roomId].filter(
+                player => player.id !== socket.id
             );
 
-        io.to(roomId).emit(
-            "updateRoom",
-            rooms[roomId]
-        );
+            io.to(roomId).emit("updateRoom", rooms[roomId]);
+
+            if (rooms[roomId].length === 0) {
+
+                delete rooms[roomId];
+
+            }
+
+        }
 
     });
 
 });
 
-// =========================
-// 起動
-// =========================
+server.listen(3000, () => {
 
-const PORT = process.env.PORT || 3000;
-
-server.listen(PORT, () => {
-
-    console.log(`Server running on ${PORT}`);
+    console.log("サーバー起動");
 
 });
