@@ -595,54 +595,136 @@ button:disabled {
     filter: grayscale(1);
 }
 
+/* プレイヤー枠は固定しつつ、文字が潰れないサイズに戻す */
 .enemy-panel,
 .my-panel {
-    width: 220px;
-    height: 118px;
+    width: 230px;
+    height: 135px;
     overflow: hidden;
 }
 
+/* フォロワー表示を大きめに戻す */
 .follower-line {
     font-size: 24px;
     color: #00ffe1;
     font-weight: bold;
-    margin-top: 4px;
+    margin-top: 6px;
 }
 
+/* オワコン表示 */
 .owakon-text {
     color: #ff3030;
     font-size: 26px;
     text-shadow: 0 0 14px rgba(255, 0, 0, 0.9);
 }
 
+/* ヘイトを見やすく */
+.panel-hate {
+    margin-top: 8px;
+    font-size: 16px;
+    color: #ffb000;
+    letter-spacing: 3px;
+}
+
+/* 相手プレイヤー枠 */
+.enemy-slots {
+    top: 24px;
+    left: 24px;
+    right: 24px;
+}
+
+/* 現在ターンと履歴は少し下へ */
 .turn-panel {
-    top: 180px;
+    top: 185px;
 }
 
 .history-panel {
-    top: 295px;
+    top: 300px;
 }
 
+/* 中央エリアを少し上へ */
+.center-zone {
+    top: 40%;
+}
+
+/* ドロップ場所を少し小さくして邪魔になりにくく */
+.drop-zone {
+    width: 320px;
+    height: 105px;
+    margin-top: 18px;
+}
+
+/* 自分の伏せカードは手札のすぐ上 */
 .field-card-area {
-    margin-top: 24px;
-    transform: scale(0.82);
-    transform-origin: top center;
+    position: absolute;
+    left: 50%;
+    bottom: 230px;
+    transform: translateX(-50%) scale(0.9);
+    transform-origin: center;
+
+    margin-top: 0;
+    padding: 8px 12px;
+
+    z-index: 3;
 }
 
 .field-card-area h3 {
     font-size: 12px;
+    margin-bottom: 6px;
+}
+
+#myFieldCards {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
 }
 
 .set-card {
-    width: 58px;
+    width: 62px;
     height: 34px;
     font-size: 11px;
 }
 
-.battle-buttons {
-    bottom: 60px;
+/* 自分プレイヤー枠とターン終了が重ならないように */
+.my-panel {
+    right: 28px;
+    bottom: 180px;
 }
 
+/* ターン終了はさらに下 */
+.battle-buttons {
+    right: 28px;
+    bottom: 62px;
+}
+
+/* 手札は最下部固定 */
+.hand-area {
+    bottom: 24px;
+}
+
+/* カード効果は自分枠と重ならない位置 */
+.card-detail {
+    right: 28px;
+    top: 330px;
+    width: 240px;
+    height: 160px;
+    overflow: hidden;
+}
+
+/* 対象選択は手札と被らないよう左寄せ */
+.target-panel {
+    left: 28px;
+    bottom: 70px;
+    width: 220px;
+}
+
+/* 使用履歴を少し小さく */
+.history-panel {
+    width: 230px;
+    max-height: 190px;
+}
+
+/* ゲーム終了オーバーレイ */
 .game-over-overlay {
     position: absolute;
     inset: 0;
@@ -658,11 +740,9 @@ button:disabled {
 
 .game-over-box {
     padding: 36px 48px;
-
     border-radius: 24px;
 
     background: rgba(0, 0, 0, 0.86);
-
     border: 2px solid #00ffe1;
 
     box-shadow:
