@@ -336,6 +336,98 @@ button:disabled {
     margin-bottom: 10px;
 }
 
+.turn-panel {
+    position: absolute;
+    left: 28px;
+    top: 120px;
+
+    min-width: 180px;
+
+    padding: 12px 16px;
+
+    border-radius: 14px;
+
+    background: rgba(0, 0, 0, 0.6);
+
+    border: 2px solid rgba(255, 0, 200, 0.4);
+
+    font-weight: bold;
+
+    text-align: center;
+}
+
+.turn-panel span {
+    color: #00ffe1;
+    font-size: 20px;
+}
+
+.drop-zone {
+    margin-top: 22px;
+
+    width: 320px;
+    height: 120px;
+
+    border: 2px dashed rgba(255, 255, 255, 0.25);
+
+    border-radius: 20px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    color: rgba(255, 255, 255, 0.55);
+
+    background: rgba(255, 255, 255, 0.04);
+
+    transition: 0.2s;
+}
+
+.active-drop-zone {
+    border-color: #00ffe1;
+
+    color: #00ffe1;
+
+    box-shadow: 0 0 24px rgba(0, 255, 225, 0.35);
+}
+
+.played-card-list {
+    margin-top: 14px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+
+    align-items: center;
+}
+
+.played-card {
+    padding: 8px 14px;
+
+    border-radius: 999px;
+
+    background: rgba(0, 0, 0, 0.45);
+
+    border: 1px solid rgba(255, 255, 255, 0.15);
+
+    font-size: 14px;
+}
+
+.battle-buttons {
+    position: absolute;
+
+    right: 28px;
+    bottom: 105px;
+}
+
+#endTurnButton {
+    background: linear-gradient(135deg, #ff9900, #ff3c00);
+}
+
+#endTurnButton:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
 /* スマホ */
 
 @media screen and (max-width:768px) {

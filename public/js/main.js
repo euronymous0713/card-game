@@ -17,6 +17,11 @@ window.onload = () => {
 
     const handArea = document.getElementById("handArea");
     const cardDetail = document.getElementById("cardDetail");
+    const dropZone = document.getElementById("dropZone");
+    const turnPanel = document.getElementById("turnPanel");
+    const battleMessage = document.getElementById("battleMessage");
+    const playedCardList = document.getElementById("playedCardList");
+    const endTurnButton = document.getElementById("endTurnButton");
 
     const enemySlots = [
         document.getElementById("enemySlot1"),
@@ -30,24 +35,30 @@ window.onload = () => {
     let isHost = false;
     let isReady = false;
     let latestPlayers = [];
+    let latestGame = null;
+    let draggedCard = null;
 
     const dummyCards = [
         {
+            id: "card-1",
             name: "炎上パンチ",
             type: "攻撃",
             effect: "相手に2,000フォロワーダメージ。ネット民の怒りを叩きつける。"
         },
         {
+            id: "card-2",
             name: "お気持ち表明",
             type: "防御",
             effect: "次に受けるダメージを1,500軽減する。長文で場を制圧する。"
         },
         {
+            id: "card-3",
             name: "釣りスレ",
             type: "罠",
             effect: "相手が攻撃した時、1,000フォロワーダメージを返す。"
         },
         {
+            id: "card-4",
             name: "古参アピール",
             type: "補助",
             effect: "自分のフォロワーを1,000回復する。『昔はよかった』を発動。"
@@ -195,18 +206,27 @@ window.onload = () => {
         lobbyScreen.style.display = "none";
         battleScreen.style.display = "block";
 
-        renderBattlePlayers();
         renderHand();
     });
 
+    socket.on("updateGame", (game) => {
+        latestGame = game;
+
+        renderBattlePlayers();
+        renderTurn();
+        renderPlayedCards();
+    });
+
     function renderBattlePlayers() {
-        const me = latestPlayers.find(player => player.id === socket.id);
-        const enemies = latestPlayers.filter(player => player.id !== socket.id);
+        if (!latestGame) return;
+
+        const me = latestGame.turnOrder.find(player => player.id === socket.id);
+        const enemies = latestGame.turnOrder.filter(player => player.id !== socket.id);
 
         if (me) {
             myPanel.innerHTML = `
                 <div class="my-name">${me.name}</div>
-                <div><span>10,000</span> フォロワー</div>
+                <div><span>${me.followers.toLocaleString()}</span> フォロワー</div>
             `;
         }
 
@@ -218,7 +238,7 @@ window.onload = () => {
 
                 slot.innerHTML = `
                     <div class="enemy-name">${enemy.name}</div>
-                    <div><span>10,000</span> フォロワー</div>
+                    <div><span>${enemy.followers.toLocaleString()}</span> フォロワー</div>
                 `;
             } else {
                 slot.classList.add("empty-enemy");
@@ -231,6 +251,39 @@ window.onload = () => {
         });
     }
 
+    function renderTurn() {
+        if (!latestGame) return;
+
+        const currentPlayer = latestGame.turnOrder[latestGame.currentTurnIndex];
+        const isMyTurn = currentPlayer.id === socket.id;
+
+        turnPanel.innerHTML = `
+            現在のターン<br>
+            <span>${currentPlayer.name}</span>
+        `;
+
+        battleMessage.innerText = isMyTurn
+            ? "あなたのターンです。カードを場に出せます。"
+            : `${currentPlayer.name} のターンです。`;
+
+        dropZone.classList.toggle("active-drop-zone", isMyTurn);
+        endTurnButton.disabled = !isMyTurn;
+    }
+
+    function renderPlayedCards() {
+        if (!latestGame) return;
+
+        playedCardList.innerHTML = "";
+
+        latestGame.playedCards.slice(-5).forEach(card => {
+            playedCardList.innerHTML += `
+                <div class="played-card">
+                    <strong>${card.playerName}</strong>：${card.cardName}
+                </div>
+            `;
+        });
+    }
+
     function renderHand() {
         handArea.innerHTML = "";
 
@@ -238,6 +291,7 @@ window.onload = () => {
             const cardElement = document.createElement("div");
 
             cardElement.className = "hand-card";
+            cardElement.draggable = true;
 
             cardElement.innerHTML = `
                 <div class="card-name">${card.name}</div>
@@ -259,9 +313,43 @@ window.onload = () => {
                 `;
             };
 
+            cardElement.ondragstart = () => {
+                draggedCard = card;
+            };
+
             handArea.appendChild(cardElement);
         });
     }
+
+    dropZone.ondragover = (event) => {
+        event.preventDefault();
+    };
+
+    dropZone.ondrop = (event) => {
+        event.preventDefault();
+
+        if (!latestGame) return;
+
+        const currentPlayer = latestGame.turnOrder[latestGame.currentTurnIndex];
+
+        if (currentPlayer.id !== socket.id) {
+            alert("今はあなたのターンではありません");
+            return;
+        }
+
+        if (!draggedCard) return;
+
+        socket.emit("playCard", {
+            roomId: currentRoomId,
+            card: draggedCard
+        });
+
+        draggedCard = null;
+    };
+
+    endTurnButton.onclick = () => {
+        socket.emit("endTurn", currentRoomId);
+    };
 
     socket.on("roomDisbanded", () => {
         alert("ルームが解散されました");
