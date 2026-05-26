@@ -428,6 +428,102 @@ button:disabled {
     cursor: not-allowed;
 }
 
+.hate-panel {
+    position: absolute;
+    right: 28px;
+    top: 28px;
+
+    width: 240px;
+
+    padding: 16px;
+
+    border-radius: 16px;
+
+    background: rgba(0, 0, 0, 0.62);
+
+    border: 2px solid rgba(255, 120, 0, 0.45);
+
+    box-shadow: 0 0 18px rgba(255, 120, 0, 0.25);
+}
+
+.hate-panel h3 {
+    color: #ffb000;
+    margin-bottom: 10px;
+}
+
+.hate-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+
+    font-size: 14px;
+
+    margin-top: 8px;
+}
+
+.hate-row strong {
+    color: #ffb000;
+    letter-spacing: 2px;
+}
+
+.target-panel {
+    position: absolute;
+    right: 28px;
+    top: 220px;
+
+    width: 240px;
+
+    padding: 16px;
+
+    border-radius: 16px;
+
+    background: rgba(0, 0, 0, 0.62);
+
+    border: 2px solid rgba(0, 255, 225, 0.35);
+}
+
+.target-panel h3 {
+    color: #00ffe1;
+    margin-bottom: 10px;
+}
+
+#targetList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.target-button {
+    width: 100%;
+
+    padding: 8px 10px;
+
+    font-size: 14px;
+
+    border-radius: 10px;
+}
+
+.selected-target-button {
+    background: linear-gradient(135deg, #00ffd5, #0099ff) !important;
+    box-shadow: 0 0 16px rgba(0, 255, 225, 0.55);
+}
+
+.selected-target {
+    border-color: #ffb000 !important;
+    box-shadow: 0 0 20px rgba(255, 176, 0, 0.6) !important;
+}
+
+.card-hate {
+    font-size: 11px;
+    color: #ffb000;
+}
+
+.detail-hate {
+    margin-top: 10px;
+    color: #ffb000;
+    font-weight: bold;
+}
+
 /* スマホ */
 
 @media screen and (max-width:768px) {

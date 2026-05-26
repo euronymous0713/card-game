@@ -22,6 +22,8 @@ window.onload = () => {
     const battleMessage = document.getElementById("battleMessage");
     const playedCardList = document.getElementById("playedCardList");
     const endTurnButton = document.getElementById("endTurnButton");
+    const targetList = document.getElementById("targetList");
+    const hateList = document.getElementById("hateList");
 
     const enemySlots = [
         document.getElementById("enemySlot1"),
@@ -37,31 +39,48 @@ window.onload = () => {
     let latestPlayers = [];
     let latestGame = null;
     let draggedCard = null;
+    let selectedTargetId = "";
 
     const dummyCards = [
         {
             id: "card-1",
             name: "炎上パンチ",
             type: "攻撃",
-            effect: "相手に2,000フォロワーダメージ。ネット民の怒りを叩きつける。"
+            targetType: "enemy",
+            hateTarget: "self",
+            hateChange: 1,
+            hateText: "自分のヘイト +1",
+            effect: "相手に2,000フォロワーダメージ予定。派手に燃えるので自分のヘイトが1上がる。"
         },
         {
             id: "card-2",
             name: "お気持ち表明",
             type: "防御",
-            effect: "次に受けるダメージを1,500軽減する。長文で場を制圧する。"
+            targetType: "self",
+            hateTarget: "self",
+            hateChange: -1,
+            hateText: "自分のヘイト -1",
+            effect: "次に受けるダメージを軽減予定。長文で沈静化し、自分のヘイトが1下がる。"
         },
         {
             id: "card-3",
             name: "釣りスレ",
             type: "罠",
-            effect: "相手が攻撃した時、1,000フォロワーダメージを返す。"
+            targetType: "enemy",
+            hateTarget: "target",
+            hateChange: 1,
+            hateText: "対象のヘイト +1",
+            effect: "相手を釣る罠カード予定。対象のヘイトを1上げる。"
         },
         {
             id: "card-4",
             name: "古参アピール",
             type: "補助",
-            effect: "自分のフォロワーを1,000回復する。『昔はよかった』を発動。"
+            targetType: "self",
+            hateTarget: "self",
+            hateChange: -1,
+            hateText: "自分のヘイト -1",
+            effect: "自分を回復予定。『昔はよかった』で自分のヘイトが1下がる。"
         }
     ];
 
@@ -130,33 +149,21 @@ window.onload = () => {
 
     socket.on("updateRoom", (players) => {
         latestPlayers = players;
-
         playerList.innerHTML = "";
 
         const me = players.find(player => player.id === socket.id);
 
         if (me) {
             isReady = me.ready;
-
             readyButton.innerText = isReady ? "準備解除" : "準備完了";
-
-            if (isReady) {
-                readyButton.classList.add("cancel-ready");
-            } else {
-                readyButton.classList.remove("cancel-ready");
-            }
+            readyButton.classList.toggle("cancel-ready", isReady);
         }
 
         players.forEach(player => {
             playerList.innerHTML += `
                 <div class="player-card ${player.ready ? "ready" : "not-ready"}">
-                    <span class="player-name">
-                        ${player.host ? "👑 " : ""}${player.name}
-                    </span>
-
-                    <span class="player-status">
-                        ${player.ready ? "準備完了" : "待機中"}
-                    </span>
+                    <span class="player-name">${player.host ? "👑 " : ""}${player.name}</span>
+                    <span class="player-status">${player.ready ? "準備完了" : "待機中"}</span>
                 </div>
             `;
         });
@@ -205,14 +212,26 @@ window.onload = () => {
         titleScreen.style.display = "none";
         lobbyScreen.style.display = "none";
         battleScreen.style.display = "block";
-
         renderHand();
     });
 
     socket.on("updateGame", (game) => {
         latestGame = game;
 
+        const me = latestGame.turnOrder.find(player => player.id === socket.id);
+        const enemies = latestGame.turnOrder.filter(player => player.id !== socket.id);
+
+        if (!selectedTargetId && enemies.length > 0) {
+            selectedTargetId = enemies[0].id;
+        }
+
+        if (selectedTargetId && !latestGame.turnOrder.some(p => p.id === selectedTargetId)) {
+            selectedTargetId = enemies[0]?.id || "";
+        }
+
         renderBattlePlayers();
+        renderTargetList();
+        renderHateList();
         renderTurn();
         renderPlayedCards();
     });
@@ -235,19 +254,72 @@ window.onload = () => {
 
             if (enemy) {
                 slot.classList.remove("empty-enemy");
+                slot.classList.toggle("selected-target", selectedTargetId === enemy.id);
 
                 slot.innerHTML = `
                     <div class="enemy-name">${enemy.name}</div>
                     <div><span>${enemy.followers.toLocaleString()}</span> フォロワー</div>
                 `;
+
+                slot.onclick = () => {
+                    selectedTargetId = enemy.id;
+                    renderBattlePlayers();
+                    renderTargetList();
+                };
             } else {
                 slot.classList.add("empty-enemy");
+                slot.classList.remove("selected-target");
+                slot.onclick = null;
 
                 slot.innerHTML = `
                     <div class="enemy-name">空席</div>
                     <div><span>-</span> フォロワー</div>
                 `;
             }
+        });
+    }
+
+    function renderTargetList() {
+        if (!latestGame) return;
+
+        const enemies = latestGame.turnOrder.filter(player => player.id !== socket.id);
+
+        targetList.innerHTML = "";
+
+        enemies.forEach(enemy => {
+            const button = document.createElement("button");
+
+            button.className = "target-button";
+            button.innerText = enemy.name;
+
+            if (selectedTargetId === enemy.id) {
+                button.classList.add("selected-target-button");
+            }
+
+            button.onclick = () => {
+                selectedTargetId = enemy.id;
+                renderBattlePlayers();
+                renderTargetList();
+            };
+
+            targetList.appendChild(button);
+        });
+    }
+
+    function renderHateList() {
+        if (!latestGame) return;
+
+        hateList.innerHTML = "";
+
+        latestGame.turnOrder.forEach(player => {
+            const hateIcons = "◆".repeat(player.hate) + "◇".repeat(3 - player.hate);
+
+            hateList.innerHTML += `
+                <div class="hate-row">
+                    <span>${player.name}</span>
+                    <strong>${hateIcons}</strong>
+                </div>
+            `;
         });
     }
 
@@ -263,7 +335,7 @@ window.onload = () => {
         `;
 
         battleMessage.innerText = isMyTurn
-            ? "あなたのターンです。カードを場に出せます。"
+            ? "あなたのターンです。対象を選び、カードを場に出せます。"
             : `${currentPlayer.name} のターンです。`;
 
         dropZone.classList.toggle("active-drop-zone", isMyTurn);
@@ -278,7 +350,8 @@ window.onload = () => {
         latestGame.playedCards.slice(-5).forEach(card => {
             playedCardList.innerHTML += `
                 <div class="played-card">
-                    <strong>${card.playerName}</strong>：${card.cardName}
+                    <strong>${card.playerName}</strong> → ${card.targetName}<br>
+                    ${card.cardName} / ${card.hateText}
                 </div>
             `;
         });
@@ -296,6 +369,7 @@ window.onload = () => {
             cardElement.innerHTML = `
                 <div class="card-name">${card.name}</div>
                 <div class="card-type">${card.type}</div>
+                <div class="card-hate">${card.hateText}</div>
             `;
 
             cardElement.onmouseenter = () => {
@@ -303,6 +377,7 @@ window.onload = () => {
                     <h3>${card.name}</h3>
                     <p class="detail-type">${card.type}</p>
                     <p>${card.effect}</p>
+                    <p class="detail-hate">${card.hateText}</p>
                 `;
             };
 
@@ -339,9 +414,21 @@ window.onload = () => {
 
         if (!draggedCard) return;
 
+        let targetId = selectedTargetId;
+
+        if (draggedCard.targetType === "self") {
+            targetId = socket.id;
+        }
+
+        if (draggedCard.targetType === "enemy" && !targetId) {
+            alert("対象プレイヤーを選択してください");
+            return;
+        }
+
         socket.emit("playCard", {
             roomId: currentRoomId,
-            card: draggedCard
+            card: draggedCard,
+            targetId
         });
 
         draggedCard = null;
