@@ -4,6 +4,10 @@
     box-sizing: border-box;
 }
 
+html {
+    font-size: 16px;
+}
+
 body {
 
     background:
@@ -24,28 +28,35 @@ body {
     justify-content: center;
     align-items: center;
 
+    overflow-x: hidden;
+
     padding: 20px;
 }
 
-/* =========================
+
+/* ======================
    タイトル画面
-========================= */
+====================== */
 
 .title-screen {
 
     width: 100%;
     max-width: 700px;
 
-    text-align: center;
-
     display: flex;
     flex-direction: column;
     align-items: center;
+
+    text-align: center;
 }
+
 
 .game-title {
 
-    font-size: clamp(32px, 8vw, 72px);
+    font-size:
+        clamp(32px,
+            8vw,
+            72px);
 
     font-weight: bold;
 
@@ -60,15 +71,21 @@ body {
     margin-bottom: 20px;
 
     text-shadow:
-        0 0 20px rgba(255, 255, 255, 0.2);
+        0 0 20px rgba(255,
+            255,
+            255,
+            0.2);
 
     white-space: nowrap;
-
 }
+
 
 .subtitle {
 
-    font-size: clamp(14px, 2vw, 20px);
+    font-size:
+        clamp(14px,
+            2vw,
+            20px);
 
     line-height: 1.8;
 
@@ -77,9 +94,10 @@ body {
     margin-bottom: 30px;
 }
 
-/* =========================
+
+/* ======================
    名前入力
-========================= */
+====================== */
 
 #nameInput {
 
@@ -93,46 +111,41 @@ body {
 
     font-size: 18px;
 
-    margin-bottom: 24px;
-
     outline: none;
 
     background:
-        rgba(255, 255, 255, 0.1);
+        rgba(255,
+            255,
+            255,
+            0.1);
 
     color: white;
+
+    margin-bottom: 30px;
 }
 
-/* =========================
-   メニューボタン
-========================= */
 
-.menu-buttons {
-
-    display: flex;
-    gap: 20px;
-
-    flex-wrap: wrap;
-
-    justify-content: center;
-}
+/* ======================
+   ボタン共通
+====================== */
 
 button {
 
-    padding:
-        14px 28px;
-
     border: none;
+
     border-radius: 14px;
+
+    cursor: pointer;
+
+    color: white;
 
     font-size: 18px;
     font-weight: bold;
 
-    cursor: pointer;
+    padding:
+        14px 28px;
 
     transition: 0.2s;
-
-    color: white;
 
     background:
         linear-gradient(135deg,
@@ -142,14 +155,32 @@ button {
 
 button:hover {
 
-    transform: scale(1.05);
+    transform:
+        scale(1.05);
 
     opacity: 0.9;
 }
 
-/* =========================
-   ロビー画面
-========================= */
+
+/* ======================
+   タイトルボタン
+====================== */
+
+.menu-buttons {
+
+    display: flex;
+
+    gap: 20px;
+
+    flex-wrap: wrap;
+
+    justify-content: center;
+}
+
+
+/* ======================
+   ロビー
+====================== */
 
 #lobbyScreen {
 
@@ -159,20 +190,34 @@ button:hover {
     display: flex;
     flex-direction: column;
     align-items: center;
+
+    text-align: center;
 }
+
 
 #roomIdText {
 
     margin-top: 12px;
-    margin-bottom: 18px;
+    margin-bottom: 20px;
 
     font-size: 20px;
     font-weight: bold;
 }
 
-/* =========================
-   プレイヤーカード
-========================= */
+
+/* ======================
+   プレイヤー一覧
+====================== */
+
+#playerList {
+
+    width: 100%;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
 
 .player-card {
 
@@ -183,10 +228,10 @@ button:hover {
     width: 100%;
     max-width: 420px;
 
-    margin-top: 12px;
-
     padding:
         14px 18px;
+
+    margin-top: 12px;
 
     border-radius: 12px;
 
@@ -196,62 +241,73 @@ button:hover {
     transition: 0.2s;
 }
 
+
 /* 未準備 */
 
 .not-ready {
 
     background:
-        rgba(255, 255, 255, 0.08);
+        rgba(255,
+            255,
+            255,
+            0.08);
 
     border:
-        2px solid rgba(255, 255, 255, 0.1);
+        2px solid rgba(255,
+            255,
+            255,
+            0.1);
 }
+
 
 /* 準備完了 */
 
 .ready {
 
     background:
-        rgba(0, 255, 170, 0.18);
+        rgba(0,
+            255,
+            170,
+            0.18);
 
     border:
         2px solid #00ffaa;
 
     box-shadow:
-        0 0 10px rgba(0, 255, 170, 0.4);
+        0 0 10px rgba(0,
+            255,
+            170,
+            0.4);
 }
+
 
 .player-status {
 
     font-size: 14px;
 }
 
-/* =========================
+
+/* ======================
    ロビーボタン
-========================= */
+====================== */
 
 .lobby-buttons {
 
     display: flex;
-    gap: 16px;
-
-    margin-top: 24px;
-
-    flex-wrap: wrap;
 
     justify-content: center;
+
+    gap: 20px;
+
+    margin-top: 30px;
+
+    flex-wrap: wrap;
 }
 
-/* =========================
-   準備ボタン統一
-========================= */
 
-#readyButton {
-
-    width: 180px;
-}
-
-/* 準備解除 */
+/* ======================
+   準備解除ボタン
+====================== */
 
 .cancel-ready {
 
@@ -261,21 +317,19 @@ button:hover {
             #ff3c3c) !important;
 }
 
-/* =========================
-   ゲーム開始ボタン
-========================= */
+
+/* ======================
+   ゲーム開始
+====================== */
 
 #startGameButton {
 
-    margin-top: 28px;
+    margin-top: 30px;
 
     padding:
         16px 42px;
 
     font-size: 22px;
-    font-weight: bold;
-
-    border-radius: 14px;
 
     background:
         linear-gradient(135deg,
@@ -283,16 +337,25 @@ button:hover {
             #0099ff);
 
     box-shadow:
-        0 0 18px rgba(0, 255, 213, 0.5);
+        0 0 18px rgba(0,
+            255,
+            213,
+            0.5);
 }
+
 
 #startGameButton:hover {
 
-    transform: scale(1.08);
+    transform:
+        scale(1.08);
 
     box-shadow:
-        0 0 30px rgba(0, 255, 213, 0.9);
+        0 0 30px rgba(0,
+            255,
+            213,
+            0.9);
 }
+
 
 #startGameButton:disabled {
 
@@ -303,20 +366,33 @@ button:hover {
     transform: none;
 }
 
-/* =========================
-   スマホ対応
-========================= */
 
-@media screen and (max-width: 768px) {
+/* ======================
+   バトル画面
+====================== */
+
+#gameScreen {
+
+    width: 100%;
+    max-width: 1200px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    text-align: center;
+}
+
+
+/* ======================
+   スマホ
+====================== */
+
+@media screen and (max-width:768px) {
 
     .game-title {
 
-        font-size: clamp(32px, 8vw, 72px);
-    }
-
-    .subtitle {
-
-        font-size: 15px;
+        font-size: 42px;
     }
 
     button {
@@ -327,14 +403,12 @@ button:hover {
 
     .menu-buttons {
 
-        width: 100%;
         flex-direction: column;
         align-items: center;
     }
 
     .lobby-buttons {
 
-        width: 100%;
         flex-direction: column;
         align-items: center;
     }
@@ -343,4 +417,5 @@ button:hover {
 
         font-size: 16px;
     }
+
 }

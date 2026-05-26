@@ -11,49 +11,52 @@ app.use(express.static("public"));
 const rooms = {};
 
 function generateRoomId() {
-
     return Math.floor(1000 + Math.random() * 9000).toString();
-
 }
 
 io.on("connection", (socket) => {
 
     console.log("接続");
 
+    // =====================
+    // ルーム作成
+    // =====================
     socket.on("createRoom", (playerName) => {
 
         const roomId = generateRoomId();
 
-        rooms[roomId] = [];
-
-        rooms[roomId].push({
+        rooms[roomId] = [{
             id: socket.id,
             name: playerName,
             ready: false,
             host: true
-        });
+        }];
 
         socket.join(roomId);
 
         socket.emit("roomCreated", roomId);
 
         io.to(roomId).emit("updateRoom", rooms[roomId]);
-
     });
 
+    // =====================
+    // ルーム参加（最大5人）
+    // =====================
     socket.on("joinRoom", ({ roomId, playerName }) => {
 
-        if (!rooms[roomId]) {
+        const room = rooms[roomId];
+
+        if (!room) {
             socket.emit("errorMessage", "ルームが存在しません");
             return;
         }
 
-        if (rooms[roomId].length >= 4) {
-            socket.emit("errorMessage", "満員です");
+        if (room.length >= 5) {
+            socket.emit("roomFull");
             return;
         }
 
-        rooms[roomId].push({
+        room.push({
             id: socket.id,
             name: playerName,
             ready: false,
@@ -64,10 +67,12 @@ io.on("connection", (socket) => {
 
         socket.emit("joinSuccess", roomId);
 
-        io.to(roomId).emit("updateRoom", rooms[roomId]);
-
+        io.to(roomId).emit("updateRoom", room);
     });
 
+    // =====================
+    // 準備切替
+    // =====================
     socket.on("toggleReady", ({ roomId }) => {
 
         const room = rooms[roomId];
@@ -81,97 +86,84 @@ io.on("connection", (socket) => {
         io.to(roomId).emit("updateRoom", room);
     });
 
+    // =====================
+    // ゲーム開始条件
+    // =====================
     socket.on("startGame", (roomId) => {
 
         const room = rooms[roomId];
-
         if (!room) return;
 
-        const allReady = room.every(player => player.ready);
+        if (room.length < 2) {
+            socket.emit("errorMessage", "2人以上必要です");
+            return;
+        }
 
-        if (!allReady) {
-
+        if (!room.every(p => p.ready)) {
             socket.emit("errorMessage", "全員準備完了していません");
             return;
-
         }
 
         io.to(roomId).emit("gameStarted");
-
     });
 
+    // =====================
+    // 退出
+    // =====================
     socket.on("leaveRoom", (roomId) => {
 
-        if (!rooms[roomId]) return;
+        const room = rooms[roomId];
+        if (!room) return;
 
-        rooms[roomId] = rooms[roomId].filter(
-            player => player.id !== socket.id
-        );
+        rooms[roomId] = room.filter(p => p.id !== socket.id);
 
         socket.leave(roomId);
 
         io.to(roomId).emit("updateRoom", rooms[roomId]);
-
     });
 
+    // =====================
+    // 解散（ホストのみ）
+    // =====================
     socket.on("disbandRoom", (roomId) => {
 
-        if (!rooms[roomId]) return;
+        const room = rooms[roomId];
+        if (!room) return;
+
+        const player = room.find(p => p.id === socket.id);
+
+        if (!player?.host) return;
 
         io.to(roomId).emit("roomDisbanded");
 
-        const clients = io.sockets.adapter.rooms.get(roomId);
-
-        if (clients) {
-
-            clients.forEach(clientId => {
-
-                io.sockets.sockets.get(clientId)?.leave(roomId);
-
-            });
-
-        }
-
         delete rooms[roomId];
-
     });
 
+    // =====================
+    // 切断
+    // =====================
     socket.on("disconnect", () => {
 
         for (const roomId in rooms) {
 
             const room = rooms[roomId];
 
-            const disconnectedPlayer = room.find(
-                player => player.id === socket.id
-            );
+            const player = room.find(p => p.id === socket.id);
+            if (!player) continue;
 
-            if (!disconnectedPlayer) continue;
-
-            if (disconnectedPlayer.host) {
-
+            if (player.host) {
                 io.to(roomId).emit("roomDisbanded");
-
                 delete rooms[roomId];
-
                 continue;
-
             }
 
-            rooms[roomId] = room.filter(
-                player => player.id !== socket.id
-            );
+            rooms[roomId] = room.filter(p => p.id !== socket.id);
 
             io.to(roomId).emit("updateRoom", rooms[roomId]);
-
         }
-
     });
-
 });
 
 server.listen(3000, () => {
-
     console.log("サーバー起動");
-
 });
