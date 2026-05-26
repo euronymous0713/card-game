@@ -524,6 +524,117 @@ button:disabled {
     font-weight: bold;
 }
 
+.enemy-slots {
+    top: 24px;
+    left: 24px;
+    right: 300px;
+}
+
+.hate-panel {
+    position: absolute;
+    right: 28px;
+    top: 105px;
+
+    width: 240px;
+
+    padding: 16px;
+
+    border-radius: 16px;
+
+    background: rgba(0, 0, 0, 0.62);
+
+    border: 2px solid rgba(255, 120, 0, 0.45);
+
+    box-shadow: 0 0 18px rgba(255, 120, 0, 0.25);
+}
+
+.target-panel {
+    position: absolute;
+    right: 28px;
+    top: 300px;
+
+    width: 240px;
+
+    padding: 16px;
+
+    border-radius: 16px;
+
+    background: rgba(0, 0, 0, 0.62);
+
+    border: 2px solid rgba(0, 255, 225, 0.35);
+}
+
+.history-panel {
+    position: absolute;
+
+    left: 28px;
+    top: 230px;
+
+    width: 270px;
+
+    padding: 16px;
+
+    border-radius: 16px;
+
+    background: rgba(0, 0, 0, 0.62);
+
+    border: 2px solid rgba(255, 255, 255, 0.18);
+
+    box-shadow: 0 0 18px rgba(255, 255, 255, 0.08);
+}
+
+.history-panel h3 {
+    color: #ff7bff;
+    margin-bottom: 10px;
+}
+
+.played-card-list {
+    max-height: 150px;
+
+    overflow-y: auto;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 8px;
+
+    padding-right: 4px;
+}
+
+.played-card {
+    padding: 10px 12px;
+
+    border-radius: 12px;
+
+    background: rgba(0, 0, 0, 0.45);
+
+    border: 1px solid rgba(255, 255, 255, 0.15);
+
+    font-size: 13px;
+
+    line-height: 1.5;
+}
+
+.center-zone {
+    position: absolute;
+
+    top: 43%;
+    left: 50%;
+
+    transform: translate(-50%, -50%);
+
+    text-align: center;
+
+    z-index: 2;
+}
+
+.drop-zone {
+    margin: 22px auto 0;
+
+    width: 360px;
+    height: 130px;
+}
+
 /* スマホ */
 
 @media screen and (max-width:768px) {

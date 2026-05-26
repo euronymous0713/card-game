@@ -347,13 +347,13 @@ window.onload = () => {
 
         playedCardList.innerHTML = "";
 
-        latestGame.playedCards.slice(-5).forEach(card => {
+        [...latestGame.playedCards].reverse().forEach(card => {
             playedCardList.innerHTML += `
-                <div class="played-card">
-                    <strong>${card.playerName}</strong> → ${card.targetName}<br>
-                    ${card.cardName} / ${card.hateText}
-                </div>
-            `;
+            <div class="played-card">
+                <strong>${card.playerName}</strong> → ${card.targetName}<br>
+                ${card.cardName} / ${card.hateText}
+            </div>
+        `;
         });
     }
 
