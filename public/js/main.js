@@ -23,6 +23,7 @@ window.onload = () => {
     const playedCardList = document.getElementById("playedCardList");
     const endTurnButton = document.getElementById("endTurnButton");
     const targetList = document.getElementById("targetList");
+    const myFieldCards = document.getElementById("myFieldCards");
 
     const enemySlots = [
         document.getElementById("enemySlot1"),
@@ -35,7 +36,6 @@ window.onload = () => {
     let currentRoomId = "";
     let isHost = false;
     let isReady = false;
-    let latestPlayers = [];
     let latestGame = null;
     let draggedCard = null;
     let selectedTargetId = "";
@@ -45,41 +45,53 @@ window.onload = () => {
             id: "card-1",
             name: "炎上パンチ",
             type: "攻撃",
+            kind: "attack",
             targetType: "enemy",
+            damage: 2000,
+            heal: 0,
             hateTarget: "self",
             hateChange: 1,
             hateText: "自分のヘイト +1",
-            effect: "相手に2,000フォロワーダメージ予定。派手に燃えるので自分のヘイトが1上がる。"
+            effect: "対象に2,000フォロワーダメージ。派手に燃えるので自分のヘイトが1上がる。"
         },
         {
             id: "card-2",
             name: "お気持ち表明",
             type: "防御",
+            kind: "support",
             targetType: "self",
+            damage: 0,
+            heal: 1000,
             hateTarget: "self",
             hateChange: -1,
             hateText: "自分のヘイト -1",
-            effect: "次に受けるダメージを軽減予定。長文で沈静化し、自分のヘイトが1下がる。"
+            effect: "自分のフォロワーを1,000回復。長文で沈静化し、自分のヘイトが1下がる。"
         },
         {
             id: "card-3",
             name: "釣りスレ",
             type: "罠",
-            targetType: "enemy",
-            hateTarget: "target",
+            kind: "trap",
+            targetType: "self",
+            damage: 0,
+            heal: 0,
+            hateTarget: "self",
             hateChange: 1,
-            hateText: "対象のヘイト +1",
-            effect: "相手を釣る罠カード予定。対象のヘイトを1上げる。"
+            hateText: "自分のヘイト +1",
+            effect: "自分の場に伏せる。最大2枚まで伏せられる。"
         },
         {
             id: "card-4",
             name: "古参アピール",
             type: "補助",
+            kind: "support",
             targetType: "self",
+            damage: 0,
+            heal: 1000,
             hateTarget: "self",
             hateChange: -1,
             hateText: "自分のヘイト -1",
-            effect: "自分を回復予定。『昔はよかった』で自分のヘイトが1下がる。"
+            effect: "自分のフォロワーを1,000回復。『昔はよかった』でヘイトが1下がる。"
         }
     ];
 
@@ -151,7 +163,6 @@ window.onload = () => {
     });
 
     socket.on("updateRoom", (players) => {
-        latestPlayers = players;
         playerList.innerHTML = "";
 
         const me = players.find(player => player.id === socket.id);
@@ -221,13 +232,15 @@ window.onload = () => {
     socket.on("updateGame", (game) => {
         latestGame = game;
 
-        const enemies = latestGame.turnOrder.filter(player => player.id !== socket.id);
+        const enemies = latestGame.turnOrder.filter(player => {
+            return player.id !== socket.id && !player.defeated;
+        });
 
         if (!selectedTargetId && enemies.length > 0) {
             selectedTargetId = enemies[0].id;
         }
 
-        if (selectedTargetId && !latestGame.turnOrder.some(p => p.id === selectedTargetId)) {
+        if (selectedTargetId && !latestGame.turnOrder.some(player => player.id === selectedTargetId && !player.defeated)) {
             selectedTargetId = enemies[0]?.id || "";
         }
 
@@ -235,6 +248,7 @@ window.onload = () => {
         renderTargetList();
         renderTurn();
         renderPlayedCards();
+        renderMyFieldCards();
     });
 
     function renderBattlePlayers() {
@@ -245,9 +259,10 @@ window.onload = () => {
 
         if (me) {
             myPanel.classList.toggle("max-hate-player", me.hate >= 3);
+            myPanel.classList.toggle("defeated-player", me.defeated);
 
             myPanel.innerHTML = `
-                <div class="my-name">${me.hate >= 3 ? "🔥 " : ""}${me.name}</div>
+                <div class="my-name">${me.defeated ? "💀 " : ""}${me.hate >= 3 ? "🔥 " : ""}${me.name}</div>
                 <div><span>${me.followers.toLocaleString()}</span> フォロワー</div>
                 <div class="panel-hate ${me.hate >= 3 ? "max-hate-text" : ""}">
                     ${hateIcons(me.hate)}
@@ -262,16 +277,21 @@ window.onload = () => {
                 slot.classList.remove("empty-enemy");
                 slot.classList.toggle("selected-target", selectedTargetId === enemy.id);
                 slot.classList.toggle("max-hate-player", enemy.hate >= 3);
+                slot.classList.toggle("defeated-player", enemy.defeated);
 
                 slot.innerHTML = `
-                    <div class="enemy-name">${enemy.hate >= 3 ? "🔥 " : ""}${enemy.name}</div>
+                    <div class="enemy-name">${enemy.defeated ? "💀 " : ""}${enemy.hate >= 3 ? "🔥 " : ""}${enemy.name}</div>
                     <div><span>${enemy.followers.toLocaleString()}</span> フォロワー</div>
                     <div class="panel-hate ${enemy.hate >= 3 ? "max-hate-text" : ""}">
                         ${hateIcons(enemy.hate)}
                     </div>
+                    <div class="enemy-field-cards">
+                        ${enemy.fieldCards.map(() => `<span class="mini-set-card">伏</span>`).join("")}
+                    </div>
                 `;
 
                 slot.onclick = () => {
+                    if (enemy.defeated) return;
                     selectedTargetId = enemy.id;
                     renderBattlePlayers();
                     renderTargetList();
@@ -280,6 +300,7 @@ window.onload = () => {
                 slot.classList.add("empty-enemy");
                 slot.classList.remove("selected-target");
                 slot.classList.remove("max-hate-player");
+                slot.classList.remove("defeated-player");
                 slot.onclick = null;
 
                 slot.innerHTML = `
@@ -294,7 +315,9 @@ window.onload = () => {
     function renderTargetList() {
         if (!latestGame) return;
 
-        const enemies = latestGame.turnOrder.filter(player => player.id !== socket.id);
+        const enemies = latestGame.turnOrder.filter(player => {
+            return player.id !== socket.id && !player.defeated;
+        });
 
         targetList.innerHTML = "";
 
@@ -349,11 +372,31 @@ window.onload = () => {
         [...latestGame.playedCards].reverse().forEach(card => {
             playedCardList.innerHTML += `
                 <div class="played-card">
-                    <strong>${card.playerName}</strong> → ${card.targetName}<br>
-                    ${card.cardName} / ${card.hateText}
+                    <strong>${card.log || `${card.playerName} → ${card.targetName}`}</strong><br>
+                    ${card.hateText}
                 </div>
             `;
         });
+    }
+
+    function renderMyFieldCards() {
+        if (!latestGame) return;
+
+        const me = latestGame.turnOrder.find(player => player.id === socket.id);
+
+        myFieldCards.innerHTML = "";
+
+        if (!me) return;
+
+        for (let i = 0; i < 2; i++) {
+            const card = me.fieldCards[i];
+
+            myFieldCards.innerHTML += `
+                <div class="set-card ${card ? "has-set-card" : ""}">
+                    ${card ? "伏せカード" : "空き"}
+                </div>
+            `;
+        }
     }
 
     function renderHand() {
@@ -436,6 +479,14 @@ window.onload = () => {
     endTurnButton.onclick = () => {
         socket.emit("endTurn", currentRoomId);
     };
+
+    socket.on("gameOver", (winner) => {
+        if (winner) {
+            alert(`${winner.name} の勝利！`);
+        } else {
+            alert("ゲーム終了");
+        }
+    });
 
     socket.on("roomDisbanded", () => {
         alert("ルームが解散されました");
