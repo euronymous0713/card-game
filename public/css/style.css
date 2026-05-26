@@ -20,6 +20,8 @@ body {
     padding: 20px;
 }
 
+/* タイトル */
+
 .title-screen {
     width: 100%;
     max-width: 700px;
@@ -59,6 +61,8 @@ body {
     margin-bottom: 30px;
 }
 
+/* ボタン */
+
 button {
     border: none;
     border-radius: 14px;
@@ -81,6 +85,8 @@ button:disabled {
     cursor: not-allowed;
     transform: none;
 }
+
+/* ロビー */
 
 .menu-buttons,
 .lobby-buttons {
@@ -157,7 +163,7 @@ button:disabled {
     box-shadow: 0 0 18px rgba(0, 255, 213, 0.5);
 }
 
-/* バトル */
+/* バトル画面 */
 
 #battleScreen {
     width: 100%;
@@ -176,19 +182,24 @@ button:disabled {
     overflow: hidden;
 }
 
+/* 相手プレイヤー */
+
 .enemy-slots {
     position: absolute;
     top: 24px;
     left: 24px;
     right: 24px;
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: repeat(3, minmax(270px, 1fr));
     gap: 18px;
     align-items: start;
 }
 
 .enemy-panel,
 .my-panel {
+    width: 270px;
+    min-width: 270px;
+    height: 135px;
     padding: 14px 18px;
     border-radius: 16px;
     font-size: 15px;
@@ -196,23 +207,40 @@ button:disabled {
     background: rgba(0, 0, 0, 0.55);
     border: 2px solid rgba(0, 255, 225, 0.4);
     box-shadow: 0 0 16px rgba(0, 255, 225, 0.2);
+    overflow: hidden;
 }
 
 .enemy-panel {
-    min-width: 160px;
     text-align: center;
-}
-
-.enemy-panel span,
-.my-panel span {
-    font-size: 28px;
-    color: #00ffe1;
 }
 
 .enemy-name,
 .my-name {
     color: #ff7bff;
     margin-bottom: 4px;
+}
+
+.follower-line {
+    white-space: nowrap;
+    font-size: 24px;
+    color: #00ffe1;
+    font-weight: bold;
+    margin-top: 6px;
+}
+
+.owakon-text {
+    white-space: nowrap;
+    color: #ff3030;
+    font-size: 26px;
+    text-shadow: 0 0 14px rgba(255, 0, 0, 0.9);
+}
+
+.panel-hate {
+    margin-top: 8px;
+    font-size: 16px;
+    color: #ffb000;
+    letter-spacing: 3px;
+    white-space: nowrap;
 }
 
 .empty-enemy {
@@ -243,48 +271,52 @@ button:disabled {
     }
 }
 
-.panel-hate {
-    margin-top: 6px;
-    font-size: 15px;
-    color: #ffb000;
-    letter-spacing: 2px;
-}
-
 .max-hate-text {
     color: #ff3030;
     text-shadow: 0 0 10px rgba(255, 0, 0, 0.9);
 }
 
-.max-hate-player {
-    border-color: #ff3030 !important;
-    background: rgba(120, 0, 0, 0.68) !important;
-    box-shadow:
-        0 0 18px rgba(255, 48, 48, 0.8),
-        inset 0 0 18px rgba(255, 0, 0, 0.25) !important;
-    animation: hatePulse 1.2s infinite alternate;
+.defeated-player {
+    opacity: 0.42;
+    filter: grayscale(1);
 }
 
-@keyframes hatePulse {
-    from {
-        transform: scale(1);
-    }
+/* 相手の伏せカード */
 
-    to {
-        transform: scale(1.035);
-    }
+.enemy-field-cards {
+    margin-top: 8px;
+    display: flex;
+    justify-content: center;
+    gap: 6px;
 }
+
+.mini-set-card {
+    width: 28px;
+    height: 22px;
+    border-radius: 6px;
+    background: rgba(255, 176, 0, 0.18);
+    border: 1px solid #ffb000;
+    color: #ffb000;
+    font-size: 11px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 自分 */
 
 .my-panel {
     position: absolute;
     right: 28px;
-    bottom: 170px;
-    min-width: 200px;
+    bottom: 180px;
     text-align: center;
 }
 
+/* 中央 */
+
 .center-zone {
     position: absolute;
-    top: 43%;
+    top: 40%;
     left: 50%;
     transform: translate(-50%, -50%);
     text-align: center;
@@ -300,9 +332,9 @@ button:disabled {
 }
 
 .drop-zone {
-    margin: 22px auto 0;
-    width: 360px;
-    height: 130px;
+    margin: 18px auto 0;
+    width: 460px;
+    height: 145px;
     border: 2px dashed rgba(255, 255, 255, 0.25);
     border-radius: 20px;
     display: flex;
@@ -319,10 +351,12 @@ button:disabled {
     box-shadow: 0 0 24px rgba(0, 255, 225, 0.35);
 }
 
+/* 現在ターン */
+
 .turn-panel {
     position: absolute;
     left: 28px;
-    top: 150px;
+    top: 185px;
     min-width: 180px;
     padding: 12px 16px;
     border-radius: 14px;
@@ -337,15 +371,19 @@ button:disabled {
     font-size: 20px;
 }
 
+/* 使用履歴 */
+
 .history-panel {
     position: absolute;
     left: 28px;
-    top: 260px;
-    width: 235px;
+    top: 300px;
+    width: 230px;
+    max-height: 190px;
     padding: 12px;
     border-radius: 14px;
     background: rgba(0, 0, 0, 0.36);
     border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.05);
 }
 
 .history-panel h3 {
@@ -372,31 +410,14 @@ button:disabled {
     line-height: 1.45;
 }
 
-.hate-row {
-    display: flex;
-    justify-content: space-between;
-    gap: 8px;
-    font-size: 14px;
-    margin-top: 8px;
-}
-
-.hate-row strong {
-    color: #ffb000;
-    letter-spacing: 2px;
-}
-
-.max-hate-row {
-    color: #ff5a5a;
-    font-weight: bold;
-    text-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
-}
+/* 対象選択 */
 
 .target-panel {
     position: absolute;
-    left: calc(50% - 560px);
+    left: 28px;
     bottom: 82px;
-    width: 210px;
-    padding: 12px;
+    width: 220px;
+    padding: 14px;
     border-radius: 16px;
     background: rgba(0, 0, 0, 0.62);
     border: 2px solid rgba(0, 255, 225, 0.35);
@@ -430,12 +451,14 @@ button:disabled {
     box-shadow: 0 0 12px rgba(255, 48, 48, 0.55);
 }
 
+/* カード効果 */
+
 .card-detail {
     position: absolute;
     right: 28px;
-    top: 315px;
+    top: 330px;
     width: 240px;
-    height: 170px;
+    height: 160px;
     padding: 14px;
     border-radius: 16px;
     background: rgba(0, 0, 0, 0.65);
@@ -468,10 +491,60 @@ button:disabled {
     font-weight: bold;
 }
 
+/* 自分の伏せカード */
+
+.field-card-area {
+    position: absolute;
+    left: 50%;
+    bottom: 230px;
+    transform: translateX(-50%);
+    transform-origin: center;
+    margin-top: 0;
+    padding: 8px 14px;
+    z-index: 3;
+    border-radius: 14px;
+    background: rgba(0, 0, 0, 0.42);
+    border: 1px solid rgba(0, 255, 225, 0.22);
+}
+
+.field-card-area h3 {
+    font-size: 12px;
+    margin-bottom: 6px;
+    color: #00ffe1;
+}
+
+#myFieldCards {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.set-card {
+    width: 64px;
+    height: 34px;
+    font-size: 11px;
+    border-radius: 10px;
+    border: 1px dashed rgba(255, 255, 255, 0.28);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: rgba(255, 255, 255, 0.45);
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.has-set-card {
+    color: #ffb000;
+    border-color: #ffb000;
+    background: rgba(255, 176, 0, 0.12);
+    box-shadow: 0 0 12px rgba(255, 176, 0, 0.35);
+}
+
+/* ターン終了 */
+
 .battle-buttons {
     position: absolute;
     right: 28px;
-    bottom: 72px;
+    bottom: 62px;
 }
 
 #endTurnButton {
@@ -482,6 +555,8 @@ button:disabled {
     opacity: 0.35;
     cursor: not-allowed;
 }
+
+/* 手札 */
 
 .hand-area {
     position: absolute;
@@ -530,210 +605,15 @@ button:disabled {
     color: #ffb000;
 }
 
-.field-card-area {
-    margin-top: 14px;
-    padding: 10px;
-    border-radius: 14px;
-    background: rgba(0, 0, 0, 0.42);
-    border: 1px solid rgba(0, 255, 225, 0.22);
-}
+/* 勝利画面 */
 
-.field-card-area h3 {
-    font-size: 13px;
-    color: #00ffe1;
-    margin-bottom: 8px;
-}
-
-#myFieldCards {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-}
-
-.set-card {
-    width: 92px;
-    height: 44px;
-    border-radius: 10px;
-    border: 1px dashed rgba(255, 255, 255, 0.28);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 12px;
-    color: rgba(255, 255, 255, 0.45);
-    background: rgba(255, 255, 255, 0.04);
-}
-
-.has-set-card {
-    color: #ffb000;
-    border-color: #ffb000;
-    background: rgba(255, 176, 0, 0.12);
-    box-shadow: 0 0 12px rgba(255, 176, 0, 0.35);
-}
-
-.enemy-field-cards {
-    margin-top: 8px;
-    display: flex;
-    justify-content: center;
-    gap: 6px;
-}
-
-.mini-set-card {
-    width: 28px;
-    height: 22px;
-    border-radius: 6px;
-    background: rgba(255, 176, 0, 0.18);
-    border: 1px solid #ffb000;
-    color: #ffb000;
-    font-size: 11px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.defeated-player {
-    opacity: 0.42;
-    filter: grayscale(1);
-}
-
-/* プレイヤー枠は固定しつつ、文字が潰れないサイズに戻す */
-.enemy-panel,
-.my-panel {
-    width: 230px;
-    height: 135px;
-    overflow: hidden;
-}
-
-/* フォロワー表示を大きめに戻す */
-.follower-line {
-    font-size: 24px;
-    color: #00ffe1;
-    font-weight: bold;
-    margin-top: 6px;
-}
-
-/* オワコン表示 */
-.owakon-text {
-    color: #ff3030;
-    font-size: 26px;
-    text-shadow: 0 0 14px rgba(255, 0, 0, 0.9);
-}
-
-/* ヘイトを見やすく */
-.panel-hate {
-    margin-top: 8px;
-    font-size: 16px;
-    color: #ffb000;
-    letter-spacing: 3px;
-}
-
-/* 相手プレイヤー枠 */
-.enemy-slots {
-    top: 24px;
-    left: 24px;
-    right: 24px;
-}
-
-/* 現在ターンと履歴は少し下へ */
-.turn-panel {
-    top: 185px;
-}
-
-.history-panel {
-    top: 300px;
-}
-
-/* 中央エリアを少し上へ */
-.center-zone {
-    top: 40%;
-}
-
-/* ドロップ場所を少し小さくして邪魔になりにくく */
-.drop-zone {
-    width: 320px;
-    height: 105px;
-    margin-top: 18px;
-}
-
-/* 自分の伏せカードは手札のすぐ上 */
-.field-card-area {
-    position: absolute;
-    left: 50%;
-    bottom: 230px;
-    transform: translateX(-50%) scale(0.9);
-    transform-origin: center;
-
-    margin-top: 0;
-    padding: 8px 12px;
-
-    z-index: 3;
-}
-
-.field-card-area h3 {
-    font-size: 12px;
-    margin-bottom: 6px;
-}
-
-#myFieldCards {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-}
-
-.set-card {
-    width: 62px;
-    height: 34px;
-    font-size: 11px;
-}
-
-/* 自分プレイヤー枠とターン終了が重ならないように */
-.my-panel {
-    right: 28px;
-    bottom: 180px;
-}
-
-/* ターン終了はさらに下 */
-.battle-buttons {
-    right: 28px;
-    bottom: 62px;
-}
-
-/* 手札は最下部固定 */
-.hand-area {
-    bottom: 24px;
-}
-
-/* カード効果は自分枠と重ならない位置 */
-.card-detail {
-    right: 28px;
-    top: 330px;
-    width: 240px;
-    height: 160px;
-    overflow: hidden;
-}
-
-/* 対象選択は手札と被らないよう左寄せ */
-.target-panel {
-    left: 28px;
-    bottom: 70px;
-    width: 220px;
-}
-
-/* 使用履歴を少し小さく */
-.history-panel {
-    width: 230px;
-    max-height: 190px;
-}
-
-/* ゲーム終了オーバーレイ */
 .game-over-overlay {
     position: absolute;
     inset: 0;
     z-index: 999;
-
     display: none;
     justify-content: center;
     align-items: center;
-
     background: rgba(0, 0, 0, 0.72);
     backdrop-filter: blur(4px);
 }
@@ -741,14 +621,11 @@ button:disabled {
 .game-over-box {
     padding: 36px 48px;
     border-radius: 24px;
-
     background: rgba(0, 0, 0, 0.86);
     border: 2px solid #00ffe1;
-
     box-shadow:
         0 0 30px rgba(0, 255, 225, 0.6),
         0 0 80px rgba(255, 0, 200, 0.25);
-
     text-align: center;
 }
 
@@ -764,6 +641,8 @@ button:disabled {
     background: linear-gradient(135deg, #00ffd5, #0099ff);
     box-shadow: 0 0 24px rgba(0, 255, 225, 0.65);
 }
+
+/* スマホ */
 
 @media screen and (max-width: 768px) {
     body {
@@ -816,7 +695,8 @@ button:disabled {
     .target-panel,
     .history-panel,
     .turn-panel,
-    .battle-buttons {
+    .battle-buttons,
+    .field-card-area {
         position: static;
         transform: none;
         width: 100%;
@@ -831,15 +711,20 @@ button:disabled {
 
     .enemy-panel,
     .my-panel {
+        width: 100%;
         min-width: 0;
+        height: auto;
         padding: 6px;
         font-size: 10px;
         border-radius: 10px;
     }
 
-    .enemy-panel span,
-    .my-panel span {
+    .follower-line {
         font-size: 15px;
+    }
+
+    .panel-hate {
+        font-size: 12px;
     }
 
     .turn-panel {
@@ -855,25 +740,29 @@ button:disabled {
     }
 
     .target-panel {
-        order: 6;
+        order: 5;
     }
 
     .card-detail {
-        order: 7;
+        order: 6;
         height: 120px;
         padding: 8px;
         font-size: 11px;
     }
 
     .my-panel {
-        order: 8;
+        order: 7;
         align-self: flex-end;
         max-width: 150px;
     }
 
     .battle-buttons {
-        order: 9;
+        order: 8;
         text-align: center;
+    }
+
+    .field-card-area {
+        order: 9;
     }
 
     .hand-area {
