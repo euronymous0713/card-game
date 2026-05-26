@@ -3,6 +3,7 @@ const socket = io();
 window.onload = () => {
     const titleScreen = document.getElementById("titleScreen");
     const lobbyScreen = document.getElementById("lobbyScreen");
+    const battleScreen = document.getElementById("battleScreen");
 
     const createRoomButton = document.getElementById("createRoomButton");
     const joinRoomButton = document.getElementById("joinRoomButton");
@@ -14,9 +15,35 @@ window.onload = () => {
     const playerList = document.getElementById("playerList");
     const nameInput = document.getElementById("nameInput");
 
+    const handArea = document.getElementById("handArea");
+    const cardDetail = document.getElementById("cardDetail");
+
     let currentRoomId = "";
     let isHost = false;
     let isReady = false;
+
+    const dummyCards = [
+        {
+            name: "炎上パンチ",
+            type: "攻撃",
+            effect: "相手に2,000フォロワーダメージ。ネット民の怒りを叩きつける。"
+        },
+        {
+            name: "お気持ち表明",
+            type: "防御",
+            effect: "次に受けるダメージを1,500軽減する。長文で場を制圧する。"
+        },
+        {
+            name: "釣りスレ",
+            type: "罠",
+            effect: "相手が攻撃した時、1,000フォロワーダメージを返す。"
+        },
+        {
+            name: "古参アピール",
+            type: "補助",
+            effect: "自分のフォロワーを1,000回復する。『昔はよかった』を発動。"
+        }
+    ];
 
     const savedName = localStorage.getItem("playerName");
     if (savedName) nameInput.value = savedName;
@@ -51,6 +78,7 @@ window.onload = () => {
 
         titleScreen.style.display = "none";
         lobbyScreen.style.display = "flex";
+        battleScreen.style.display = "none";
 
         roomIdText.innerText = `ルームID : ${roomId}`;
 
@@ -69,6 +97,7 @@ window.onload = () => {
 
         titleScreen.style.display = "none";
         lobbyScreen.style.display = "flex";
+        battleScreen.style.display = "none";
 
         roomIdText.innerText = `ルームID : ${roomId}`;
 
@@ -87,9 +116,7 @@ window.onload = () => {
         if (me) {
             isReady = me.ready;
 
-            readyButton.innerText = isReady
-                ? "準備解除"
-                : "準備完了";
+            readyButton.innerText = isReady ? "準備解除" : "準備完了";
 
             if (isReady) {
                 readyButton.classList.add("cancel-ready");
@@ -141,6 +168,7 @@ window.onload = () => {
         isReady = false;
 
         lobbyScreen.style.display = "none";
+        battleScreen.style.display = "none";
         titleScreen.style.display = "flex";
 
         readyButton.innerText = "準備完了";
@@ -152,22 +180,44 @@ window.onload = () => {
     };
 
     socket.on("gameStarted", () => {
+        titleScreen.style.display = "none";
         lobbyScreen.style.display = "none";
+        battleScreen.style.display = "block";
 
-        let gameScreen = document.getElementById("gameScreen");
-
-        if (!gameScreen) {
-            gameScreen = document.createElement("div");
-            gameScreen.id = "gameScreen";
-            gameScreen.innerHTML = `
-                <h1 class="game-title">バトル開始</h1>
-                <p class="subtitle">カードゲーム画面をここから作成します</p>
-            `;
-            document.body.appendChild(gameScreen);
-        }
-
-        gameScreen.style.display = "flex";
+        renderHand();
     });
+
+    function renderHand() {
+        handArea.innerHTML = "";
+
+        dummyCards.forEach(card => {
+            const cardElement = document.createElement("div");
+
+            cardElement.className = "hand-card";
+
+            cardElement.innerHTML = `
+                <div class="card-name">${card.name}</div>
+                <div class="card-type">${card.type}</div>
+            `;
+
+            cardElement.onmouseenter = () => {
+                cardDetail.innerHTML = `
+                    <h3>${card.name}</h3>
+                    <p class="detail-type">${card.type}</p>
+                    <p>${card.effect}</p>
+                `;
+            };
+
+            cardElement.onmouseleave = () => {
+                cardDetail.innerHTML = `
+                    <h3>カード効果</h3>
+                    <p>カードにカーソルを合わせると効果が表示されます。</p>
+                `;
+            };
+
+            handArea.appendChild(cardElement);
+        });
+    }
 
     socket.on("roomDisbanded", () => {
         alert("ルームが解散されました");
@@ -177,6 +227,7 @@ window.onload = () => {
         isReady = false;
 
         lobbyScreen.style.display = "none";
+        battleScreen.style.display = "none";
         titleScreen.style.display = "flex";
 
         readyButton.innerText = "準備完了";
@@ -187,6 +238,7 @@ window.onload = () => {
         alert("ルームが満員です");
         titleScreen.style.display = "flex";
         lobbyScreen.style.display = "none";
+        battleScreen.style.display = "none";
     });
 
     socket.on("errorMessage", (message) => {
