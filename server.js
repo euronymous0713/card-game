@@ -16,21 +16,20 @@ function generateRoomId() {
 
 io.on("connection", (socket) => {
 
-    console.log("接続");
+    console.log("接続:", socket.id);
 
-    // =====================
-    // ルーム作成
-    // =====================
     socket.on("createRoom", (playerName) => {
 
         const roomId = generateRoomId();
 
-        rooms[roomId] = [{
-            id: socket.id,
-            name: playerName,
-            ready: false,
-            host: true
-        }];
+        rooms[roomId] = [
+            {
+                id: socket.id,
+                name: playerName,
+                ready: false,
+                host: true
+            }
+        ];
 
         socket.join(roomId);
 
@@ -39,9 +38,6 @@ io.on("connection", (socket) => {
         io.to(roomId).emit("updateRoom", rooms[roomId]);
     });
 
-    // =====================
-    // ルーム参加（最大5人）
-    // =====================
     socket.on("joinRoom", ({ roomId, playerName }) => {
 
         const room = rooms[roomId];
@@ -51,8 +47,17 @@ io.on("connection", (socket) => {
             return;
         }
 
-        if (room.length >= 5) {
+        // ここが重要：4人以上なら入室拒否
+        if (room.length >= 4) {
             socket.emit("roomFull");
+            socket.emit("errorMessage", "このルームは満員です（最大4人）");
+            return;
+        }
+
+        const alreadyJoined = room.some(player => player.id === socket.id);
+
+        if (alreadyJoined) {
+            socket.emit("errorMessage", "すでにこのルームに参加しています");
             return;
         }
 
@@ -70,15 +75,14 @@ io.on("connection", (socket) => {
         io.to(roomId).emit("updateRoom", room);
     });
 
-    // =====================
-    // 準備切替
-    // =====================
     socket.on("toggleReady", ({ roomId }) => {
 
         const room = rooms[roomId];
+
         if (!room) return;
 
-        const player = room.find(p => p.id === socket.id);
+        const player = room.find(player => player.id === socket.id);
+
         if (!player) return;
 
         player.ready = !player.ready;
@@ -86,69 +90,93 @@ io.on("connection", (socket) => {
         io.to(roomId).emit("updateRoom", room);
     });
 
-    // =====================
-    // ゲーム開始条件
-    // =====================
     socket.on("startGame", (roomId) => {
 
         const room = rooms[roomId];
+
         if (!room) return;
 
-        if (room.length < 2) {
-            socket.emit("errorMessage", "2人以上必要です");
+        const starter = room.find(player => player.id === socket.id);
+
+        if (!starter || !starter.host) {
+            socket.emit("errorMessage", "ゲーム開始はルーム作成者のみ可能です");
             return;
         }
 
-        if (!room.every(p => p.ready)) {
-            socket.emit("errorMessage", "全員準備完了していません");
+        if (room.length < 2) {
+            socket.emit("errorMessage", "ゲーム開始には2人以上必要です");
+            return;
+        }
+
+        const allReady = room.every(player => player.ready);
+
+        if (!allReady) {
+            socket.emit("errorMessage", "全員が準備完了していません");
             return;
         }
 
         io.to(roomId).emit("gameStarted");
     });
 
-    // =====================
-    // 退出
-    // =====================
     socket.on("leaveRoom", (roomId) => {
 
         const room = rooms[roomId];
+
         if (!room) return;
 
-        rooms[roomId] = room.filter(p => p.id !== socket.id);
+        const player = room.find(player => player.id === socket.id);
+
+        if (!player) return;
+
+        if (player.host) {
+            socket.emit("errorMessage", "ルーム作成者は退出ではなく解散してください");
+            return;
+        }
+
+        rooms[roomId] = room.filter(player => player.id !== socket.id);
 
         socket.leave(roomId);
 
         io.to(roomId).emit("updateRoom", rooms[roomId]);
     });
 
-    // =====================
-    // 解散（ホストのみ）
-    // =====================
     socket.on("disbandRoom", (roomId) => {
 
         const room = rooms[roomId];
+
         if (!room) return;
 
-        const player = room.find(p => p.id === socket.id);
+        const player = room.find(player => player.id === socket.id);
 
-        if (!player?.host) return;
+        if (!player || !player.host) {
+            socket.emit("errorMessage", "ルームを解散できるのは作成者のみです");
+            return;
+        }
 
         io.to(roomId).emit("roomDisbanded");
+
+        const clients = io.sockets.adapter.rooms.get(roomId);
+
+        if (clients) {
+            clients.forEach(clientId => {
+                const clientSocket = io.sockets.sockets.get(clientId);
+                if (clientSocket) {
+                    clientSocket.leave(roomId);
+                }
+            });
+        }
 
         delete rooms[roomId];
     });
 
-    // =====================
-    // 切断
-    // =====================
     socket.on("disconnect", () => {
 
         for (const roomId in rooms) {
 
             const room = rooms[roomId];
 
-            const player = room.find(p => p.id === socket.id);
+            const player = room.find(player => player.id === socket.id);
+
             if (!player) continue;
 
             if (player.host) {
@@ -157,7 +185,7 @@ io.on("connection", (socket) => {
                 continue;
             }
 
-            rooms[roomId] = room.filter(p => p.id !== socket.id);
+            rooms[roomId] = room.filter(player => player.id !== socket.id);
 
             io.to(roomId).emit("updateRoom", rooms[roomId]);
         }
