@@ -25,6 +25,10 @@ window.onload = () => {
     const targetList = document.getElementById("targetList");
     const myFieldCards = document.getElementById("myFieldCards");
 
+    const gameOverOverlay = document.getElementById("gameOverOverlay");
+    const gameOverText = document.getElementById("gameOverText");
+    const nextButton = document.getElementById("nextButton");
+
     const enemySlots = [
         document.getElementById("enemySlot1"),
         document.getElementById("enemySlot2"),
@@ -97,6 +101,12 @@ window.onload = () => {
 
     function hateIcons(hate) {
         return "◆".repeat(hate) + "◇".repeat(3 - hate);
+    }
+
+    function followerText(player) {
+        return player.defeated
+            ? "オワコン"
+            : `${player.followers.toLocaleString()} フォロワー`;
     }
 
     const savedName = localStorage.getItem("playerName");
@@ -206,16 +216,7 @@ window.onload = () => {
             socket.emit("leaveRoom", currentRoomId);
         }
 
-        currentRoomId = "";
-        isHost = false;
-        isReady = false;
-
-        lobbyScreen.style.display = "none";
-        battleScreen.style.display = "none";
-        titleScreen.style.display = "flex";
-
-        readyButton.innerText = "準備完了";
-        readyButton.classList.remove("cancel-ready");
+        resetToTitle();
     };
 
     startGameButton.onclick = () => {
@@ -226,6 +227,7 @@ window.onload = () => {
         titleScreen.style.display = "none";
         lobbyScreen.style.display = "none";
         battleScreen.style.display = "block";
+        gameOverOverlay.style.display = "none";
         renderHand();
     });
 
@@ -249,6 +251,10 @@ window.onload = () => {
         renderTurn();
         renderPlayedCards();
         renderMyFieldCards();
+
+        if (game.gameOver && game.winner) {
+            showGameOver(game.winner);
+        }
     });
 
     function renderBattlePlayers() {
@@ -263,7 +269,9 @@ window.onload = () => {
 
             myPanel.innerHTML = `
                 <div class="my-name">${me.defeated ? "💀 " : ""}${me.hate >= 3 ? "🔥 " : ""}${me.name}</div>
-                <div><span>${me.followers.toLocaleString()}</span> フォロワー</div>
+                <div class="follower-line ${me.defeated ? "owakon-text" : ""}">
+                    ${followerText(me)}
+                </div>
                 <div class="panel-hate ${me.hate >= 3 ? "max-hate-text" : ""}">
                     ${hateIcons(me.hate)}
                 </div>
@@ -281,7 +289,9 @@ window.onload = () => {
 
                 slot.innerHTML = `
                     <div class="enemy-name">${enemy.defeated ? "💀 " : ""}${enemy.hate >= 3 ? "🔥 " : ""}${enemy.name}</div>
-                    <div><span>${enemy.followers.toLocaleString()}</span> フォロワー</div>
+                    <div class="follower-line ${enemy.defeated ? "owakon-text" : ""}">
+                        ${followerText(enemy)}
+                    </div>
                     <div class="panel-hate ${enemy.hate >= 3 ? "max-hate-text" : ""}">
                         ${hateIcons(enemy.hate)}
                     </div>
@@ -305,7 +315,7 @@ window.onload = () => {
 
                 slot.innerHTML = `
                     <div class="enemy-name">空席</div>
-                    <div><span>-</span> フォロワー</div>
+                    <div class="follower-line">-</div>
                     <div class="panel-hate">◇◇◇</div>
                 `;
             }
@@ -393,7 +403,7 @@ window.onload = () => {
 
             myFieldCards.innerHTML += `
                 <div class="set-card ${card ? "has-set-card" : ""}">
-                    ${card ? "伏せカード" : "空き"}
+                    ${card ? "伏" : "空"}
                 </div>
             `;
         }
@@ -445,7 +455,7 @@ window.onload = () => {
     dropZone.ondrop = (event) => {
         event.preventDefault();
 
-        if (!latestGame) return;
+        if (!latestGame || latestGame.gameOver) return;
 
         const currentPlayer = latestGame.turnOrder[latestGame.currentTurnIndex];
 
@@ -480,34 +490,51 @@ window.onload = () => {
         socket.emit("endTurn", currentRoomId);
     };
 
+    function showGameOver(winner) {
+        const isWinner = winner.id === socket.id;
+
+        gameOverText.innerText = isWinner
+            ? "勝利！最後まで生き残った"
+            : `${winner.name} の勝利`;
+
+        gameOverOverlay.style.display = "flex";
+    }
+
+    nextButton.onclick = () => {
+        socket.emit("returnTitle", currentRoomId);
+        resetToTitle();
+    };
+
+    function resetToTitle() {
+        currentRoomId = "";
+        isHost = false;
+        isReady = false;
+        latestGame = null;
+        selectedTargetId = "";
+
+        lobbyScreen.style.display = "none";
+        battleScreen.style.display = "none";
+        titleScreen.style.display = "flex";
+        gameOverOverlay.style.display = "none";
+
+        readyButton.innerText = "準備完了";
+        readyButton.classList.remove("cancel-ready");
+    }
+
     socket.on("gameOver", (winner) => {
         if (winner) {
-            alert(`${winner.name} の勝利！`);
-        } else {
-            alert("ゲーム終了");
+            showGameOver(winner);
         }
     });
 
     socket.on("roomDisbanded", () => {
         alert("ルームが解散されました");
-
-        currentRoomId = "";
-        isHost = false;
-        isReady = false;
-
-        lobbyScreen.style.display = "none";
-        battleScreen.style.display = "none";
-        titleScreen.style.display = "flex";
-
-        readyButton.innerText = "準備完了";
-        readyButton.classList.remove("cancel-ready");
+        resetToTitle();
     });
 
     socket.on("roomFull", () => {
         alert("ルームが満員です");
-        titleScreen.style.display = "flex";
-        lobbyScreen.style.display = "none";
-        battleScreen.style.display = "none";
+        resetToTitle();
     });
 
     socket.on("errorMessage", (message) => {

@@ -595,6 +595,96 @@ button:disabled {
     filter: grayscale(1);
 }
 
+.enemy-panel,
+.my-panel {
+    width: 220px;
+    height: 118px;
+    overflow: hidden;
+}
+
+.follower-line {
+    font-size: 24px;
+    color: #00ffe1;
+    font-weight: bold;
+    margin-top: 4px;
+}
+
+.owakon-text {
+    color: #ff3030;
+    font-size: 26px;
+    text-shadow: 0 0 14px rgba(255, 0, 0, 0.9);
+}
+
+.turn-panel {
+    top: 180px;
+}
+
+.history-panel {
+    top: 295px;
+}
+
+.field-card-area {
+    margin-top: 24px;
+    transform: scale(0.82);
+    transform-origin: top center;
+}
+
+.field-card-area h3 {
+    font-size: 12px;
+}
+
+.set-card {
+    width: 58px;
+    height: 34px;
+    font-size: 11px;
+}
+
+.battle-buttons {
+    bottom: 60px;
+}
+
+.game-over-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 999;
+
+    display: none;
+    justify-content: center;
+    align-items: center;
+
+    background: rgba(0, 0, 0, 0.72);
+    backdrop-filter: blur(4px);
+}
+
+.game-over-box {
+    padding: 36px 48px;
+
+    border-radius: 24px;
+
+    background: rgba(0, 0, 0, 0.86);
+
+    border: 2px solid #00ffe1;
+
+    box-shadow:
+        0 0 30px rgba(0, 255, 225, 0.6),
+        0 0 80px rgba(255, 0, 200, 0.25);
+
+    text-align: center;
+}
+
+.game-over-box h2 {
+    margin-bottom: 28px;
+    font-size: 34px;
+    color: #00ffe1;
+}
+
+#nextButton {
+    font-size: 24px;
+    padding: 18px 54px;
+    background: linear-gradient(135deg, #00ffd5, #0099ff);
+    box-shadow: 0 0 24px rgba(0, 255, 225, 0.65);
+}
+
 @media screen and (max-width: 768px) {
     body {
         display: block;

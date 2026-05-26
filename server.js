@@ -37,7 +37,9 @@ function createGameState(players) {
         turnOrder,
         currentTurnIndex: 0,
         playedCards: [],
-        phase: "battle"
+        phase: "battle",
+        winner: null,
+        gameOver: false
     };
 }
 
@@ -45,12 +47,14 @@ function getCurrentPlayer(game) {
     return game.turnOrder[game.currentTurnIndex];
 }
 
-function moveToNextAliveTurn(game) {
-    const alivePlayers = game.turnOrder.filter(player => !player.defeated);
+function getAlivePlayers(game) {
+    return game.turnOrder.filter(player => !player.defeated);
+}
 
-    if (alivePlayers.length <= 1) {
-        return;
-    }
+function moveToNextAliveTurn(game) {
+    const alivePlayers = getAlivePlayers(game);
+
+    if (alivePlayers.length <= 1) return;
 
     do {
         game.currentTurnIndex =
@@ -58,8 +62,13 @@ function moveToNextAliveTurn(game) {
     } while (game.turnOrder[game.currentTurnIndex].defeated);
 }
 
-function getAlivePlayers(game) {
-    return game.turnOrder.filter(player => !player.defeated);
+function checkGameOver(game) {
+    const alivePlayers = getAlivePlayers(game);
+
+    if (alivePlayers.length === 1) {
+        game.gameOver = true;
+        game.winner = alivePlayers[0];
+    }
 }
 
 io.on("connection", (socket) => {
@@ -67,30 +76,24 @@ io.on("connection", (socket) => {
     console.log("接続:", socket.id);
 
     socket.on("createRoom", (playerName) => {
-
         const roomId = generateRoomId();
 
         rooms[roomId] = {
-            players: [
-                {
-                    id: socket.id,
-                    name: playerName,
-                    ready: false,
-                    host: true
-                }
-            ],
+            players: [{
+                id: socket.id,
+                name: playerName,
+                ready: false,
+                host: true
+            }],
             game: null
         };
 
         socket.join(roomId);
-
         socket.emit("roomCreated", roomId);
-
         io.to(roomId).emit("updateRoom", rooms[roomId].players);
     });
 
     socket.on("joinRoom", ({ roomId, playerName }) => {
-
         const room = rooms[roomId];
 
         if (!room) {
@@ -112,31 +115,23 @@ io.on("connection", (socket) => {
         });
 
         socket.join(roomId);
-
         socket.emit("joinSuccess", roomId);
-
         io.to(roomId).emit("updateRoom", room.players);
     });
 
     socket.on("toggleReady", ({ roomId }) => {
-
         const room = rooms[roomId];
-
         if (!room) return;
 
         const player = room.players.find(player => player.id === socket.id);
-
         if (!player) return;
 
         player.ready = !player.ready;
-
         io.to(roomId).emit("updateRoom", room.players);
     });
 
     socket.on("startGame", (roomId) => {
-
         const room = rooms[roomId];
-
         if (!room) return;
 
         const starter = room.players.find(player => player.id === socket.id);
@@ -151,9 +146,7 @@ io.on("connection", (socket) => {
             return;
         }
 
-        const allReady = room.players.every(player => player.ready);
-
-        if (!allReady) {
+        if (!room.players.every(player => player.ready)) {
             socket.emit("errorMessage", "全員が準備完了していません");
             return;
         }
@@ -165,12 +158,14 @@ io.on("connection", (socket) => {
     });
 
     socket.on("playCard", ({ roomId, card, targetId }) => {
-
         const room = rooms[roomId];
 
         if (!room || !room.game) return;
 
         const game = room.game;
+
+        if (game.gameOver) return;
+
         const currentPlayer = getCurrentPlayer(game);
 
         if (!currentPlayer || currentPlayer.id !== socket.id) {
@@ -179,7 +174,7 @@ io.on("connection", (socket) => {
         }
 
         if (currentPlayer.defeated) {
-            socket.emit("errorMessage", "敗北済みのため行動できません");
+            socket.emit("errorMessage", "オワコン済みのため行動できません");
             return;
         }
 
@@ -189,7 +184,6 @@ io.on("connection", (socket) => {
         if (!caster) return;
 
         if (card.kind === "trap") {
-
             if (caster.fieldCards.length >= 2) {
                 socket.emit("errorMessage", "伏せカードは最大2枚までです");
                 return;
@@ -218,7 +212,6 @@ io.on("connection", (socket) => {
         }
 
         if (card.targetType === "enemy") {
-
             if (!target) {
                 socket.emit("errorMessage", "対象プレイヤーを選択してください");
                 return;
@@ -230,7 +223,7 @@ io.on("connection", (socket) => {
             }
 
             if (target.defeated) {
-                socket.emit("errorMessage", "敗北済みのプレイヤーは対象にできません");
+                socket.emit("errorMessage", "オワコン済みのプレイヤーは対象にできません");
                 return;
             }
         }
@@ -273,22 +266,24 @@ io.on("connection", (socket) => {
             log: `${caster.name} → ${finalTarget.name}：${card.name}`
         });
 
-        const alivePlayers = getAlivePlayers(game);
-
-        if (alivePlayers.length <= 1) {
-            io.to(roomId).emit("gameOver", alivePlayers[0] || null);
-        }
+        checkGameOver(game);
 
         io.to(roomId).emit("updateGame", game);
+
+        if (game.gameOver) {
+            io.to(roomId).emit("gameOver", game.winner);
+        }
     });
 
     socket.on("endTurn", (roomId) => {
-
         const room = rooms[roomId];
 
         if (!room || !room.game) return;
 
         const game = room.game;
+
+        if (game.gameOver) return;
+
         const currentPlayer = getCurrentPlayer(game);
 
         if (!currentPlayer || currentPlayer.id !== socket.id) {
@@ -302,13 +297,10 @@ io.on("connection", (socket) => {
     });
 
     socket.on("leaveRoom", (roomId) => {
-
         const room = rooms[roomId];
-
         if (!room) return;
 
         const player = room.players.find(player => player.id === socket.id);
-
         if (!player) return;
 
         if (player.host) {
@@ -319,14 +311,11 @@ io.on("connection", (socket) => {
         room.players = room.players.filter(player => player.id !== socket.id);
 
         socket.leave(roomId);
-
         io.to(roomId).emit("updateRoom", room.players);
     });
 
     socket.on("disbandRoom", (roomId) => {
-
         const room = rooms[roomId];
-
         if (!room) return;
 
         const player = room.players.find(player => player.id === socket.id);
@@ -352,10 +341,18 @@ io.on("connection", (socket) => {
         delete rooms[roomId];
     });
 
+    socket.on("returnTitle", (roomId) => {
+        const room = rooms[roomId];
+
+        if (!room) return;
+
+        socket.leave(roomId);
+
+        delete rooms[roomId];
+    });
+
     socket.on("disconnect", () => {
-
         for (const roomId in rooms) {
-
             const room = rooms[roomId];
 
             const player = room.players.find(player => player.id === socket.id);
