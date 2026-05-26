@@ -23,7 +23,6 @@ window.onload = () => {
     const playedCardList = document.getElementById("playedCardList");
     const endTurnButton = document.getElementById("endTurnButton");
     const targetList = document.getElementById("targetList");
-    const hateList = document.getElementById("hateList");
 
     const enemySlots = [
         document.getElementById("enemySlot1"),
@@ -83,6 +82,10 @@ window.onload = () => {
             effect: "自分を回復予定。『昔はよかった』で自分のヘイトが1下がる。"
         }
     ];
+
+    function hateIcons(hate) {
+        return "◆".repeat(hate) + "◇".repeat(3 - hate);
+    }
 
     const savedName = localStorage.getItem("playerName");
     if (savedName) nameInput.value = savedName;
@@ -230,7 +233,6 @@ window.onload = () => {
 
         renderBattlePlayers();
         renderTargetList();
-        renderHateList();
         renderTurn();
         renderPlayedCards();
     });
@@ -247,7 +249,9 @@ window.onload = () => {
             myPanel.innerHTML = `
                 <div class="my-name">${me.hate >= 3 ? "🔥 " : ""}${me.name}</div>
                 <div><span>${me.followers.toLocaleString()}</span> フォロワー</div>
-                <div class="panel-hate">ヘイト ${me.hate}/3</div>
+                <div class="panel-hate ${me.hate >= 3 ? "max-hate-text" : ""}">
+                    ${hateIcons(me.hate)}
+                </div>
             `;
         }
 
@@ -262,7 +266,9 @@ window.onload = () => {
                 slot.innerHTML = `
                     <div class="enemy-name">${enemy.hate >= 3 ? "🔥 " : ""}${enemy.name}</div>
                     <div><span>${enemy.followers.toLocaleString()}</span> フォロワー</div>
-                    <div class="panel-hate">ヘイト ${enemy.hate}/3</div>
+                    <div class="panel-hate ${enemy.hate >= 3 ? "max-hate-text" : ""}">
+                        ${hateIcons(enemy.hate)}
+                    </div>
                 `;
 
                 slot.onclick = () => {
@@ -279,6 +285,7 @@ window.onload = () => {
                 slot.innerHTML = `
                     <div class="enemy-name">空席</div>
                     <div><span>-</span> フォロワー</div>
+                    <div class="panel-hate">◇◇◇</div>
                 `;
             }
         });
@@ -312,23 +319,6 @@ window.onload = () => {
             };
 
             targetList.appendChild(button);
-        });
-    }
-
-    function renderHateList() {
-        if (!latestGame) return;
-
-        hateList.innerHTML = "";
-
-        latestGame.turnOrder.forEach(player => {
-            const hateIcons = "◆".repeat(player.hate) + "◇".repeat(3 - player.hate);
-
-            hateList.innerHTML += `
-                <div class="hate-row ${player.hate >= 3 ? "max-hate-row" : ""}">
-                    <span>${player.hate >= 3 ? "🔥 " : ""}${player.name}</span>
-                    <strong>${hateIcons}</strong>
-                </div>
-            `;
         });
     }
 
