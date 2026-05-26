@@ -195,7 +195,19 @@ button:disabled {
     align-items: start;
 }
 
-.enemy-panel,
+.enemy-panel {
+    width: 100%;
+    min-width: 0;
+
+    height: 165px;
+
+    padding: 16px 20px;
+
+    border-radius: 18px;
+
+    overflow: hidden;
+}
+
 .my-panel {
     width: 300px;
     min-width: 300px;
@@ -308,9 +320,17 @@ button:disabled {
 /* 自分 */
 
 .my-panel {
+
     position: absolute;
+
     right: 28px;
+
     bottom: 205px;
+
+    width: 300px;
+
+    height: 125px;
+
     text-align: center;
 }
 
@@ -503,17 +523,16 @@ button:disabled {
 /* カード効果 */
 
 .card-detail {
+
     position: absolute;
+
     right: 28px;
-    top: 390px;
+
+    top: 300px;
+
     width: 250px;
+
     height: 160px;
-    padding: 14px;
-    border-radius: 16px;
-    background: rgba(0, 0, 0, 0.65);
-    border: 2px solid rgba(255, 0, 200, 0.35);
-    box-shadow: 0 0 20px rgba(255, 0, 200, 0.2);
-    overflow: hidden;
 }
 
 .card-detail h3 {
