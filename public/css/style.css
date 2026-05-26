@@ -372,23 +372,6 @@ button:disabled {
     line-height: 1.45;
 }
 
-.hate-panel {
-    position: absolute;
-    right: 28px;
-    top: 72px;
-    width: 240px;
-    padding: 16px;
-    border-radius: 16px;
-    background: rgba(0, 0, 0, 0.62);
-    border: 2px solid rgba(255, 120, 0, 0.45);
-    box-shadow: 0 0 18px rgba(255, 120, 0, 0.25);
-}
-
-.hate-panel h3 {
-    color: #ffb000;
-    margin-bottom: 10px;
-}
-
 .hate-row {
     display: flex;
     justify-content: space-between;
@@ -595,7 +578,6 @@ button:disabled {
     .center-zone,
     .card-detail,
     .hand-area,
-    .hate-panel,
     .target-panel,
     .history-panel,
     .turn-panel,
@@ -635,10 +617,6 @@ button:disabled {
 
     .history-panel {
         order: 4;
-    }
-
-    .hate-panel {
-        order: 5;
     }
 
     .target-panel {
