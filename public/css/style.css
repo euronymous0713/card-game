@@ -9,143 +9,75 @@ html {
 }
 
 body {
-    background:
-        linear-gradient(135deg,
-            #0f0f1a,
-            #1a1a2e,
-            #16213e);
-
+    background: linear-gradient(135deg, #0f0f1a, #1a1a2e, #16213e);
     color: white;
-
-    font-family:
-        "Segoe UI",
-        sans-serif;
-
+    font-family: "Segoe UI", sans-serif;
     min-height: 100vh;
-
     display: flex;
     justify-content: center;
     align-items: center;
-
     overflow-x: hidden;
-
     padding: 20px;
 }
 
-/* ======================
-   タイトル画面
-====================== */
+/* タイトル */
 
 .title-screen {
     width: 100%;
     max-width: 700px;
-
     display: flex;
     flex-direction: column;
     align-items: center;
-
     text-align: center;
 }
 
 .game-title {
-    font-size:
-        clamp(32px,
-            8vw,
-            72px);
-
+    font-size: clamp(32px, 8vw, 72px);
     font-weight: bold;
-
-    background:
-        linear-gradient(90deg,
-            #ff00c8,
-            #00ffe1);
-
+    background: linear-gradient(90deg, #ff00c8, #00ffe1);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-
     margin-bottom: 20px;
-
-    text-shadow:
-        0 0 20px rgba(255,
-            255,
-            255,
-            0.2);
-
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
     white-space: nowrap;
 }
 
 .subtitle {
-    font-size:
-        clamp(14px,
-            2vw,
-            20px);
-
+    font-size: clamp(14px, 2vw, 20px);
     line-height: 1.8;
-
     opacity: 0.85;
-
     margin-bottom: 30px;
 }
-
-/* ======================
-   名前入力
-====================== */
 
 #nameInput {
     width: 100%;
     max-width: 320px;
-
     padding: 14px;
-
     border: none;
     border-radius: 12px;
-
     font-size: 18px;
-
     outline: none;
-
-    background:
-        rgba(255,
-            255,
-            255,
-            0.1);
-
+    background: rgba(255, 255, 255, 0.1);
     color: white;
-
     margin-bottom: 30px;
 }
 
-/* ======================
-   ボタン共通
-====================== */
+/* ボタン */
 
 button {
     border: none;
-
     border-radius: 14px;
-
     cursor: pointer;
-
     color: white;
-
     font-size: 18px;
     font-weight: bold;
-
-    padding:
-        14px 28px;
-
+    padding: 14px 28px;
     transition: 0.2s;
-
-    background:
-        linear-gradient(135deg,
-            #ff00c8,
-            #7a00ff);
+    background: linear-gradient(135deg, #ff00c8, #7a00ff);
 }
 
 button:hover {
-    transform:
-        scale(1.05);
-
+    transform: scale(1.05);
     opacity: 0.9;
 }
 
@@ -155,50 +87,34 @@ button:disabled {
     transform: none;
 }
 
-/* ======================
-   タイトルボタン
-====================== */
-
-.menu-buttons {
+.menu-buttons,
+.lobby-buttons {
     display: flex;
-
     gap: 20px;
-
     flex-wrap: wrap;
-
     justify-content: center;
 }
 
-/* ======================
-   ロビー
-====================== */
+/* ロビー */
 
 #lobbyScreen {
     width: 100%;
     max-width: 700px;
-
     display: flex;
     flex-direction: column;
     align-items: center;
-
     text-align: center;
 }
 
 #roomIdText {
     margin-top: 12px;
     margin-bottom: 20px;
-
     font-size: 20px;
     font-weight: bold;
 }
 
-/* ======================
-   プレイヤー一覧
-====================== */
-
 #playerList {
     width: 100%;
-
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -208,115 +124,47 @@ button:disabled {
     display: flex;
     justify-content: space-between;
     align-items: center;
-
     width: 100%;
     max-width: 420px;
-
-    padding:
-        14px 18px;
-
+    padding: 14px 18px;
     margin-top: 12px;
-
     border-radius: 12px;
-
     font-size: 18px;
     font-weight: bold;
-
-    transition: 0.2s;
 }
 
 .not-ready {
-    background:
-        rgba(255,
-            255,
-            255,
-            0.08);
-
-    border:
-        2px solid rgba(255,
-            255,
-            255,
-            0.1);
+    background: rgba(255, 255, 255, 0.08);
+    border: 2px solid rgba(255, 255, 255, 0.1);
 }
 
 .ready {
-    background:
-        rgba(0,
-            255,
-            170,
-            0.18);
-
-    border:
-        2px solid #00ffaa;
-
-    box-shadow:
-        0 0 10px rgba(0,
-            255,
-            170,
-            0.4);
+    background: rgba(0, 255, 170, 0.18);
+    border: 2px solid #00ffaa;
+    box-shadow: 0 0 10px rgba(0, 255, 170, 0.4);
 }
 
 .player-status {
     font-size: 14px;
 }
 
-/* ======================
-   ロビーボタン
-====================== */
-
 .lobby-buttons {
-    display: flex;
-
-    justify-content: center;
-
-    gap: 20px;
-
     margin-top: 30px;
-
-    flex-wrap: wrap;
 }
 
 .cancel-ready {
-    background:
-        linear-gradient(135deg,
-            #ff7b7b,
-            #ff3c3c) !important;
+    background: linear-gradient(135deg, #ff7b7b, #ff3c3c) !important;
 }
 
 #startGameButton {
     margin-top: 30px;
-
-    padding:
-        16px 42px;
-
+    padding: 16px 42px;
     font-size: 22px;
-
-    background:
-        linear-gradient(135deg,
-            #00ffd5,
-            #0099ff);
-
-    box-shadow:
-        0 0 18px rgba(0,
-            255,
-            213,
-            0.5);
+    background: linear-gradient(135deg, #00ffd5, #0099ff);
+    box-shadow: 0 0 18px rgba(0, 255, 213, 0.5);
 }
 
-#startGameButton:hover {
-    transform:
-        scale(1.08);
-
-    box-shadow:
-        0 0 30px rgba(0,
-            255,
-            213,
-            0.9);
-}
-
-/* ======================
-   バトル画面
-====================== */
+/* バトル画面 PC */
 
 #battleScreen {
     width: 100%;
@@ -325,35 +173,20 @@ button:disabled {
 
 .battle-field {
     position: relative;
-
     width: 100%;
     max-width: 1200px;
     height: 100%;
-
     margin: 0 auto;
-
-    border:
-        2px solid rgba(0,
-            255,
-            225,
-            0.25);
-
+    border: 2px solid rgba(0, 255, 225, 0.25);
     border-radius: 24px;
-
-    background:
-        radial-gradient(circle at center,
-            rgba(255, 0, 200, 0.14),
-            rgba(0, 0, 0, 0.35));
-
+    background: radial-gradient(circle at center, rgba(255, 0, 200, 0.14), rgba(0, 0, 0, 0.35));
     overflow: hidden;
 }
 
 .opponent-area,
 .player-area {
     position: absolute;
-
     width: 100%;
-
     display: flex;
     align-items: center;
 }
@@ -361,46 +194,27 @@ button:disabled {
 .opponent-area {
     top: 28px;
     left: 28px;
-
     justify-content: flex-start;
 }
 
 .player-area {
     right: 28px;
     bottom: 150px;
-
     justify-content: flex-end;
 }
 
 .avatar {
     width: 120px;
     height: 120px;
-
     border-radius: 50%;
-
     display: flex;
     justify-content: center;
     align-items: center;
-
     font-size: 22px;
     font-weight: bold;
-
-    background:
-        linear-gradient(135deg,
-            #222,
-            #444);
-
-    border:
-        3px solid rgba(255,
-            255,
-            255,
-            0.2);
-
-    box-shadow:
-        0 0 24px rgba(255,
-            0,
-            200,
-            0.35);
+    background: linear-gradient(135deg, #222, #444);
+    border: 3px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 24px rgba(255, 0, 200, 0.35);
 }
 
 .opponent-avatar {
@@ -412,33 +226,14 @@ button:disabled {
 }
 
 .follower-box {
-    padding:
-        14px 18px;
-
+    padding: 14px 18px;
     min-width: 180px;
-
     border-radius: 16px;
-
     font-size: 16px;
     font-weight: bold;
-
-    background:
-        rgba(0,
-            0,
-            0,
-            0.55);
-
-    border:
-        2px solid rgba(0,
-            255,
-            225,
-            0.4);
-
-    box-shadow:
-        0 0 16px rgba(0,
-            255,
-            225,
-            0.2);
+    background: rgba(0, 0, 0, 0.55);
+    border: 2px solid rgba(0, 255, 225, 0.4);
+    box-shadow: 0 0 16px rgba(0, 255, 225, 0.2);
 }
 
 .follower-box span {
@@ -448,53 +243,27 @@ button:disabled {
 
 .center-zone {
     position: absolute;
-
     top: 42%;
     left: 50%;
-
-    transform:
-        translate(-50%,
-            -50%);
-
+    transform: translate(-50%, -50%);
     text-align: center;
 }
 
 .battle-message {
-    padding:
-        16px 28px;
-
+    padding: 16px 28px;
     border-radius: 999px;
-
-    background:
-        rgba(255,
-            255,
-            255,
-            0.08);
-
-    border:
-        1px solid rgba(255,
-            255,
-            255,
-            0.14);
-
-    color: rgba(255,
-            255,
-            255,
-            0.8);
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    color: rgba(255, 255, 255, 0.8);
 }
 
 .hand-area {
     position: absolute;
-
     left: 50%;
     bottom: 24px;
-
-    transform:
-        translateX(-50%);
-
+    transform: translateX(-50%);
     display: flex;
     gap: 18px;
-
     justify-content: center;
     align-items: flex-end;
 }
@@ -502,48 +271,22 @@ button:disabled {
 .hand-card {
     width: 130px;
     height: 190px;
-
     padding: 14px;
-
     border-radius: 16px;
-
     cursor: pointer;
-
-    background:
-        linear-gradient(160deg,
-            #1d102d,
-            #351a52);
-
-    border:
-        2px solid rgba(255,
-            255,
-            255,
-            0.18);
-
-    box-shadow:
-        0 0 18px rgba(255,
-            0,
-            200,
-            0.2);
-
+    background: linear-gradient(160deg, #1d102d, #351a52);
+    border: 2px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 0 18px rgba(255, 0, 200, 0.2);
     transition: 0.18s;
-
     display: flex;
     flex-direction: column;
     justify-content: space-between;
 }
 
 .hand-card:hover {
-    transform:
-        translateY(-18px) scale(1.06);
-
+    transform: translateY(-18px) scale(1.06);
     border-color: #00ffe1;
-
-    box-shadow:
-        0 0 30px rgba(0,
-            255,
-            225,
-            0.45);
+    box-shadow: 0 0 30px rgba(0, 255, 225, 0.45);
 }
 
 .card-name {
@@ -553,48 +296,25 @@ button:disabled {
 
 .card-type {
     font-size: 14px;
-
     color: #00ffe1;
 }
 
 .card-detail {
     position: absolute;
-
     right: 28px;
     top: 50%;
-
-    transform:
-        translateY(-50%);
-
+    transform: translateY(-50%);
     width: 260px;
     min-height: 180px;
-
     padding: 20px;
-
     border-radius: 18px;
-
-    background:
-        rgba(0,
-            0,
-            0,
-            0.65);
-
-    border:
-        2px solid rgba(255,
-            0,
-            200,
-            0.35);
-
-    box-shadow:
-        0 0 20px rgba(255,
-            0,
-            200,
-            0.2);
+    background: rgba(0, 0, 0, 0.65);
+    border: 2px solid rgba(255, 0, 200, 0.35);
+    box-shadow: 0 0 20px rgba(255, 0, 200, 0.2);
 }
 
 .card-detail h3 {
     margin-bottom: 12px;
-
     color: #00ffe1;
 }
 
@@ -609,13 +329,22 @@ button:disabled {
     margin-bottom: 10px;
 }
 
-/* ======================
-   スマホ
-====================== */
+/* スマホ対応 */
 
-@media screen and (max-width:768px) {
+@media screen and (max-width: 768px) {
+    body {
+        display: block;
+        padding: 10px;
+        min-height: 100vh;
+    }
+
     .game-title {
-        font-size: 42px;
+        font-size: 38px;
+        white-space: nowrap;
+    }
+
+    .subtitle {
+        font-size: 14px;
     }
 
     button {
@@ -623,37 +352,93 @@ button:disabled {
         max-width: 300px;
     }
 
-    .menu-buttons {
-        flex-direction: column;
-        align-items: center;
-    }
-
+    .menu-buttons,
     .lobby-buttons {
         flex-direction: column;
         align-items: center;
     }
 
-    .player-card {
-        font-size: 16px;
-    }
-
     #battleScreen {
-        height: auto;
+        width: 100%;
         min-height: 100vh;
+        height: auto;
     }
 
     .battle-field {
-        min-height: 820px;
+        width: 100%;
+        min-height: 100vh;
+        height: auto;
+        padding: 12px;
+        border-radius: 18px;
+        overflow: visible;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .opponent-area,
+    .player-area,
+    .center-zone,
+    .card-detail,
+    .hand-area {
+        position: static;
+        transform: none;
+        width: 100%;
+    }
+
+    .opponent-area {
+        order: 1;
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .center-zone {
+        order: 2;
+        margin: 4px 0;
+    }
+
+    .player-area {
+        order: 3;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .card-detail {
+        order: 4;
+        width: 100%;
+        min-height: 120px;
+        padding: 14px;
+        border-radius: 14px;
+    }
+
+    .hand-area {
+        order: 5;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        padding-bottom: 12px;
     }
 
     .avatar {
-        width: 86px;
-        height: 86px;
-        font-size: 16px;
+        width: 72px;
+        height: 72px;
+        font-size: 14px;
+        flex-shrink: 0;
+    }
+
+    .opponent-avatar,
+    .player-avatar {
+        margin: 0;
     }
 
     .follower-box {
-        min-width: 140px;
+        min-width: 0;
+        width: 180px;
+        padding: 10px 12px;
         font-size: 13px;
     }
 
@@ -661,42 +446,27 @@ button:disabled {
         font-size: 22px;
     }
 
-    .player-area {
-        bottom: 250px;
-        right: 16px;
-    }
-
-    .opponent-area {
-        top: 20px;
-        left: 16px;
-    }
-
-    .card-detail {
-        position: absolute;
-        top: auto;
-        right: 50%;
-        bottom: 180px;
-
-        transform: translateX(50%);
-
-        width: 90%;
-        max-width: 340px;
-    }
-
-    .hand-area {
+    .battle-message {
         width: 100%;
-
-        gap: 10px;
-
-        overflow-x: auto;
-
-        padding: 0 16px 8px;
-
-        justify-content: flex-start;
+        padding: 12px;
+        font-size: 14px;
     }
 
     .hand-card {
-        min-width: 110px;
-        height: 160px;
+        width: 100%;
+        height: 150px;
+        padding: 12px;
+    }
+
+    .hand-card:hover {
+        transform: translateY(-8px) scale(1.02);
+    }
+
+    .card-name {
+        font-size: 15px;
+    }
+
+    .card-type {
+        font-size: 12px;
     }
 }
