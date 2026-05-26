@@ -44,14 +44,20 @@
   <div id="battleScreen" style="display:none;">
     <div class="battle-field">
 
-      <div class="opponent-area">
-        <div class="follower-box opponent-followers">
-          相手<br>
-          <span id="opponentFollowers">10,000</span> フォロワー
+      <div class="enemy-slots">
+        <div class="enemy-panel enemy-left" id="enemySlot1">
+          <div class="enemy-name">空席</div>
+          <div><span>10,000</span> フォロワー</div>
         </div>
 
-        <div class="avatar opponent-avatar">
-          相手
+        <div class="enemy-panel enemy-center" id="enemySlot2">
+          <div class="enemy-name">空席</div>
+          <div><span>10,000</span> フォロワー</div>
+        </div>
+
+        <div class="enemy-panel enemy-right" id="enemySlot3">
+          <div class="enemy-name">空席</div>
+          <div><span>10,000</span> フォロワー</div>
         </div>
       </div>
 
@@ -61,15 +67,9 @@
         </div>
       </div>
 
-      <div class="player-area">
-        <div class="avatar player-avatar">
-          自分
-        </div>
-
-        <div class="follower-box player-followers">
-          自分<br>
-          <span id="myFollowers">10,000</span> フォロワー
-        </div>
+      <div class="my-panel" id="myPanel">
+        <div class="my-name">自分</div>
+        <div><span>10,000</span> フォロワー</div>
       </div>
 
       <div class="card-detail" id="cardDetail">

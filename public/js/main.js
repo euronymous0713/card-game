@@ -18,9 +18,18 @@ window.onload = () => {
     const handArea = document.getElementById("handArea");
     const cardDetail = document.getElementById("cardDetail");
 
+    const enemySlots = [
+        document.getElementById("enemySlot1"),
+        document.getElementById("enemySlot2"),
+        document.getElementById("enemySlot3")
+    ];
+
+    const myPanel = document.getElementById("myPanel");
+
     let currentRoomId = "";
     let isHost = false;
     let isReady = false;
+    let latestPlayers = [];
 
     const dummyCards = [
         {
@@ -109,6 +118,8 @@ window.onload = () => {
     });
 
     socket.on("updateRoom", (players) => {
+        latestPlayers = players;
+
         playerList.innerHTML = "";
 
         const me = players.find(player => player.id === socket.id);
@@ -184,8 +195,41 @@ window.onload = () => {
         lobbyScreen.style.display = "none";
         battleScreen.style.display = "block";
 
+        renderBattlePlayers();
         renderHand();
     });
+
+    function renderBattlePlayers() {
+        const me = latestPlayers.find(player => player.id === socket.id);
+        const enemies = latestPlayers.filter(player => player.id !== socket.id);
+
+        if (me) {
+            myPanel.innerHTML = `
+                <div class="my-name">${me.name}</div>
+                <div><span>10,000</span> フォロワー</div>
+            `;
+        }
+
+        enemySlots.forEach((slot, index) => {
+            const enemy = enemies[index];
+
+            if (enemy) {
+                slot.classList.remove("empty-enemy");
+
+                slot.innerHTML = `
+                    <div class="enemy-name">${enemy.name}</div>
+                    <div><span>10,000</span> フォロワー</div>
+                `;
+            } else {
+                slot.classList.add("empty-enemy");
+
+                slot.innerHTML = `
+                    <div class="enemy-name">空席</div>
+                    <div><span>-</span> フォロワー</div>
+                `;
+            }
+        });
+    }
 
     function renderHand() {
         handArea.innerHTML = "";
