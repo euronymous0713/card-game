@@ -20,8 +20,6 @@ body {
     padding: 20px;
 }
 
-/* タイトル */
-
 .title-screen {
     width: 100%;
     max-width: 700px;
@@ -61,8 +59,6 @@ body {
     margin-bottom: 30px;
 }
 
-/* ボタン */
-
 button {
     border: none;
     border-radius: 14px;
@@ -85,8 +81,6 @@ button:disabled {
     cursor: not-allowed;
     transform: none;
 }
-
-/* ロビー */
 
 .menu-buttons,
 .lobby-buttons {
@@ -163,7 +157,7 @@ button:disabled {
     box-shadow: 0 0 18px rgba(0, 255, 213, 0.5);
 }
 
-/* バトル画面 */
+/* バトル */
 
 #battleScreen {
     width: 100%;
@@ -181,8 +175,6 @@ button:disabled {
     background: radial-gradient(circle at center, rgba(255, 0, 200, 0.14), rgba(0, 0, 0, 0.35));
     overflow: hidden;
 }
-
-/* 相手プレイヤー */
 
 .enemy-slots {
     position: absolute;
@@ -232,17 +224,38 @@ button:disabled {
     box-shadow: 0 0 20px rgba(255, 176, 0, 0.6) !important;
 }
 
-/* 自分 */
+.max-hate-player {
+    border-color: #ff3030 !important;
+    background: rgba(120, 0, 0, 0.68) !important;
+    box-shadow:
+        0 0 18px rgba(255, 48, 48, 0.8),
+        inset 0 0 18px rgba(255, 0, 0, 0.25) !important;
+    animation: hatePulse 1.2s infinite alternate;
+}
+
+@keyframes hatePulse {
+    from {
+        transform: scale(1);
+    }
+
+    to {
+        transform: scale(1.035);
+    }
+}
+
+.panel-hate {
+    margin-top: 6px;
+    font-size: 12px;
+    color: #ffb000;
+}
 
 .my-panel {
     position: absolute;
     right: 28px;
-    bottom: 185px;
+    bottom: 170px;
     min-width: 200px;
     text-align: center;
 }
-
-/* 中央 */
 
 .center-zone {
     position: absolute;
@@ -281,8 +294,6 @@ button:disabled {
     box-shadow: 0 0 24px rgba(0, 255, 225, 0.35);
 }
 
-/* ターン */
-
 .turn-panel {
     position: absolute;
     left: 28px;
@@ -300,8 +311,6 @@ button:disabled {
     color: #00ffe1;
     font-size: 20px;
 }
-
-/* 履歴 */
 
 .history-panel {
     position: absolute;
@@ -339,12 +348,10 @@ button:disabled {
     line-height: 1.45;
 }
 
-/* ヘイト */
-
 .hate-panel {
     position: absolute;
     right: 28px;
-    top: 105px;
+    top: 72px;
     width: 240px;
     padding: 16px;
     border-radius: 16px;
@@ -371,14 +378,18 @@ button:disabled {
     letter-spacing: 2px;
 }
 
-/* 対象選択 */
+.max-hate-row {
+    color: #ff5a5a;
+    font-weight: bold;
+    text-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
+}
 
 .target-panel {
     position: absolute;
-    right: 28px;
-    top: 285px;
-    width: 240px;
-    padding: 16px;
+    left: calc(50% - 470px);
+    bottom: 48px;
+    width: 220px;
+    padding: 14px;
     border-radius: 16px;
     background: rgba(0, 0, 0, 0.62);
     border: 2px solid rgba(0, 255, 225, 0.35);
@@ -407,14 +418,17 @@ button:disabled {
     box-shadow: 0 0 16px rgba(0, 255, 225, 0.55);
 }
 
-/* カード効果 */
+.max-hate-target-button {
+    border: 2px solid #ff3030;
+    box-shadow: 0 0 12px rgba(255, 48, 48, 0.55);
+}
 
 .card-detail {
     position: absolute;
     right: 28px;
-    top: 470px;
+    top: 315px;
     width: 240px;
-    height: 205px;
+    height: 170px;
     padding: 16px;
     border-radius: 16px;
     background: rgba(0, 0, 0, 0.65);
@@ -446,8 +460,6 @@ button:disabled {
     font-weight: bold;
 }
 
-/* ターン終了 */
-
 .battle-buttons {
     position: absolute;
     right: 28px;
@@ -462,8 +474,6 @@ button:disabled {
     opacity: 0.35;
     cursor: not-allowed;
 }
-
-/* 手札 */
 
 .hand-area {
     position: absolute;
@@ -511,8 +521,6 @@ button:disabled {
     font-size: 11px;
     color: #ffb000;
 }
-
-/* スマホ */
 
 @media screen and (max-width: 768px) {
     body {

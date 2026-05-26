@@ -218,7 +218,6 @@ window.onload = () => {
     socket.on("updateGame", (game) => {
         latestGame = game;
 
-        const me = latestGame.turnOrder.find(player => player.id === socket.id);
         const enemies = latestGame.turnOrder.filter(player => player.id !== socket.id);
 
         if (!selectedTargetId && enemies.length > 0) {
@@ -243,9 +242,12 @@ window.onload = () => {
         const enemies = latestGame.turnOrder.filter(player => player.id !== socket.id);
 
         if (me) {
+            myPanel.classList.toggle("max-hate-player", me.hate >= 3);
+
             myPanel.innerHTML = `
-                <div class="my-name">${me.name}</div>
+                <div class="my-name">${me.hate >= 3 ? "🔥 " : ""}${me.name}</div>
                 <div><span>${me.followers.toLocaleString()}</span> フォロワー</div>
+                <div class="panel-hate">ヘイト ${me.hate}/3</div>
             `;
         }
 
@@ -255,10 +257,12 @@ window.onload = () => {
             if (enemy) {
                 slot.classList.remove("empty-enemy");
                 slot.classList.toggle("selected-target", selectedTargetId === enemy.id);
+                slot.classList.toggle("max-hate-player", enemy.hate >= 3);
 
                 slot.innerHTML = `
-                    <div class="enemy-name">${enemy.name}</div>
+                    <div class="enemy-name">${enemy.hate >= 3 ? "🔥 " : ""}${enemy.name}</div>
                     <div><span>${enemy.followers.toLocaleString()}</span> フォロワー</div>
+                    <div class="panel-hate">ヘイト ${enemy.hate}/3</div>
                 `;
 
                 slot.onclick = () => {
@@ -269,6 +273,7 @@ window.onload = () => {
             } else {
                 slot.classList.add("empty-enemy");
                 slot.classList.remove("selected-target");
+                slot.classList.remove("max-hate-player");
                 slot.onclick = null;
 
                 slot.innerHTML = `
@@ -296,6 +301,10 @@ window.onload = () => {
                 button.classList.add("selected-target-button");
             }
 
+            if (enemy.hate >= 3) {
+                button.classList.add("max-hate-target-button");
+            }
+
             button.onclick = () => {
                 selectedTargetId = enemy.id;
                 renderBattlePlayers();
@@ -315,8 +324,8 @@ window.onload = () => {
             const hateIcons = "◆".repeat(player.hate) + "◇".repeat(3 - player.hate);
 
             hateList.innerHTML += `
-                <div class="hate-row">
-                    <span>${player.name}</span>
+                <div class="hate-row ${player.hate >= 3 ? "max-hate-row" : ""}">
+                    <span>${player.hate >= 3 ? "🔥 " : ""}${player.name}</span>
                     <strong>${hateIcons}</strong>
                 </div>
             `;
@@ -349,11 +358,11 @@ window.onload = () => {
 
         [...latestGame.playedCards].reverse().forEach(card => {
             playedCardList.innerHTML += `
-            <div class="played-card">
-                <strong>${card.playerName}</strong> → ${card.targetName}<br>
-                ${card.cardName} / ${card.hateText}
-            </div>
-        `;
+                <div class="played-card">
+                    <strong>${card.playerName}</strong> → ${card.targetName}<br>
+                    ${card.cardName} / ${card.hateText}
+                </div>
+            `;
         });
     }
 
