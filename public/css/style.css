@@ -20,8 +20,6 @@ body {
     padding: 20px;
 }
 
-/* タイトル */
-
 .title-screen {
     width: 100%;
     max-width: 700px;
@@ -61,8 +59,6 @@ body {
     margin-bottom: 30px;
 }
 
-/* ボタン */
-
 button {
     border: none;
     border-radius: 14px;
@@ -85,8 +81,6 @@ button:disabled {
     cursor: not-allowed;
     transform: none;
 }
-
-/* ロビー */
 
 .menu-buttons,
 .lobby-buttons {
@@ -163,8 +157,6 @@ button:disabled {
     box-shadow: 0 0 18px rgba(0, 255, 213, 0.5);
 }
 
-/* バトル画面 */
-
 #battleScreen {
     width: 100%;
     height: calc(100vh - 40px);
@@ -182,48 +174,47 @@ button:disabled {
     overflow: hidden;
 }
 
-/* 相手プレイヤー */
-
 .enemy-slots {
     position: absolute;
     top: 24px;
-    left: 24px;
-    right: 24px;
+    left: 10px;
+    right: 10px;
     display: grid;
-    grid-template-columns: repeat(3, minmax(300px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(3, minmax(360px, 1fr));
+    gap: 8px;
     align-items: start;
 }
 
 .enemy-panel {
     width: 100%;
     min-width: 0;
-
-    height: 165px;
-
-    padding: 16px 20px;
-
-    border-radius: 18px;
-
-    overflow: hidden;
-}
-
-.my-panel {
-    width: 300px;
-    min-width: 300px;
     height: 165px;
     padding: 16px 20px;
     border-radius: 18px;
     font-size: 16px;
     font-weight: bold;
+    text-align: center;
     background: rgba(0, 0, 0, 0.55);
     border: 2px solid rgba(0, 255, 225, 0.4);
     box-shadow: 0 0 16px rgba(0, 255, 225, 0.2);
     overflow: hidden;
 }
 
-.enemy-panel {
+.my-panel {
+    position: absolute;
+    right: 28px;
+    bottom: 205px;
+    width: 300px;
+    height: 135px;
+    padding: 16px 20px;
+    border-radius: 18px;
+    font-size: 16px;
+    font-weight: bold;
     text-align: center;
+    background: rgba(0, 0, 0, 0.55);
+    border: 2px solid rgba(0, 255, 225, 0.4);
+    box-shadow: 0 0 16px rgba(0, 255, 225, 0.2);
+    overflow: hidden;
 }
 
 .enemy-name,
@@ -294,8 +285,6 @@ button:disabled {
     filter: grayscale(1);
 }
 
-/* 相手の伏せカード */
-
 .enemy-field-cards {
     margin-top: 10px;
     display: flex;
@@ -316,25 +305,6 @@ button:disabled {
     align-items: center;
     justify-content: center;
 }
-
-/* 自分 */
-
-.my-panel {
-
-    position: absolute;
-
-    right: 28px;
-
-    bottom: 205px;
-
-    width: 300px;
-
-    height: 125px;
-
-    text-align: center;
-}
-
-/* 中央 */
 
 .center-zone {
     position: absolute;
@@ -377,8 +347,6 @@ button:disabled {
     box-shadow: 0 0 24px rgba(0, 255, 225, 0.35);
 }
 
-/* 自分の伏せカード：ドロップ場所の下、手札のすぐ上 */
-
 .field-card-area {
     margin-top: 18px;
     padding: 8px 14px;
@@ -420,8 +388,6 @@ button:disabled {
     box-shadow: 0 0 12px rgba(255, 176, 0, 0.35);
 }
 
-/* 現在ターン */
-
 .turn-panel {
     position: absolute;
     left: 28px;
@@ -439,8 +405,6 @@ button:disabled {
     color: #00ffe1;
     font-size: 20px;
 }
-
-/* 使用履歴 */
 
 .history-panel {
     position: absolute;
@@ -478,8 +442,6 @@ button:disabled {
     font-size: 12px;
     line-height: 1.45;
 }
-
-/* 対象選択 */
 
 .target-panel {
     position: absolute;
@@ -520,19 +482,17 @@ button:disabled {
     box-shadow: 0 0 12px rgba(255, 48, 48, 0.55);
 }
 
-/* カード効果 */
-
 .card-detail {
-
     position: absolute;
-
     right: 28px;
-
     top: 300px;
-
     width: 250px;
-
     height: 160px;
+    padding: 14px;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    overflow: hidden;
 }
 
 .card-detail h3 {
@@ -559,8 +519,6 @@ button:disabled {
     font-weight: bold;
 }
 
-/* ターン終了 */
-
 .battle-buttons {
     position: absolute;
     right: 28px;
@@ -575,8 +533,6 @@ button:disabled {
     opacity: 0.35;
     cursor: not-allowed;
 }
-
-/* 手札 */
 
 .hand-area {
     position: absolute;
@@ -625,8 +581,6 @@ button:disabled {
     color: #ffb000;
 }
 
-/* 勝利画面 */
-
 .game-over-overlay {
     position: absolute;
     inset: 0;
@@ -661,8 +615,6 @@ button:disabled {
     background: linear-gradient(135deg, #00ffd5, #0099ff);
     box-shadow: 0 0 24px rgba(0, 255, 225, 0.65);
 }
-
-/* スマホ */
 
 @media screen and (max-width: 768px) {
     body {
