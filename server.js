@@ -10,8 +10,79 @@ app.use(express.static("public"));
 
 const rooms = {};
 
+const CARD_MASTER = [
+    {
+        id: "card-1",
+        name: "炎上パンチ",
+        type: "攻撃",
+        kind: "attack",
+        targetType: "enemy",
+        damage: 2000,
+        heal: 0,
+        hateTarget: "self",
+        hateChange: 1,
+        hateText: "自分のヘイト +1",
+        effect: "対象に2,000フォロワーダメージ。対象のヘイトが3ならダメージ2倍。自分のヘイトが1上がる。"
+    },
+    {
+        id: "card-2",
+        name: "お気持ち表明",
+        type: "防御",
+        kind: "support",
+        targetType: "self",
+        damage: 0,
+        heal: 1000,
+        hateTarget: "self",
+        hateChange: -1,
+        hateText: "自分のヘイト -1",
+        effect: "自分のフォロワーを1,000回復。長文で沈静化し、自分のヘイトが1下がる。"
+    },
+    {
+        id: "card-3",
+        name: "釣りスレ",
+        type: "罠",
+        kind: "trap",
+        targetType: "self",
+        damage: 0,
+        heal: 0,
+        hateTarget: "self",
+        hateChange: 1,
+        hateText: "自分のヘイト +1",
+        effect: "自分の場に伏せる。最大2枚まで伏せられる。"
+    },
+    {
+        id: "card-4",
+        name: "古参アピール",
+        type: "補助",
+        kind: "support",
+        targetType: "self",
+        damage: 0,
+        heal: 1000,
+        hateTarget: "self",
+        hateChange: -1,
+        hateText: "自分のヘイト -1",
+        effect: "自分のフォロワーを1,000回復。『昔はよかった』でヘイトが1下がる。"
+    }
+];
+
 function generateRoomId() {
     return Math.floor(1000 + Math.random() * 9000).toString();
+}
+
+function generateCardInstance() {
+    const baseCard =
+        CARD_MASTER[Math.floor(Math.random() * CARD_MASTER.length)];
+
+    return {
+        ...baseCard,
+        instanceId: `${baseCard.id}-${Date.now()}-${Math.random()}`
+    };
+}
+
+function drawCards(player) {
+    while (player.hand.length < 4) {
+        player.hand.push(generateCardInstance());
+    }
 }
 
 function shuffleArray(array) {
@@ -23,15 +94,22 @@ function clamp(value, min, max) {
 }
 
 function createGameState(players) {
-    const turnOrder = shuffleArray(players).map(player => ({
-        id: player.id,
-        name: player.name,
-        followers: 10000,
-        hate: 0,
-        host: player.host,
-        fieldCards: [],
-        defeated: false
-    }));
+    const turnOrder = shuffleArray(players).map(player => {
+        const gamePlayer = {
+            id: player.id,
+            name: player.name,
+            followers: 10000,
+            hate: 0,
+            host: player.host,
+            hand: [],
+            fieldCards: [],
+            defeated: false
+        };
+
+        drawCards(gamePlayer);
+
+        return gamePlayer;
+    });
 
     return {
         turnOrder,
@@ -60,6 +138,12 @@ function moveToNextAliveTurn(game) {
         game.currentTurnIndex =
             (game.currentTurnIndex + 1) % game.turnOrder.length;
     } while (game.turnOrder[game.currentTurnIndex].defeated);
+
+    const nextPlayer = getCurrentPlayer(game);
+
+    if (nextPlayer) {
+        drawCards(nextPlayer);
+    }
 }
 
 function checkGameOver(game) {
@@ -69,6 +153,20 @@ function checkGameOver(game) {
         game.gameOver = true;
         game.winner = alivePlayers[0];
     }
+}
+
+function removeCardFromHand(player, instanceId) {
+    const index = player.hand.findIndex(card => card.instanceId === instanceId);
+
+    if (index === -1) {
+        return null;
+    }
+
+    const usedCard = player.hand[index];
+
+    player.hand.splice(index, 1);
+
+    return usedCard;
 }
 
 io.on("connection", (socket) => {
@@ -179,31 +277,40 @@ io.on("connection", (socket) => {
         }
 
         const caster = game.turnOrder.find(player => player.id === socket.id);
-        const target = game.turnOrder.find(player => player.id === targetId);
 
         if (!caster) return;
 
-        if (card.kind === "trap") {
+        const usedCard = removeCardFromHand(caster, card.instanceId);
+
+        if (!usedCard) {
+            socket.emit("errorMessage", "そのカードは手札にありません");
+            return;
+        }
+
+        const target = game.turnOrder.find(player => player.id === targetId);
+
+        if (usedCard.kind === "trap") {
             if (caster.fieldCards.length >= 2) {
+                caster.hand.push(usedCard);
                 socket.emit("errorMessage", "伏せカードは最大2枚までです");
                 return;
             }
 
             caster.fieldCards.push({
-                id: card.id,
-                name: card.name,
-                type: card.type,
-                effect: card.effect
+                id: usedCard.id,
+                name: usedCard.name,
+                type: usedCard.type,
+                effect: usedCard.effect
             });
 
-            caster.hate = clamp(caster.hate + card.hateChange, 0, 3);
+            caster.hate = clamp(caster.hate + usedCard.hateChange, 0, 3);
 
             game.playedCards.push({
                 playerName: caster.name,
                 targetName: "自分の場",
-                cardName: card.name,
-                cardType: card.type,
-                hateText: card.hateText,
+                cardName: usedCard.name,
+                cardType: usedCard.type,
+                hateText: usedCard.hateText,
                 log: `${caster.name} はカードを1枚伏せた`
             });
 
@@ -211,59 +318,74 @@ io.on("connection", (socket) => {
             return;
         }
 
-        if (card.targetType === "enemy") {
+        if (usedCard.targetType === "enemy") {
             if (!target) {
+                caster.hand.push(usedCard);
                 socket.emit("errorMessage", "対象プレイヤーを選択してください");
                 return;
             }
 
             if (target.id === socket.id) {
+                caster.hand.push(usedCard);
                 socket.emit("errorMessage", "このカードは自分には使えません");
                 return;
             }
 
             if (target.defeated) {
+                caster.hand.push(usedCard);
                 socket.emit("errorMessage", "オワコン済みのプレイヤーは対象にできません");
                 return;
             }
         }
 
         const finalTarget =
-            card.targetType === "self"
+            usedCard.targetType === "self"
                 ? caster
                 : target;
 
-        if (!finalTarget) return;
+        if (!finalTarget) {
+            caster.hand.push(usedCard);
+            return;
+        }
 
-        if (card.kind === "attack") {
+        let damageText = "";
+
+        if (usedCard.kind === "attack") {
+            let damage = usedCard.damage;
+
+            if (finalTarget.hate >= 3) {
+                damage *= 2;
+                damageText = " / ヘイト3のためダメージ2倍";
+            }
+
             finalTarget.followers =
-                Math.max(0, finalTarget.followers - card.damage);
+                Math.max(0, finalTarget.followers - damage);
 
             if (finalTarget.followers <= 0) {
                 finalTarget.defeated = true;
             }
         }
 
-        if (card.kind === "support") {
+        if (usedCard.kind === "support") {
             caster.followers =
-                Math.min(10000, caster.followers + card.heal);
+                Math.min(10000, caster.followers + usedCard.heal);
         }
 
-        if (card.hateTarget === "self") {
-            caster.hate = clamp(caster.hate + card.hateChange, 0, 3);
+        if (usedCard.hateTarget === "self") {
+            caster.hate = clamp(caster.hate + usedCard.hateChange, 0, 3);
         }
 
-        if (card.hateTarget === "target") {
-            finalTarget.hate = clamp(finalTarget.hate + card.hateChange, 0, 3);
+        if (usedCard.hateTarget === "target") {
+            finalTarget.hate = clamp(finalTarget.hate + usedCard.hateChange, 0, 3);
         }
 
         game.playedCards.push({
             playerName: caster.name,
             targetName: finalTarget.name,
-            cardName: card.name,
-            cardType: card.type,
-            hateText: card.hateText,
-            log: `${caster.name} → ${finalTarget.name}：${card.name}`
+            cardName: usedCard.name,
+            cardType: usedCard.type,
+            hateText: `${usedCard.hateText}${damageText}`,
+            log: `${caster.name} → ${finalTarget.name}：${usedCard.name}`
         });
 
         checkGameOver(game);

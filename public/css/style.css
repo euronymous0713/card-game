@@ -616,6 +616,19 @@ button:disabled {
     box-shadow: 0 0 24px rgba(0, 255, 225, 0.65);
 }
 
+.empty-hand-card {
+    opacity: 0.28;
+    cursor: default;
+    border-style: dashed;
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.empty-hand-card:hover {
+    transform: none;
+    border-color: rgba(255, 255, 255, 0.18);
+    box-shadow: none;
+}
+
 @media screen and (max-width: 768px) {
     body {
         display: block;
