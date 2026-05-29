@@ -4,6 +4,7 @@ window.onload = () => {
     const titleScreen = document.getElementById("titleScreen");
     const lobbyScreen = document.getElementById("lobbyScreen");
     const battleScreen = document.getElementById("battleScreen");
+    const battleField = document.getElementById("battleField");
 
     const createRoomButton = document.getElementById("createRoomButton");
     const joinRoomButton = document.getElementById("joinRoomButton");
@@ -29,6 +30,9 @@ window.onload = () => {
     const gameOverText = document.getElementById("gameOverText");
     const nextButton = document.getElementById("nextButton");
 
+    const turnAnnouncement = document.getElementById("turnAnnouncement");
+    const effectLayer = document.getElementById("effectLayer");
+
     const enemySlots = [
         document.getElementById("enemySlot1"),
         document.getElementById("enemySlot2"),
@@ -41,6 +45,7 @@ window.onload = () => {
     let isHost = false;
     let isReady = false;
     let latestGame = null;
+    let previousGame = null;
     let draggedCard = null;
     let selectedTargetId = "";
 
@@ -59,6 +64,161 @@ window.onload = () => {
             <h3>カード効果</h3>
             <p>カードにカーソルを合わせると効果が表示されます。</p>
         `;
+    }
+
+    function cloneGame(game) {
+        return game ? JSON.parse(JSON.stringify(game)) : null;
+    }
+
+    function getPlayerFromGame(game, playerId) {
+        if (!game) return null;
+        return game.turnOrder.find(player => player.id === playerId);
+    }
+
+    function getPlayerElement(playerId) {
+        const me = latestGame?.turnOrder.find(player => player.id === socket.id);
+
+        if (me && me.id === playerId) {
+            return myPanel;
+        }
+
+        const enemies = latestGame?.turnOrder.filter(player => player.id !== socket.id) || [];
+        const index = enemies.findIndex(player => player.id === playerId);
+
+        if (index >= 0) {
+            return enemySlots[index];
+        }
+
+        return battleField;
+    }
+
+    function showTurnAnnouncement(playerName, isMyTurn) {
+        turnAnnouncement.innerHTML = `
+            <div class="turn-announcement-text">
+                ${isMyTurn ? "あなたのターン" : `${playerName} のターン`}
+            </div>
+        `;
+
+        turnAnnouncement.classList.remove("show-turn-announcement");
+        void turnAnnouncement.offsetWidth;
+        turnAnnouncement.classList.add("show-turn-announcement");
+
+        setTimeout(() => {
+            turnAnnouncement.classList.remove("show-turn-announcement");
+        }, 1500);
+    }
+
+    function showFloatingText(targetElement, text, className) {
+        const targetRect = targetElement.getBoundingClientRect();
+        const fieldRect = battleField.getBoundingClientRect();
+
+        const popup = document.createElement("div");
+        popup.className = `floating-effect ${className}`;
+        popup.innerText = text;
+
+        popup.style.left = `${targetRect.left - fieldRect.left + targetRect.width / 2}px`;
+        popup.style.top = `${targetRect.top - fieldRect.top + targetRect.height / 2}px`;
+
+        effectLayer.appendChild(popup);
+
+        setTimeout(() => {
+            popup.remove();
+        }, 1200);
+    }
+
+    function showCardUseAnimation(cardName) {
+        const effect = document.createElement("div");
+        effect.className = "card-use-effect";
+        effect.innerText = cardName;
+
+        effectLayer.appendChild(effect);
+
+        setTimeout(() => {
+            effect.remove();
+        }, 900);
+    }
+
+    function showDiscardAnimation(cardName) {
+        const effect = document.createElement("div");
+        effect.className = "discard-effect";
+        effect.innerText = `捨て札：${cardName}`;
+
+        effectLayer.appendChild(effect);
+
+        setTimeout(() => {
+            effect.remove();
+        }, 900);
+    }
+
+    function showDrawAnimation(count) {
+        if (count <= 0) return;
+
+        const effect = document.createElement("div");
+        effect.className = "draw-effect";
+        effect.innerText = `+${count} Card`;
+
+        effectLayer.appendChild(effect);
+
+        setTimeout(() => {
+            effect.remove();
+        }, 1000);
+    }
+
+    function runAnimations(oldGame, newGame) {
+        if (!newGame) return;
+
+        const currentPlayer = newGame.turnOrder[newGame.currentTurnIndex];
+
+        if (!oldGame && currentPlayer) {
+            showTurnAnnouncement(currentPlayer.name, currentPlayer.id === socket.id);
+        }
+
+        if (oldGame) {
+            const oldTurnPlayer = oldGame.turnOrder[oldGame.currentTurnIndex];
+            const newTurnPlayer = newGame.turnOrder[newGame.currentTurnIndex];
+
+            if (oldTurnPlayer && newTurnPlayer && oldTurnPlayer.id !== newTurnPlayer.id) {
+                showTurnAnnouncement(newTurnPlayer.name, newTurnPlayer.id === socket.id);
+            }
+
+            newGame.turnOrder.forEach(newPlayer => {
+                const oldPlayer = getPlayerFromGame(oldGame, newPlayer.id);
+
+                if (!oldPlayer) return;
+
+                if (newPlayer.followers < oldPlayer.followers) {
+                    const damage = oldPlayer.followers - newPlayer.followers;
+                    const targetElement = getPlayerElement(newPlayer.id);
+
+                    targetElement.classList.remove("damage-shake");
+                    void targetElement.offsetWidth;
+                    targetElement.classList.add("damage-shake");
+
+                    showFloatingText(targetElement, `-${damage.toLocaleString()}`, "damage-popup");
+
+                    setTimeout(() => {
+                        targetElement.classList.remove("damage-shake");
+                    }, 500);
+                }
+            });
+
+            const oldMe = getPlayerFromGame(oldGame, socket.id);
+            const newMe = getPlayerFromGame(newGame, socket.id);
+
+            if (oldMe && newMe && newMe.hand.length > oldMe.hand.length) {
+                showDrawAnimation(newMe.hand.length - oldMe.hand.length);
+            }
+
+            if (newGame.playedCards.length > oldGame.playedCards.length) {
+                const latestLog = newGame.playedCards[newGame.playedCards.length - 1];
+
+                if (latestLog?.log?.includes("捨てた")) {
+                    showDiscardAnimation(latestLog.cardName || "カード");
+                } else {
+                    showCardUseAnimation(latestLog.cardName || "カード");
+                }
+            }
+        }
     }
 
     const savedName = localStorage.getItem("playerName");
@@ -180,9 +340,12 @@ window.onload = () => {
         lobbyScreen.style.display = "none";
         battleScreen.style.display = "block";
         gameOverOverlay.style.display = "none";
+        previousGame = null;
     });
 
     socket.on("updateGame", (game) => {
+        const oldGame = previousGame;
+
         latestGame = game;
 
         const enemies = latestGame.turnOrder.filter(player => {
@@ -202,6 +365,10 @@ window.onload = () => {
         renderPlayedCards();
         renderMyFieldCards();
         renderHand();
+
+        runAnimations(oldGame, latestGame);
+
+        previousGame = cloneGame(latestGame);
 
         if (game.gameOver && game.winner) {
             showGameOver(game.winner);
@@ -485,6 +652,7 @@ window.onload = () => {
         isHost = false;
         isReady = false;
         latestGame = null;
+        previousGame = null;
         selectedTargetId = "";
         draggedCard = null;
 

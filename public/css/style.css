@@ -619,3 +619,225 @@ button:disabled {
     background: linear-gradient(135deg, #00ffd5, #0099ff);
     box-shadow: 0 0 24px rgba(0, 255, 225, 0.65);
 }
+
+/* 既存の style.css の一番下に追加してください */
+
+.effect-layer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 800;
+}
+
+.turn-announcement {
+    position: absolute;
+    inset: 0;
+    z-index: 850;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+}
+
+.show-turn-announcement {
+    display: flex;
+    animation: turnAnnouncementFade 1.5s ease-in-out forwards;
+}
+
+.turn-announcement-text {
+    padding: 24px 52px;
+    border-radius: 999px;
+    font-size: 42px;
+    font-weight: bold;
+    color: #00ffe1;
+    background: rgba(0, 0, 0, 0.78);
+    border: 2px solid rgba(0, 255, 225, 0.7);
+    box-shadow:
+        0 0 30px rgba(0, 255, 225, 0.65),
+        0 0 80px rgba(255, 0, 200, 0.28);
+}
+
+@keyframes turnAnnouncementFade {
+    0% {
+        opacity: 0;
+        transform: scale(0.88);
+    }
+
+    20% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    75% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    100% {
+        opacity: 0;
+        transform: scale(1.08);
+    }
+}
+
+.card-use-effect {
+    position: absolute;
+    left: 50%;
+    top: 46%;
+    transform: translate(-50%, -50%);
+    padding: 18px 36px;
+    border-radius: 18px;
+    font-size: 28px;
+    font-weight: bold;
+    color: #ffffff;
+    background: linear-gradient(135deg, rgba(255, 0, 200, 0.95), rgba(0, 255, 225, 0.85));
+    box-shadow:
+        0 0 28px rgba(255, 0, 200, 0.65),
+        0 0 42px rgba(0, 255, 225, 0.5);
+    animation: cardUsePop 0.9s ease-out forwards;
+}
+
+@keyframes cardUsePop {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, 40%) scale(0.75) rotate(-4deg);
+    }
+
+    25% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.08) rotate(2deg);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -115%) scale(0.96) rotate(0deg);
+    }
+}
+
+.discard-effect {
+    position: absolute;
+    left: 130px;
+    bottom: 190px;
+    padding: 14px 22px;
+    border-radius: 16px;
+    font-size: 20px;
+    font-weight: bold;
+    color: #ffb000;
+    background: rgba(0, 0, 0, 0.82);
+    border: 2px dashed rgba(255, 176, 0, 0.85);
+    box-shadow: 0 0 22px rgba(255, 176, 0, 0.45);
+    animation: discardPop 0.9s ease-out forwards;
+}
+
+@keyframes discardPop {
+    0% {
+        opacity: 0;
+        transform: translateY(30px) scale(0.8);
+    }
+
+    25% {
+        opacity: 1;
+        transform: translateY(0) scale(1.05);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateY(-35px) scale(0.94);
+    }
+}
+
+.floating-effect {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    font-weight: bold;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+.damage-popup {
+    color: #ff3030;
+    font-size: 34px;
+    text-shadow:
+        0 0 12px rgba(255, 0, 0, 0.95),
+        0 0 24px rgba(255, 0, 0, 0.65);
+    animation: damageFloat 1.2s ease-out forwards;
+}
+
+@keyframes damageFloat {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -20%) scale(0.75);
+    }
+
+    20% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.15);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -140%) scale(0.95);
+    }
+}
+
+.damage-shake {
+    animation: damageShake 0.45s ease-in-out;
+}
+
+@keyframes damageShake {
+    0% {
+        transform: translateX(0);
+    }
+
+    20% {
+        transform: translateX(-8px);
+    }
+
+    40% {
+        transform: translateX(8px);
+    }
+
+    60% {
+        transform: translateX(-6px);
+    }
+
+    80% {
+        transform: translateX(6px);
+    }
+
+    100% {
+        transform: translateX(0);
+    }
+}
+
+.draw-effect {
+    position: absolute;
+    left: 50%;
+    bottom: 230px;
+    transform: translateX(-50%);
+    padding: 12px 26px;
+    border-radius: 999px;
+    color: #00ffe1;
+    font-size: 24px;
+    font-weight: bold;
+    background: rgba(0, 0, 0, 0.76);
+    border: 2px solid rgba(0, 255, 225, 0.75);
+    box-shadow: 0 0 24px rgba(0, 255, 225, 0.55);
+    animation: drawPop 1s ease-out forwards;
+}
+
+@keyframes drawPop {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, 30px) scale(0.85);
+    }
+
+    25% {
+        opacity: 1;
+        transform: translate(-50%, 0) scale(1.08);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -45px) scale(0.95);
+    }
+}
