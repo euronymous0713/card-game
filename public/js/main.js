@@ -1,4 +1,5 @@
 const socket = io();
+window.socket = socket;
 
 window.onload = () => {
     const titleScreen = document.getElementById("titleScreen");
