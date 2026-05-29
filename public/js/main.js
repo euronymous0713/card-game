@@ -18,11 +18,11 @@ window.onload = () => {
     const handArea = document.getElementById("handArea");
     const cardDetail = document.getElementById("cardDetail");
     const dropZone = document.getElementById("dropZone");
+    const discardZone = document.getElementById("discardZone");
     const turnPanel = document.getElementById("turnPanel");
     const battleMessage = document.getElementById("battleMessage");
     const playedCardList = document.getElementById("playedCardList");
     const endTurnButton = document.getElementById("endTurnButton");
-    const targetList = document.getElementById("targetList");
     const myFieldCards = document.getElementById("myFieldCards");
 
     const gameOverOverlay = document.getElementById("gameOverOverlay");
@@ -52,6 +52,13 @@ window.onload = () => {
         return player.defeated
             ? "オワコン"
             : `${player.followers.toLocaleString()} フォロワー`;
+    }
+
+    function resetCardDetail() {
+        cardDetail.innerHTML = `
+            <h3>カード効果</h3>
+            <p>カードにカーソルを合わせると効果が表示されます。</p>
+        `;
     }
 
     const savedName = localStorage.getItem("playerName");
@@ -191,7 +198,6 @@ window.onload = () => {
         }
 
         renderBattlePlayers();
-        renderTargetList();
         renderTurn();
         renderPlayedCards();
         renderMyFieldCards();
@@ -249,7 +255,6 @@ window.onload = () => {
                     if (enemy.defeated) return;
                     selectedTargetId = enemy.id;
                     renderBattlePlayers();
-                    renderTargetList();
                 };
             } else {
                 slot.classList.add("empty-enemy");
@@ -264,39 +269,6 @@ window.onload = () => {
                     <div class="panel-hate">◇◇◇</div>
                 `;
             }
-        });
-    }
-
-    function renderTargetList() {
-        if (!latestGame) return;
-
-        const enemies = latestGame.turnOrder.filter(player => {
-            return player.id !== socket.id && !player.defeated;
-        });
-
-        targetList.innerHTML = "";
-
-        enemies.forEach(enemy => {
-            const button = document.createElement("button");
-
-            button.className = "target-button";
-            button.innerText = enemy.name;
-
-            if (selectedTargetId === enemy.id) {
-                button.classList.add("selected-target-button");
-            }
-
-            if (enemy.hate >= 3) {
-                button.classList.add("max-hate-target-button");
-            }
-
-            button.onclick = () => {
-                selectedTargetId = enemy.id;
-                renderBattlePlayers();
-                renderTargetList();
-            };
-
-            targetList.appendChild(button);
         });
     }
 
@@ -316,6 +288,7 @@ window.onload = () => {
             : `${currentPlayer.name} のターンです。`;
 
         dropZone.classList.toggle("active-drop-zone", isMyTurn);
+        discardZone.classList.toggle("active-discard-zone", isMyTurn);
         endTurnButton.disabled = !isMyTurn;
     }
 
@@ -346,11 +319,27 @@ window.onload = () => {
         for (let i = 0; i < 2; i++) {
             const card = me.fieldCards[i];
 
-            myFieldCards.innerHTML += `
-                <div class="set-card ${card ? "has-set-card" : ""}">
-                    ${card ? "伏" : "空"}
-                </div>
-            `;
+            const setCard = document.createElement("div");
+
+            setCard.className = `set-card ${card ? "has-set-card" : ""}`;
+            setCard.innerText = card ? "伏" : "空";
+
+            if (card) {
+                setCard.onmouseenter = () => {
+                    cardDetail.innerHTML = `
+                        <h3>${card.name}</h3>
+                        <p class="detail-type">${card.type}</p>
+                        <p>${card.effect}</p>
+                        <p class="detail-hate">${card.hateText || ""}</p>
+                    `;
+                };
+
+                setCard.onmouseleave = () => {
+                    resetCardDetail();
+                };
+            }
+
+            myFieldCards.appendChild(setCard);
         }
     }
 
@@ -397,10 +386,7 @@ window.onload = () => {
             };
 
             cardElement.onmouseleave = () => {
-                cardDetail.innerHTML = `
-                    <h3>カード効果</h3>
-                    <p>カードにカーソルを合わせると効果が表示されます。</p>
-                `;
+                resetCardDetail();
             };
 
             cardElement.ondragstart = () => {
@@ -442,8 +428,34 @@ window.onload = () => {
 
         socket.emit("playCard", {
             roomId: currentRoomId,
-            card: draggedCard,
+            cardInstanceId: draggedCard.instanceId,
             targetId
+        });
+
+        draggedCard = null;
+    };
+
+    discardZone.ondragover = (event) => {
+        event.preventDefault();
+    };
+
+    discardZone.ondrop = (event) => {
+        event.preventDefault();
+
+        if (!latestGame || latestGame.gameOver) return;
+
+        const currentPlayer = latestGame.turnOrder[latestGame.currentTurnIndex];
+
+        if (currentPlayer.id !== socket.id) {
+            alert("今はあなたのターンではありません");
+            return;
+        }
+
+        if (!draggedCard) return;
+
+        socket.emit("discardCard", {
+            roomId: currentRoomId,
+            cardInstanceId: draggedCard.instanceId
         });
 
         draggedCard = null;
