@@ -1,7 +1,7 @@
 module.exports = [
     {
         id: "card-1",
-        name: "炎上パンチ",
+        name: "誹謗中傷",
         type: "攻撃",
         kind: "attack",
         targetType: "enemy",
@@ -36,7 +36,9 @@ module.exports = [
         hateTarget: "self",
         hateChange: 1,
         hateText: "自分のヘイト +1",
-        effect: "自分の場に伏せる。最大2枚まで伏せられる。"
+        effect: "伏せカード。自分が他プレイヤーからダメージを受けた時、そのダメージを打ち消して相手に跳ね返す。",
+        trapCondition: "onDamage",
+        trapEffect: "reflectDamage"
     },
     {
         id: "card-4",
@@ -50,5 +52,80 @@ module.exports = [
         hateChange: -1,
         hateText: "自分のヘイト -1",
         effect: "自分のフォロワーを1,000回復。『昔はよかった』でヘイトが1下がる。"
+    },
+    {
+        id: "card-5",
+        name: "煽りリプ",
+        type: "妨害",
+        kind: "hate",
+        targetType: "enemy",
+        damage: 0,
+        heal: 0,
+        hateTarget: "target",
+        hateChange: 1,
+        hateText: "対象のヘイト +1",
+        effect: "対象プレイヤーのヘイトを1上げる。"
+    },
+    {
+        id: "card-6",
+        name: "火消し",
+        type: "罠",
+        kind: "trap",
+        targetType: "self",
+        damage: 0,
+        heal: 0,
+        hateTarget: "self",
+        hateChange: 0,
+        hateText: "ヘイト変動を無効化",
+        effect: "伏せカード。自分が他プレイヤーからヘイトを変動させられた時、その変動を打ち消す。",
+        trapCondition: "onHateChange",
+        trapEffect: "cancelHate"
+    },
+    {
+        id: "card-7",
+        name: "逆張り",
+        type: "罠",
+        kind: "trap",
+        targetType: "self",
+        damage: 0,
+        heal: 0,
+        hateTarget: "self",
+        hateChange: 0,
+        hateText: "罠効果を無効化",
+        effect: "伏せカード。自分が罠カードの効果を受けた時、その罠効果を打ち消す。",
+        trapCondition: "onTrapEffect",
+        trapEffect: "cancelTrap"
+    },
+    {
+        id: "card-8",
+        name: "通報爆撃",
+        type: "罠",
+        kind: "trap",
+        targetType: "self",
+        damage: 0,
+        heal: 0,
+        hateTarget: "self",
+        hateChange: 0,
+        hateText: "罠無効＋相手の伏せカード破壊",
+        effect: "伏せカード。自分が罠カードの効果を受けた時、その効果を打ち消し、相手の伏せカードをすべて破壊する。",
+        trapCondition: "onTrapEffect",
+        trapEffect: "cancelTrapAndDestroyEnemyTraps"
+    },
+    {
+        id: "card-9",
+        name: "晒し返し",
+        type: "罠",
+        kind: "trap",
+        targetType: "self",
+        damage: 0,
+        heal: 0,
+        hateTarget: "self",
+        hateChange: 0,
+        hateText: "相手に1,500ダメージ / 相手のヘイト +1",
+        effect: "伏せカード。自分が他プレイヤーからダメージを受けた時、相手に1,500ダメージを与え、相手のヘイトを1上げる。",
+        trapCondition: "onDamage",
+        trapEffect: "damageAndHate",
+        trapDamage: 1500,
+        trapHateChange: 1
     }
 ];
