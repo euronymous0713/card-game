@@ -169,6 +169,65 @@ function removeCardFromHand(player, instanceId) {
     return usedCard;
 }
 
+function createGameViewForPlayer(game, viewerId) {
+    const view = JSON.parse(JSON.stringify(game));
+
+    view.turnOrder = view.turnOrder.map(player => {
+        if (player.id === viewerId) {
+            return player;
+        }
+
+        return {
+            ...player,
+            hand: [],
+            fieldCards: player.fieldCards.map(() => ({
+                hidden: true,
+                name: "伏せカード",
+                type: "罠",
+                effect: "",
+                hateText: ""
+            }))
+        };
+    });
+
+    view.playedCards = view.playedCards.map(log => {
+        if (log.actionType === "trap" && log.playerId !== viewerId) {
+            return {
+                ...log,
+                cardName: "伏せカード",
+                cardType: "罠",
+                hateText: "カードを1枚伏せた",
+                log: `${log.playerName} はカードを1枚伏せた`
+            };
+        }
+
+        return log;
+    });
+
+    return view;
+}
+
+function emitGameUpdate(roomId) {
+    const room = rooms[roomId];
+
+    if (!room || !room.game) return;
+
+    const clients = io.sockets.adapter.rooms.get(roomId);
+
+    if (!clients) return;
+
+    clients.forEach(clientId => {
+        const clientSocket = io.sockets.sockets.get(clientId);
+
+        if (!clientSocket) return;
+
+        clientSocket.emit(
+            "updateGame",
+            createGameViewForPlayer(room.game, clientId)
+        );
+    });
+}
+
 io.on("connection", (socket) => {
 
     console.log("接続:", socket.id);
@@ -252,7 +311,7 @@ io.on("connection", (socket) => {
         room.game = createGameState(room.players);
 
         io.to(roomId).emit("gameStarted");
-        io.to(roomId).emit("updateGame", room.game);
+        emitGameUpdate(roomId);
     });
 
     socket.on("playCard", ({ roomId, cardInstanceId, targetId }) => {
@@ -307,15 +366,17 @@ io.on("connection", (socket) => {
             caster.hate = clamp(caster.hate + usedCard.hateChange, 0, 3);
 
             game.playedCards.push({
+                actionType: "trap",
+                playerId: caster.id,
                 playerName: caster.name,
                 targetName: "自分の場",
                 cardName: usedCard.name,
                 cardType: usedCard.type,
                 hateText: usedCard.hateText,
-                log: `${caster.name} はカードを1枚伏せた`
+                log: `${caster.name} は ${usedCard.name} を伏せた`
             });
 
-            io.to(roomId).emit("updateGame", game);
+            emitGameUpdate(roomId);
             return;
         }
 
@@ -381,6 +442,8 @@ io.on("connection", (socket) => {
         }
 
         game.playedCards.push({
+            actionType: "play",
+            playerId: caster.id,
             playerName: caster.name,
             targetName: finalTarget.name,
             cardName: usedCard.name,
@@ -391,7 +454,7 @@ io.on("connection", (socket) => {
 
         checkGameOver(game);
 
-        io.to(roomId).emit("updateGame", game);
+        emitGameUpdate(roomId);
 
         if (game.gameOver) {
             io.to(roomId).emit("gameOver", game.winner);
@@ -426,6 +489,8 @@ io.on("connection", (socket) => {
         }
 
         game.playedCards.push({
+            actionType: "discard",
+            playerId: player.id,
             playerName: player.name,
             targetName: "捨て札",
             cardName: discardedCard.name,
@@ -434,7 +499,7 @@ io.on("connection", (socket) => {
             log: `${player.name} は ${discardedCard.name} を捨てた`
         });
 
-        io.to(roomId).emit("updateGame", game);
+        emitGameUpdate(roomId);
     });
 
     socket.on("endTurn", (roomId) => {
@@ -455,7 +520,7 @@ io.on("connection", (socket) => {
 
         moveToNextAliveTurn(game);
 
-        io.to(roomId).emit("updateGame", game);
+        emitGameUpdate(roomId);
     });
 
     socket.on("leaveRoom", (roomId) => {
