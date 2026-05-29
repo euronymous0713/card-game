@@ -197,7 +197,17 @@ function createGameViewForPlayer(game, viewerId) {
                 cardName: "伏せカード",
                 cardType: "罠",
                 hateText: "カードを1枚伏せた",
-                log: `${log.playerName} はカードを1枚伏せた`
+                log: `${log.playerName} はカードを伏せた`
+            };
+        }
+
+        if (log.actionType === "discard" && log.playerId !== viewerId) {
+            return {
+                ...log,
+                cardName: "不明",
+                cardType: "不明",
+                hateText: "カードを捨てた",
+                log: `${log.playerName} はカードを捨てた`
             };
         }
 
