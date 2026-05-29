@@ -2,6 +2,8 @@ const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
 
+const CARD_MASTER = require("./data/cards");
+
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
@@ -9,61 +11,6 @@ const io = new Server(server);
 app.use(express.static("public"));
 
 const rooms = {};
-
-const CARD_MASTER = [
-    {
-        id: "card-1",
-        name: "炎上パンチ",
-        type: "攻撃",
-        kind: "attack",
-        targetType: "enemy",
-        damage: 2000,
-        heal: 0,
-        hateTarget: "self",
-        hateChange: 1,
-        hateText: "自分のヘイト +1",
-        effect: "対象に2,000フォロワーダメージ。対象のヘイトが3ならダメージ2倍。自分のヘイトが1上がる。"
-    },
-    {
-        id: "card-2",
-        name: "お気持ち表明",
-        type: "防御",
-        kind: "support",
-        targetType: "self",
-        damage: 0,
-        heal: 1000,
-        hateTarget: "self",
-        hateChange: -1,
-        hateText: "自分のヘイト -1",
-        effect: "自分のフォロワーを1,000回復。長文で沈静化し、自分のヘイトが1下がる。"
-    },
-    {
-        id: "card-3",
-        name: "釣りスレ",
-        type: "罠",
-        kind: "trap",
-        targetType: "self",
-        damage: 0,
-        heal: 0,
-        hateTarget: "self",
-        hateChange: 1,
-        hateText: "自分のヘイト +1",
-        effect: "自分の場に伏せる。最大2枚まで伏せられる。"
-    },
-    {
-        id: "card-4",
-        name: "古参アピール",
-        type: "補助",
-        kind: "support",
-        targetType: "self",
-        damage: 0,
-        heal: 1000,
-        hateTarget: "self",
-        hateChange: -1,
-        hateText: "自分のヘイト -1",
-        effect: "自分のフォロワーを1,000回復。『昔はよかった』でヘイトが1下がる。"
-    }
-];
 
 function generateRoomId() {
     return Math.floor(1000 + Math.random() * 9000).toString();
@@ -158,12 +105,9 @@ function checkGameOver(game) {
 function removeCardFromHand(player, instanceId) {
     const index = player.hand.findIndex(card => card.instanceId === instanceId);
 
-    if (index === -1) {
-        return null;
-    }
+    if (index === -1) return null;
 
     const usedCard = player.hand[index];
-
     player.hand.splice(index, 1);
 
     return usedCard;
@@ -288,17 +232,21 @@ io.on("connection", (socket) => {
 
     socket.on("toggleReady", ({ roomId }) => {
         const room = rooms[roomId];
+
         if (!room) return;
 
         const player = room.players.find(player => player.id === socket.id);
+
         if (!player) return;
 
         player.ready = !player.ready;
+
         io.to(roomId).emit("updateRoom", room.players);
     });
 
     socket.on("startGame", (roomId) => {
         const room = rooms[roomId];
+
         if (!room) return;
 
         const starter = room.players.find(player => player.id === socket.id);
@@ -535,9 +483,11 @@ io.on("connection", (socket) => {
 
     socket.on("leaveRoom", (roomId) => {
         const room = rooms[roomId];
+
         if (!room) return;
 
         const player = room.players.find(player => player.id === socket.id);
+
         if (!player) return;
 
         if (player.host) {
@@ -548,11 +498,13 @@ io.on("connection", (socket) => {
         room.players = room.players.filter(player => player.id !== socket.id);
 
         socket.leave(roomId);
+
         io.to(roomId).emit("updateRoom", room.players);
     });
 
     socket.on("disbandRoom", (roomId) => {
         const room = rooms[roomId];
+
         if (!room) return;
 
         const player = room.players.find(player => player.id === socket.id);
