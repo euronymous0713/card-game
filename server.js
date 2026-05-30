@@ -312,6 +312,102 @@ function requestTrapChoice({
     return true;
 }
 
+function requestTrapEffectThenDamage({
+    roomId,
+    game,
+    targetPlayer,
+    sourcePlayer,
+    damage,
+    trapName,
+    trapType,
+    trapEffectText,
+    trapHateText
+}) {
+    const trapEffectRequested = requestTrapChoice({
+        roomId,
+        targetPlayer,
+        sourcePlayer,
+        condition: "onTrapEffect",
+        context: {
+            amount: damage,
+            cardName: trapName,
+            cardType: trapType,
+            effect: trapEffectText,
+            hateText: trapHateText,
+            sourceActionText: `${sourcePlayer.name} の罠 ${trapName} の効果`,
+            resultText: `${damage.toLocaleString()}ダメージの罠効果を受けます`
+        },
+        onResolved: trapEffectResult => {
+            if (trapEffectResult.canceled) {
+                finishGameIfNeeded(roomId);
+                return;
+            }
+
+            const damageRequested = requestTrapChoice({
+                roomId,
+                targetPlayer,
+                sourcePlayer,
+                condition: "onDamage",
+                context: {
+                    amount: damage,
+                    cardName: trapName,
+                    cardType: trapType,
+                    effect: trapEffectText,
+                    hateText: trapHateText,
+                    sourceActionText: `${sourcePlayer.name} の罠 ${trapName} の効果`,
+                    resultText: `${damage.toLocaleString()}ダメージを受けます`
+                },
+                onResolved: damageResult => {
+                    if (!damageResult.canceled) {
+                        applyDamage(game, targetPlayer, damage);
+                    }
+
+                    finishGameIfNeeded(roomId);
+                }
+            });
+
+            if (!damageRequested) {
+                applyDamage(game, targetPlayer, damage);
+                finishGameIfNeeded(roomId);
+            }
+        }
+    });
+
+    if (trapEffectRequested) {
+        return true;
+    }
+
+    const damageRequested = requestTrapChoice({
+        roomId,
+        targetPlayer,
+        sourcePlayer,
+        condition: "onDamage",
+        context: {
+            amount: damage,
+            cardName: trapName,
+            cardType: trapType,
+            effect: trapEffectText,
+            hateText: trapHateText,
+            sourceActionText: `${sourcePlayer.name} の罠 ${trapName} の効果`,
+            resultText: `${damage.toLocaleString()}ダメージを受けます`
+        },
+        onResolved: damageResult => {
+            if (!damageResult.canceled) {
+                applyDamage(game, targetPlayer, damage);
+            }
+
+            finishGameIfNeeded(roomId);
+        }
+    });
+
+    if (damageRequested) {
+        return true;
+    }
+
+    applyDamage(game, targetPlayer, damage);
+    return false;
+}
+
 function resolveTrapEffect(game, roomId, trapOwner, sourcePlayer, trap, context) {
     addLog(game, {
         actionType: "trap",
@@ -338,32 +434,17 @@ function resolveTrapEffect(game, roomId, trapOwner, sourcePlayer, trap, context)
             log: `${trapOwner.name} はダメージを跳ね返した`
         });
 
-        const reflected = requestTrapChoice({
+        requestTrapEffectThenDamage({
             roomId,
+            game,
             targetPlayer: sourcePlayer,
             sourcePlayer: trapOwner,
-            condition: "onDamage",
-            context: {
-                amount: damage,
-                cardName: trap.name,
-                cardType: trap.type,
-                effect: trap.effect,
-                hateText: trap.hateText,
-                sourceActionText: `${trapOwner.name} の罠 ${trap.name} が発動`,
-                resultText: `${damage.toLocaleString()}ダメージが跳ね返ってきました`
-            },
-            onResolved: result => {
-                if (!result.canceled) {
-                    applyDamage(game, sourcePlayer, damage);
-                }
-
-                finishGameIfNeeded(roomId);
-            }
+            damage,
+            trapName: trap.name,
+            trapType: trap.type,
+            trapEffectText: trap.effect,
+            trapHateText: trap.hateText
         });
-
-        if (!reflected) {
-            applyDamage(game, sourcePlayer, damage);
-        }
 
         return { canceled: true };
     }
@@ -419,7 +500,22 @@ function resolveTrapEffect(game, roomId, trapOwner, sourcePlayer, trap, context)
         const damage = trap.trapDamage || 0;
         const hateChange = trap.trapHateChange || 0;
 
-        applyDamage(game, sourcePlayer, damage);
+        const handledByChoice = requestTrapEffectThenDamage({
+            roomId,
+            game,
+            targetPlayer: sourcePlayer,
+            sourcePlayer: trapOwner,
+            damage,
+            trapName: trap.name,
+            trapType: trap.type,
+            trapEffectText: trap.effect,
+            trapHateText: trap.hateText
+        });
+
+        if (!handledByChoice) {
+            finishGameIfNeeded(roomId);
+        }
+
         changeHate(sourcePlayer, hateChange);
 
         addLog(game, {
