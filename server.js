@@ -321,8 +321,15 @@ function requestTrapEffectThenDamage({
     trapName,
     trapType,
     trapEffectText,
-    trapHateText
+    trapHateText,
+    onComplete
 }) {
+    const complete = () => {
+        if (typeof onComplete === "function") {
+            onComplete();
+        }
+    };
+
     const trapEffectRequested = requestTrapChoice({
         roomId,
         targetPlayer,
@@ -338,8 +345,10 @@ function requestTrapEffectThenDamage({
             resultText: `${damage.toLocaleString()}ダメージの罠効果を受けます`
         },
         onResolved: trapEffectResult => {
+            if (trapEffectResult.pending) return;
+
             if (trapEffectResult.canceled) {
-                finishGameIfNeeded(roomId);
+                complete();
                 return;
             }
 
@@ -358,17 +367,19 @@ function requestTrapEffectThenDamage({
                     resultText: `${damage.toLocaleString()}ダメージを受けます`
                 },
                 onResolved: damageResult => {
+                    if (damageResult.pending) return;
+
                     if (!damageResult.canceled) {
                         applyDamage(game, targetPlayer, damage);
                     }
 
-                    finishGameIfNeeded(roomId);
+                    complete();
                 }
             });
 
             if (!damageRequested) {
                 applyDamage(game, targetPlayer, damage);
-                finishGameIfNeeded(roomId);
+                complete();
             }
         }
     });
@@ -392,11 +403,13 @@ function requestTrapEffectThenDamage({
             resultText: `${damage.toLocaleString()}ダメージを受けます`
         },
         onResolved: damageResult => {
+            if (damageResult.pending) return;
+
             if (!damageResult.canceled) {
                 applyDamage(game, targetPlayer, damage);
             }
 
-            finishGameIfNeeded(roomId);
+            complete();
         }
     });
 
@@ -408,7 +421,7 @@ function requestTrapEffectThenDamage({
     return false;
 }
 
-function resolveTrapEffect(game, roomId, trapOwner, sourcePlayer, trap, context) {
+function resolveTrapEffect(game, roomId, trapOwner, sourcePlayer, trap, context, afterPendingComplete) {
     addLog(game, {
         actionType: "trap",
         playerId: trapOwner.id,
@@ -434,7 +447,7 @@ function resolveTrapEffect(game, roomId, trapOwner, sourcePlayer, trap, context)
             log: `${trapOwner.name} はダメージを跳ね返した`
         });
 
-        requestTrapEffectThenDamage({
+        const pending = requestTrapEffectThenDamage({
             roomId,
             game,
             targetPlayer: sourcePlayer,
@@ -443,10 +456,24 @@ function resolveTrapEffect(game, roomId, trapOwner, sourcePlayer, trap, context)
             trapName: trap.name,
             trapType: trap.type,
             trapEffectText: trap.effect,
-            trapHateText: trap.hateText
+            trapHateText: trap.hateText,
+            onComplete: () => {
+                afterPendingComplete({
+                    canceled: true
+                });
+            }
         });
 
-        return { canceled: true };
+        if (pending) {
+            return {
+                canceled: true,
+                pending: true
+            };
+        }
+
+        return {
+            canceled: true
+        };
     }
 
     if (trap.trapEffect === "cancelHate") {
@@ -500,24 +527,6 @@ function resolveTrapEffect(game, roomId, trapOwner, sourcePlayer, trap, context)
         const damage = trap.trapDamage || 0;
         const hateChange = trap.trapHateChange || 0;
 
-        const handledByChoice = requestTrapEffectThenDamage({
-            roomId,
-            game,
-            targetPlayer: sourcePlayer,
-            sourcePlayer: trapOwner,
-            damage,
-            trapName: trap.name,
-            trapType: trap.type,
-            trapEffectText: trap.effect,
-            trapHateText: trap.hateText
-        });
-
-        if (!handledByChoice) {
-            finishGameIfNeeded(roomId);
-        }
-
-        changeHate(sourcePlayer, hateChange);
-
         addLog(game, {
             actionType: "trapEffect",
             playerId: trapOwner.id,
@@ -529,7 +538,35 @@ function resolveTrapEffect(game, roomId, trapOwner, sourcePlayer, trap, context)
             log: `${trapOwner.name} の罠が ${sourcePlayer.name} に反撃した`
         });
 
-        return { canceled: false };
+        changeHate(sourcePlayer, hateChange);
+
+        const pending = requestTrapEffectThenDamage({
+            roomId,
+            game,
+            targetPlayer: sourcePlayer,
+            sourcePlayer: trapOwner,
+            damage,
+            trapName: trap.name,
+            trapType: trap.type,
+            trapEffectText: trap.effect,
+            trapHateText: trap.hateText,
+            onComplete: () => {
+                afterPendingComplete({
+                    canceled: false
+                });
+            }
+        });
+
+        if (pending) {
+            return {
+                canceled: false,
+                pending: true
+            };
+        }
+
+        return {
+            canceled: false
+        };
     }
 
     return { canceled: false };
@@ -646,6 +683,15 @@ io.on("connection", socket => {
             return;
         }
 
+        const callback = pending.onResolved;
+
+        delete pendingTrapChoices[choiceId];
+
+        const finishPending = result => {
+            game.waitingTrapChoice = false;
+            callback(result);
+        };
+
         let result = { canceled: false };
 
         if (fieldId) {
@@ -665,19 +711,18 @@ io.on("connection", socket => {
                         trapOwner,
                         sourcePlayer,
                         trap,
-                        pending.context
+                        pending.context,
+                        finishPending
                     );
                 }
             }
         }
 
-        const callback = pending.onResolved;
+        if (result.pending) {
+            return;
+        }
 
-        delete pendingTrapChoices[choiceId];
-
-        game.waitingTrapChoice = false;
-
-        callback(result);
+        finishPending(result);
     });
 
     socket.on("playCard", ({ roomId, cardInstanceId, targetId }) => {
@@ -822,6 +867,8 @@ io.on("connection", socket => {
                     resultText: `${damage.toLocaleString()}ダメージを受ける可能性があります`
                 },
                 onResolved: result => {
+                    if (result.pending) return;
+
                     if (!result.canceled) {
                         applyDamage(game, finalTarget, damage);
                     }
@@ -875,6 +922,8 @@ io.on("connection", socket => {
                     resultText: `ヘイトが ${usedCard.hateChange > 0 ? "+" : ""}${usedCard.hateChange} 変動する可能性があります`
                 },
                 onResolved: result => {
+                    if (result.pending) return;
+
                     if (!result.canceled) {
                         changeHate(finalTarget, usedCard.hateChange);
                     }
