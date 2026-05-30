@@ -312,7 +312,7 @@ function requestTrapChoice({
     return true;
 }
 
-function resolveTrapEffect(game, trapOwner, sourcePlayer, trap, context) {
+function resolveTrapEffect(game, roomId, trapOwner, sourcePlayer, trap, context) {
     addLog(game, {
         actionType: "trap",
         playerId: trapOwner.id,
@@ -327,8 +327,6 @@ function resolveTrapEffect(game, trapOwner, sourcePlayer, trap, context) {
     if (trap.trapEffect === "reflectDamage") {
         const damage = context.amount || 0;
 
-        applyDamage(game, sourcePlayer, damage);
-
         addLog(game, {
             actionType: "trapEffect",
             playerId: trapOwner.id,
@@ -339,6 +337,33 @@ function resolveTrapEffect(game, trapOwner, sourcePlayer, trap, context) {
             hateText: `${damage.toLocaleString()}ダメージを跳ね返した`,
             log: `${trapOwner.name} はダメージを跳ね返した`
         });
+
+        const reflected = requestTrapChoice({
+            roomId,
+            targetPlayer: sourcePlayer,
+            sourcePlayer: trapOwner,
+            condition: "onDamage",
+            context: {
+                amount: damage,
+                cardName: trap.name,
+                cardType: trap.type,
+                effect: trap.effect,
+                hateText: trap.hateText,
+                sourceActionText: `${trapOwner.name} の罠 ${trap.name} が発動`,
+                resultText: `${damage.toLocaleString()}ダメージが跳ね返ってきました`
+            },
+            onResolved: result => {
+                if (!result.canceled) {
+                    applyDamage(game, sourcePlayer, damage);
+                }
+
+                finishGameIfNeeded(roomId);
+            }
+        });
+
+        if (!reflected) {
+            applyDamage(game, sourcePlayer, damage);
+        }
 
         return { canceled: true };
     }
@@ -540,6 +565,7 @@ io.on("connection", socket => {
                 if (trap) {
                     result = resolveTrapEffect(
                         game,
+                        pending.roomId,
                         trapOwner,
                         sourcePlayer,
                         trap,
@@ -552,6 +578,7 @@ io.on("connection", socket => {
         const callback = pending.onResolved;
 
         delete pendingTrapChoices[choiceId];
+
         game.waitingTrapChoice = false;
 
         callback(result);
@@ -997,7 +1024,7 @@ io.on("connection", socket => {
             }
 
             room.players = room.players.filter(player => player.id !== socket.id);
-            io.to(roomId).emit("updateRoom", room.players);
+            io.to(roomId).emit("updateRoom", rooms[roomId]?.players || []);
         }
     });
 });
