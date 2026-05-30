@@ -1,902 +1,103 @@
-const socket = io();
-window.socket = socket;
+function showTrapChoiceModal(data) {
+    const oldOverlay = document.getElementById("trapChoiceOverlay");
 
-window.onload = () => {
-    const titleScreen = document.getElementById("titleScreen");
-    const lobbyScreen = document.getElementById("lobbyScreen");
-    const battleScreen = document.getElementById("battleScreen");
-    const battleField = document.getElementById("battleField");
-
-    const createRoomButton = document.getElementById("createRoomButton");
-    const joinRoomButton = document.getElementById("joinRoomButton");
-    const readyButton = document.getElementById("readyButton");
-    const leaveRoomButton = document.getElementById("leaveRoomButton");
-    const startGameButton = document.getElementById("startGameButton");
-
-    const roomIdText = document.getElementById("roomIdText");
-    const playerList = document.getElementById("playerList");
-    const nameInput = document.getElementById("nameInput");
-
-    const handArea = document.getElementById("handArea");
-    const cardDetail = document.getElementById("cardDetail");
-    const dropZone = document.getElementById("dropZone");
-    const discardZone = document.getElementById("discardZone");
-    const turnPanel = document.getElementById("turnPanel");
-    const battleMessage = document.getElementById("battleMessage");
-    const playedCardList = document.getElementById("playedCardList");
-    const endTurnButton = document.getElementById("endTurnButton");
-    const myFieldCards = document.getElementById("myFieldCards");
-
-    const gameOverOverlay = document.getElementById("gameOverOverlay");
-    const gameOverText = document.getElementById("gameOverText");
-    const nextButton = document.getElementById("nextButton");
-
-    const turnAnnouncement = document.getElementById("turnAnnouncement");
-    const effectLayer = document.getElementById("effectLayer");
-
-    const enemySlots = [
-        document.getElementById("enemySlot1"),
-        document.getElementById("enemySlot2"),
-        document.getElementById("enemySlot3")
-    ];
-
-    const myPanel = document.getElementById("myPanel");
-
-    let currentRoomId = "";
-    let isHost = false;
-    let isReady = false;
-    let latestGame = null;
-    let previousGame = null;
-    let draggedCard = null;
-    let selectedTargetId = "";
-
-    createTrapChoiceModalStyle();
-
-    function createTrapChoiceModalStyle() {
-        const style = document.createElement("style");
-
-        style.innerHTML = `
-            .trap-choice-overlay {
-                position: fixed;
-                inset: 0;
-                z-index: 10000;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                background: rgba(0, 0, 0, 0.72);
-                backdrop-filter: blur(4px);
-            }
-
-            .trap-choice-box {
-                width: min(520px, 92vw);
-                padding: 28px;
-                border-radius: 24px;
-                background: rgba(0, 0, 0, 0.9);
-                border: 2px solid rgba(255, 176, 0, 0.85);
-                box-shadow:
-                    0 0 28px rgba(255, 176, 0, 0.55),
-                    0 0 80px rgba(255, 0, 200, 0.18);
-                color: white;
-                text-align: center;
-            }
-
-            .trap-choice-box h2 {
-                margin-bottom: 12px;
-                color: #ffb000;
-                font-size: 26px;
-            }
-
-            .trap-choice-box p {
-                margin-bottom: 18px;
-                line-height: 1.6;
-                color: rgba(255, 255, 255, 0.78);
-            }
-
-            .trap-choice-list {
-                display: flex;
-                flex-direction: column;
-                gap: 12px;
-                margin-bottom: 18px;
-            }
-
-            .trap-choice-card {
-                padding: 14px;
-                border-radius: 14px;
-                border: 2px solid rgba(0, 255, 225, 0.35);
-                background: rgba(255, 255, 255, 0.06);
-                cursor: pointer;
-                text-align: left;
-                transition: 0.18s;
-            }
-
-            .trap-choice-card:hover {
-                transform: scale(1.02);
-                border-color: #00ffe1;
-                box-shadow: 0 0 18px rgba(0, 255, 225, 0.35);
-            }
-
-            .trap-choice-card strong {
-                display: block;
-                margin-bottom: 6px;
-                color: #00ffe1;
-                font-size: 18px;
-            }
-
-            .trap-choice-card span {
-                font-size: 13px;
-                line-height: 1.5;
-                color: rgba(255, 255, 255, 0.78);
-            }
-
-            .trap-skip-button {
-                width: 100%;
-                margin-top: 4px;
-                background: linear-gradient(135deg, #555, #222);
-            }
-        `;
-
-        document.head.appendChild(style);
+    if (oldOverlay) {
+        oldOverlay.remove();
     }
 
-    function hateIcons(hate) {
-        return "◆".repeat(hate) + "◇".repeat(3 - hate);
-    }
+    const overlay = document.createElement("div");
 
-    function followerText(player) {
-        return player.defeated
-            ? "オワコン"
-            : `${player.followers.toLocaleString()} フォロワー`;
-    }
+    overlay.id = "trapChoiceOverlay";
+    overlay.className = "trap-choice-overlay";
 
-    function resetCardDetail() {
-        cardDetail.innerHTML = `
-            <h3>カード効果</h3>
-            <p>カードにカーソルを合わせると効果が表示されます。</p>
-        `;
-    }
+    const conditionText =
+        data.condition === "onDamage"
+            ? "ダメージを受けます。発動する罠を選んでください。"
+            : data.condition === "onHateChange"
+                ? "ヘイトが変動します。発動する罠を選んでください。"
+                : "罠効果を受けます。発動する罠を選んでください。";
 
-    function cloneGame(game) {
-        return game ? JSON.parse(JSON.stringify(game)) : null;
-    }
+    const sourceCardName = data.context?.cardName || "不明なカード";
+    const sourceCardType = data.context?.cardType || "";
+    const sourceEffect = data.context?.effect || "";
+    const sourceResultText = data.context?.resultText || "";
+    const sourceActionText =
+        data.context?.sourceActionText ||
+        `${data.sourcePlayerName} のカードに反応できます。`;
 
-    function getPlayerFromGame(game, playerId) {
-        if (!game) return null;
-        return game.turnOrder.find(player => player.id === playerId);
-    }
+    const boardPlayers = data.board?.turnOrder || [];
+    const currentTurnPlayer =
+        boardPlayers[data.board?.currentTurnIndex]?.name || "-";
 
-    function getPlayerElement(playerId) {
-        const me = latestGame?.turnOrder.find(player => player.id === socket.id);
+    overlay.innerHTML = `
+        <div class="trap-choice-box large-trap-choice-box">
+            <h2>罠カード発動確認</h2>
 
-        if (me && me.id === playerId) {
-            return myPanel;
-        }
+            <div class="trap-source-box">
+                <div class="trap-section-title">反応元カード</div>
+                <div class="trap-source-card-name">
+                    ${sourceCardName}
+                    ${sourceCardType ? `<span>${sourceCardType}</span>` : ""}
+                </div>
+                <p>${sourceActionText}</p>
+                ${sourceEffect ? `<p class="trap-source-effect">${sourceEffect}</p>` : ""}
+                ${sourceResultText ? `<p class="trap-danger-text">${sourceResultText}</p>` : ""}
+            </div>
 
-        const enemies = latestGame?.turnOrder.filter(player => player.id !== socket.id) || [];
-        const index = enemies.findIndex(player => player.id === playerId);
+            <div class="trap-board-box">
+                <div class="trap-section-title">現在の盤面</div>
+                <div class="trap-current-turn">現在のターン：${currentTurnPlayer}</div>
 
-        if (index >= 0) {
-            return enemySlots[index];
-        }
-
-        return battleField;
-    }
-
-    function showTrapChoiceModal(data) {
-        const oldOverlay = document.getElementById("trapChoiceOverlay");
-
-        if (oldOverlay) {
-            oldOverlay.remove();
-        }
-
-        const overlay = document.createElement("div");
-
-        overlay.id = "trapChoiceOverlay";
-        overlay.className = "trap-choice-overlay";
-
-        const conditionText =
-            data.condition === "onDamage"
-                ? "ダメージを受けます。発動する罠を選んでください。"
-                : data.condition === "onHateChange"
-                    ? "ヘイトが変動します。発動する罠を選んでください。"
-                    : "罠効果を受けます。発動する罠を選んでください。";
-
-        overlay.innerHTML = `
-            <div class="trap-choice-box">
-                <h2>罠カード発動確認</h2>
-                <p>
-                    ${data.sourcePlayerName} からの行動に反応できます。<br>
-                    ${conditionText}
-                </p>
-
-                <div class="trap-choice-list">
-                    ${data.traps.map(trap => `
-                        <div class="trap-choice-card" data-field-id="${trap.fieldId}">
-                            <strong>${trap.name}</strong>
-                            <span>${trap.effect}</span>
+                <div class="trap-board-list">
+                    ${boardPlayers.map(player => `
+                        <div class="trap-board-player ${player.defeated ? "trap-board-defeated" : ""}">
+                            <strong>${player.name}</strong>
+                            <span>${player.defeated ? "オワコン" : `${player.followers.toLocaleString()} フォロワー`}</span>
+                            <span>ヘイト ${"◆".repeat(player.hate)}${"◇".repeat(3 - player.hate)}</span>
+                            <span>伏せ ${player.fieldCardCount}枚</span>
                         </div>
                     `).join("")}
                 </div>
-
-                <button class="trap-skip-button" id="trapSkipButton">
-                    発動しない
-                </button>
             </div>
-        `;
 
-        document.body.appendChild(overlay);
+            <p class="trap-choice-message">${conditionText}</p>
 
-        overlay.querySelectorAll(".trap-choice-card").forEach(cardElement => {
-            cardElement.onclick = () => {
-                const fieldId = cardElement.dataset.fieldId;
+            <div class="trap-choice-list">
+                ${data.traps.map(trap => `
+                    <div class="trap-choice-card" data-field-id="${trap.fieldId}">
+                        <strong>${trap.name}</strong>
+                        <span>${trap.effect}</span>
+                    </div>
+                `).join("")}
+            </div>
 
-                socket.emit("chooseTrapResponse", {
-                    choiceId: data.choiceId,
-                    fieldId
-                });
+            <button class="trap-skip-button" id="trapSkipButton">
+                発動しない
+            </button>
+        </div>
+    `;
 
-                overlay.remove();
-            };
-        });
+    document.body.appendChild(overlay);
 
-        document.getElementById("trapSkipButton").onclick = () => {
+    overlay.querySelectorAll(".trap-choice-card").forEach(cardElement => {
+        cardElement.onclick = () => {
+            const fieldId = cardElement.dataset.fieldId;
+
             socket.emit("chooseTrapResponse", {
                 choiceId: data.choiceId,
-                fieldId: null
+                fieldId
             });
 
             overlay.remove();
         };
-    }
+    });
 
-    function showTurnAnnouncement(playerName, isMyTurn) {
-        turnAnnouncement.innerHTML = `
-            <div class="turn-announcement-text">
-                ${isMyTurn ? "あなたのターン" : `${playerName} のターン`}
-            </div>
-        `;
-
-        turnAnnouncement.classList.remove("show-turn-announcement");
-        void turnAnnouncement.offsetWidth;
-        turnAnnouncement.classList.add("show-turn-announcement");
-
-        setTimeout(() => {
-            turnAnnouncement.classList.remove("show-turn-announcement");
-        }, 1500);
-    }
-
-    function showFloatingText(targetElement, text, className) {
-        const targetRect = targetElement.getBoundingClientRect();
-        const fieldRect = battleField.getBoundingClientRect();
-
-        const popup = document.createElement("div");
-
-        popup.className = `floating-effect ${className}`;
-        popup.innerText = text;
-
-        popup.style.left = `${targetRect.left - fieldRect.left + targetRect.width / 2}px`;
-        popup.style.top = `${targetRect.top - fieldRect.top + targetRect.height / 2}px`;
-
-        effectLayer.appendChild(popup);
-
-        setTimeout(() => {
-            popup.remove();
-        }, 1200);
-    }
-
-    function showCardUseAnimation(text) {
-        const effect = document.createElement("div");
-
-        effect.className = "card-use-effect";
-        effect.innerText = text;
-
-        effectLayer.appendChild(effect);
-
-        setTimeout(() => {
-            effect.remove();
-        }, 900);
-    }
-
-    function showDiscardAnimation(cardName) {
-        const effect = document.createElement("div");
-
-        effect.className = "discard-effect";
-        effect.innerText = `捨て札：${cardName}`;
-
-        effectLayer.appendChild(effect);
-
-        setTimeout(() => {
-            effect.remove();
-        }, 900);
-    }
-
-    function showDrawAnimation(count) {
-        if (count <= 0) return;
-
-        const effect = document.createElement("div");
-
-        effect.className = "draw-effect";
-        effect.innerText = `+${count} Card`;
-
-        effectLayer.appendChild(effect);
-
-        setTimeout(() => {
-            effect.remove();
-        }, 1000);
-    }
-
-    function runAnimations(oldGame, newGame) {
-        if (!newGame) return;
-
-        const currentPlayer = newGame.turnOrder[newGame.currentTurnIndex];
-
-        if (!oldGame && currentPlayer) {
-            showTurnAnnouncement(currentPlayer.name, currentPlayer.id === socket.id);
-        }
-
-        if (!oldGame) return;
-
-        const oldTurnPlayer = oldGame.turnOrder[oldGame.currentTurnIndex];
-        const newTurnPlayer = newGame.turnOrder[newGame.currentTurnIndex];
-
-        if (oldTurnPlayer && newTurnPlayer && oldTurnPlayer.id !== newTurnPlayer.id) {
-            showTurnAnnouncement(newTurnPlayer.name, newTurnPlayer.id === socket.id);
-        }
-
-        newGame.turnOrder.forEach(newPlayer => {
-            const oldPlayer = getPlayerFromGame(oldGame, newPlayer.id);
-
-            if (!oldPlayer) return;
-
-            if (newPlayer.followers < oldPlayer.followers) {
-                const damage = oldPlayer.followers - newPlayer.followers;
-                const targetElement = getPlayerElement(newPlayer.id);
-
-                if (!targetElement) return;
-
-                targetElement.classList.remove("damage-shake");
-                void targetElement.offsetWidth;
-                targetElement.classList.add("damage-shake");
-
-                showFloatingText(targetElement, `-${damage.toLocaleString()}`, "damage-popup");
-
-                setTimeout(() => {
-                    targetElement.classList.remove("damage-shake");
-                }, 500);
-            }
+    document.getElementById("trapSkipButton").onclick = () => {
+        socket.emit("chooseTrapResponse", {
+            choiceId: data.choiceId,
+            fieldId: null
         });
 
-        const oldMe = getPlayerFromGame(oldGame, socket.id);
-        const newMe = getPlayerFromGame(newGame, socket.id);
-
-        if (oldMe && newMe && newMe.hand.length > oldMe.hand.length) {
-            const currentTurnPlayer = newGame.turnOrder[newGame.currentTurnIndex];
-
-            if (currentTurnPlayer && currentTurnPlayer.id === socket.id) {
-                showDrawAnimation(newMe.hand.length - oldMe.hand.length);
-            }
-        }
-
-        if (newGame.playedCards.length > oldGame.playedCards.length) {
-            const latestLog = newGame.playedCards[newGame.playedCards.length - 1];
-
-            if (!latestLog) return;
-
-            const isMyAction = latestLog.playerId === socket.id;
-
-            if (latestLog.actionType === "discard") {
-                if (isMyAction) {
-                    showDiscardAnimation(latestLog.cardName || "カード");
-                }
-
-                return;
-            }
-
-            if (latestLog.actionType === "trap") {
-                if (isMyAction) {
-                    showCardUseAnimation(`${latestLog.cardName} を発動`);
-                } else {
-                    showCardUseAnimation(`${latestLog.playerName} の罠が発動`);
-                }
-
-                return;
-            }
-
-            showCardUseAnimation(`${latestLog.playerName}：${latestLog.cardName}`);
-        }
-    }
-
-    const savedName = localStorage.getItem("playerName");
-
-    if (savedName) {
-        nameInput.value = savedName;
-    }
-
-    createRoomButton.onclick = () => {
-        const playerName = nameInput.value.trim();
-
-        if (!playerName) {
-            alert("名前を入力してください");
-            return;
-        }
-
-        localStorage.setItem("playerName", playerName);
-        socket.emit("createRoom", playerName);
+        overlay.remove();
     };
-
-    joinRoomButton.onclick = () => {
-        const playerName = nameInput.value.trim();
-
-        if (!playerName) {
-            alert("名前を入力してください");
-            return;
-        }
-
-        const roomId = prompt("ルームIDを入力してください");
-
-        if (!roomId) return;
-
-        localStorage.setItem("playerName", playerName);
-
-        socket.emit("joinRoom", {
-            roomId,
-            playerName
-        });
-    };
-
-    socket.on("roomCreated", roomId => {
-        currentRoomId = roomId;
-        isHost = true;
-        isReady = false;
-
-        titleScreen.style.display = "none";
-        lobbyScreen.style.display = "flex";
-        battleScreen.style.display = "none";
-
-        roomIdText.innerText = `ルームID : ${roomId}`;
-
-        leaveRoomButton.innerText = "ルーム解散";
-        readyButton.innerText = "準備完了";
-        readyButton.classList.remove("cancel-ready");
-
-        startGameButton.style.display = "block";
-        startGameButton.disabled = true;
-    });
-
-    socket.on("joinSuccess", roomId => {
-        currentRoomId = roomId;
-        isHost = false;
-        isReady = false;
-
-        titleScreen.style.display = "none";
-        lobbyScreen.style.display = "flex";
-        battleScreen.style.display = "none";
-
-        roomIdText.innerText = `ルームID : ${roomId}`;
-
-        leaveRoomButton.innerText = "退出";
-        readyButton.innerText = "準備完了";
-        readyButton.classList.remove("cancel-ready");
-
-        startGameButton.style.display = "none";
-    });
-
-    socket.on("updateRoom", players => {
-        playerList.innerHTML = "";
-
-        const me = players.find(player => player.id === socket.id);
-
-        if (me) {
-            isReady = me.ready;
-            readyButton.innerText = isReady ? "準備解除" : "準備完了";
-            readyButton.classList.toggle("cancel-ready", isReady);
-        }
-
-        players.forEach(player => {
-            playerList.innerHTML += `
-                <div class="player-card ${player.ready ? "ready" : "not-ready"}">
-                    <span class="player-name">${player.host ? "👑 " : ""}${player.name}</span>
-                    <span class="player-status">${player.ready ? "準備完了" : "待機中"}</span>
-                </div>
-            `;
-        });
-
-        const allReady = players.every(player => player.ready);
-        const canStart = players.length >= 2 && allReady;
-
-        if (isHost) {
-            startGameButton.style.display = "block";
-            startGameButton.disabled = !canStart;
-        } else {
-            startGameButton.style.display = "none";
-        }
-    });
-
-    readyButton.onclick = () => {
-        socket.emit("toggleReady", {
-            roomId: currentRoomId
-        });
-    };
-
-    leaveRoomButton.onclick = () => {
-        if (isHost) {
-            socket.emit("disbandRoom", currentRoomId);
-        } else {
-            socket.emit("leaveRoom", currentRoomId);
-        }
-
-        resetToTitle();
-    };
-
-    startGameButton.onclick = () => {
-        socket.emit("startGame", currentRoomId);
-    };
-
-    socket.on("gameStarted", () => {
-        titleScreen.style.display = "none";
-        lobbyScreen.style.display = "none";
-        battleScreen.style.display = "block";
-        gameOverOverlay.style.display = "none";
-        previousGame = null;
-    });
-
-    socket.on("chooseTrap", data => {
-        showTrapChoiceModal(data);
-    });
-
-    socket.on("updateGame", game => {
-        const oldGame = previousGame;
-
-        latestGame = game;
-
-        const enemies = latestGame.turnOrder.filter(player => {
-            return player.id !== socket.id && !player.defeated;
-        });
-
-        if (!selectedTargetId && enemies.length > 0) {
-            selectedTargetId = enemies[0].id;
-        }
-
-        if (
-            selectedTargetId &&
-            !latestGame.turnOrder.some(player => {
-                return player.id === selectedTargetId && !player.defeated;
-            })
-        ) {
-            selectedTargetId = enemies[0]?.id || "";
-        }
-
-        renderBattlePlayers();
-        renderTurn();
-        renderPlayedCards();
-        renderMyFieldCards();
-        renderHand();
-
-        runAnimations(oldGame, latestGame);
-
-        previousGame = cloneGame(latestGame);
-
-        if (game.gameOver && game.winner) {
-            showGameOver(game.winner);
-        }
-    });
-
-    function renderBattlePlayers() {
-        if (!latestGame) return;
-
-        const me = latestGame.turnOrder.find(player => player.id === socket.id);
-        const enemies = latestGame.turnOrder.filter(player => player.id !== socket.id);
-
-        if (me) {
-            myPanel.classList.toggle("max-hate-player", me.hate >= 3);
-            myPanel.classList.toggle("defeated-player", me.defeated);
-
-            myPanel.innerHTML = `
-                <div class="my-name">${me.defeated ? "💀 " : ""}${me.hate >= 3 ? "🔥 " : ""}${me.name}</div>
-                <div class="follower-line ${me.defeated ? "owakon-text" : ""}">
-                    ${followerText(me)}
-                </div>
-                <div class="panel-hate ${me.hate >= 3 ? "max-hate-text" : ""}">
-                    ${hateIcons(me.hate)}
-                </div>
-            `;
-        }
-
-        enemySlots.forEach((slot, index) => {
-            const enemy = enemies[index];
-
-            if (enemy) {
-                slot.classList.remove("empty-enemy");
-                slot.classList.toggle("selected-target", selectedTargetId === enemy.id);
-                slot.classList.toggle("max-hate-player", enemy.hate >= 3);
-                slot.classList.toggle("defeated-player", enemy.defeated);
-
-                slot.innerHTML = `
-                    <div class="enemy-name">${enemy.defeated ? "💀 " : ""}${enemy.hate >= 3 ? "🔥 " : ""}${enemy.name}</div>
-                    <div class="follower-line ${enemy.defeated ? "owakon-text" : ""}">
-                        ${followerText(enemy)}
-                    </div>
-                    <div class="panel-hate ${enemy.hate >= 3 ? "max-hate-text" : ""}">
-                        ${hateIcons(enemy.hate)}
-                    </div>
-                    <div class="enemy-field-cards">
-                        ${enemy.fieldCards.map(() => `<span class="mini-set-card">伏</span>`).join("")}
-                    </div>
-                `;
-
-                slot.onclick = () => {
-                    if (enemy.defeated) return;
-
-                    selectedTargetId = enemy.id;
-
-                    renderBattlePlayers();
-                };
-            } else {
-                slot.classList.add("empty-enemy");
-                slot.classList.remove("selected-target");
-                slot.classList.remove("max-hate-player");
-                slot.classList.remove("defeated-player");
-                slot.onclick = null;
-
-                slot.innerHTML = `
-                    <div class="enemy-name">空席</div>
-                    <div class="follower-line">-</div>
-                    <div class="panel-hate">◇◇◇</div>
-                `;
-            }
-        });
-    }
-
-    function renderTurn() {
-        if (!latestGame) return;
-
-        const currentPlayer = latestGame.turnOrder[latestGame.currentTurnIndex];
-        const isMyTurn = currentPlayer.id === socket.id;
-
-        turnPanel.innerHTML = `
-            現在のターン<br>
-            <span>${currentPlayer.name}</span>
-        `;
-
-        battleMessage.innerText = isMyTurn
-            ? "あなたのターンです。対象を選び、カードを場に出せます。"
-            : `${currentPlayer.name} のターンです。`;
-
-        dropZone.classList.toggle("active-drop-zone", isMyTurn);
-        discardZone.classList.toggle("active-discard-zone", isMyTurn);
-        endTurnButton.disabled = !isMyTurn;
-    }
-
-    function renderPlayedCards() {
-        if (!latestGame) return;
-
-        playedCardList.innerHTML = "";
-
-        [...latestGame.playedCards].reverse().forEach(card => {
-            playedCardList.innerHTML += `
-                <div class="played-card">
-                    <strong>${card.log || `${card.playerName} → ${card.targetName}`}</strong><br>
-                    ${card.hateText}
-                </div>
-            `;
-        });
-    }
-
-    function renderMyFieldCards() {
-        if (!latestGame) return;
-
-        const me = latestGame.turnOrder.find(player => player.id === socket.id);
-
-        myFieldCards.innerHTML = "";
-
-        if (!me) return;
-
-        for (let i = 0; i < 2; i++) {
-            const card = me.fieldCards[i];
-
-            const setCard = document.createElement("div");
-
-            setCard.className = `set-card ${card ? "has-set-card" : ""}`;
-            setCard.innerText = card ? "伏" : "空";
-
-            if (card && !card.hidden) {
-                setCard.onmouseenter = () => {
-                    cardDetail.innerHTML = `
-                        <h3>${card.name}</h3>
-                        <p class="detail-type">${card.type}</p>
-                        <p>${card.effect}</p>
-                        <p class="detail-hate">${card.hateText || ""}</p>
-                    `;
-                };
-
-                setCard.onmouseleave = () => {
-                    resetCardDetail();
-                };
-            }
-
-            myFieldCards.appendChild(setCard);
-        }
-    }
-
-    function renderHand() {
-        if (!latestGame) return;
-
-        const me = latestGame.turnOrder.find(player => player.id === socket.id);
-
-        handArea.innerHTML = "";
-
-        if (!me) return;
-
-        for (let i = 0; i < 4; i++) {
-            const card = me.hand[i];
-
-            const cardElement = document.createElement("div");
-
-            if (!card) {
-                cardElement.className = "hand-card empty-hand-card";
-                cardElement.innerHTML = `
-                    <div class="card-name">空</div>
-                    <div class="card-type">次の自分のターンで補充</div>
-                `;
-
-                handArea.appendChild(cardElement);
-
-                continue;
-            }
-
-            cardElement.className = "hand-card";
-            cardElement.draggable = true;
-
-            cardElement.innerHTML = `
-                <div class="card-name">${card.name}</div>
-                <div class="card-type">${card.type}</div>
-                <div class="card-hate">${card.hateText}</div>
-            `;
-
-            cardElement.onmouseenter = () => {
-                cardDetail.innerHTML = `
-                    <h3>${card.name}</h3>
-                    <p class="detail-type">${card.type}</p>
-                    <p>${card.effect}</p>
-                    <p class="detail-hate">${card.hateText}</p>
-                `;
-            };
-
-            cardElement.onmouseleave = () => {
-                resetCardDetail();
-            };
-
-            cardElement.ondragstart = () => {
-                draggedCard = card;
-            };
-
-            handArea.appendChild(cardElement);
-        }
-    }
-
-    dropZone.ondragover = event => {
-        event.preventDefault();
-    };
-
-    dropZone.ondrop = event => {
-        event.preventDefault();
-
-        if (!latestGame || latestGame.gameOver) return;
-
-        const currentPlayer = latestGame.turnOrder[latestGame.currentTurnIndex];
-
-        if (currentPlayer.id !== socket.id) {
-            alert("今はあなたのターンではありません");
-            return;
-        }
-
-        if (!draggedCard) return;
-
-        let targetId = selectedTargetId;
-
-        if (draggedCard.targetType === "self") {
-            targetId = socket.id;
-        }
-
-        if (draggedCard.targetType === "enemy" && !targetId) {
-            alert("対象プレイヤーを選択してください");
-            return;
-        }
-
-        socket.emit("playCard", {
-            roomId: currentRoomId,
-            cardInstanceId: draggedCard.instanceId,
-            targetId
-        });
-
-        draggedCard = null;
-    };
-
-    discardZone.ondragover = event => {
-        event.preventDefault();
-    };
-
-    discardZone.ondrop = event => {
-        event.preventDefault();
-
-        if (!latestGame || latestGame.gameOver) return;
-
-        const currentPlayer = latestGame.turnOrder[latestGame.currentTurnIndex];
-
-        if (currentPlayer.id !== socket.id) {
-            alert("今はあなたのターンではありません");
-            return;
-        }
-
-        if (!draggedCard) return;
-
-        socket.emit("discardCard", {
-            roomId: currentRoomId,
-            cardInstanceId: draggedCard.instanceId
-        });
-
-        draggedCard = null;
-    };
-
-    endTurnButton.onclick = () => {
-        socket.emit("endTurn", currentRoomId);
-    };
-
-    function showGameOver(winner) {
-        const isWinner = winner.id === socket.id;
-
-        gameOverText.innerText = isWinner
-            ? "勝利！最後まで生き残った"
-            : `${winner.name} の勝利`;
-
-        gameOverOverlay.style.display = "flex";
-    }
-
-    nextButton.onclick = () => {
-        socket.emit("returnTitle", currentRoomId);
-        resetToTitle();
-    };
-
-    function resetToTitle() {
-        currentRoomId = "";
-        isHost = false;
-        isReady = false;
-        latestGame = null;
-        previousGame = null;
-        selectedTargetId = "";
-        draggedCard = null;
-
-        const trapOverlay = document.getElementById("trapChoiceOverlay");
-
-        if (trapOverlay) {
-            trapOverlay.remove();
-        }
-
-        lobbyScreen.style.display = "none";
-        battleScreen.style.display = "none";
-        titleScreen.style.display = "flex";
-        gameOverOverlay.style.display = "none";
-
-        readyButton.innerText = "準備完了";
-        readyButton.classList.remove("cancel-ready");
-    }
-
-    socket.on("gameOver", winner => {
-        if (winner) {
-            showGameOver(winner);
-        }
-    });
-
-    socket.on("roomDisbanded", () => {
-        alert("ルームが解散されました");
-        resetToTitle();
-    });
-
-    socket.on("roomFull", () => {
-        alert("ルームが満員です");
-        resetToTitle();
-    });
-
-    socket.on("errorMessage", message => {
-        alert(message);
-    });
-};
+}
