@@ -11,10 +11,15 @@ const io = new Server(server);
 app.use(express.static("public"));
 
 const rooms = {};
+const pendingTrapChoices = {};
 const DEV_MODE = true;
 
 function generateRoomId() {
     return Math.floor(1000 + Math.random() * 9000).toString();
+}
+
+function generateChoiceId() {
+    return `choice-${Date.now()}-${Math.random()}`;
 }
 
 function generateCardInstance(cardId = null) {
@@ -32,7 +37,11 @@ function generateCardInstance(cardId = null) {
 
 function drawCards(player) {
     while (player.hand.length < 4) {
-        player.hand.push(generateCardInstance());
+        const card = generateCardInstance();
+
+        if (card) {
+            player.hand.push(card);
+        }
     }
 }
 
@@ -58,6 +67,7 @@ function createGameState(players) {
         };
 
         drawCards(gamePlayer);
+
         return gamePlayer;
     });
 
@@ -111,22 +121,10 @@ function removeCardFromHand(player, instanceId) {
     if (index === -1) return null;
 
     const usedCard = player.hand[index];
+
     player.hand.splice(index, 1);
 
     return usedCard;
-}
-
-function findAndRemoveTrap(player, condition) {
-    const index = player.fieldCards.findIndex(card => {
-        return card.trapCondition === condition;
-    });
-
-    if (index === -1) return null;
-
-    const trap = player.fieldCards[index];
-    player.fieldCards.splice(index, 1);
-
-    return trap;
 }
 
 function addLog(game, log) {
@@ -147,120 +145,39 @@ function changeHate(player, amount) {
     player.hate = clamp(player.hate + amount, 0, 3);
 }
 
-function triggerTrapIfNeeded(game, targetPlayer, sourcePlayer, context) {
-    if (!targetPlayer || !sourcePlayer) {
-        return { canceled: false };
-    }
+function findRoomBySocketId(socketId) {
+    for (const roomId in rooms) {
+        const room = rooms[roomId];
 
-    if (targetPlayer.id === sourcePlayer.id) {
-        return { canceled: false };
-    }
+        const player = room.players.find(player => player.id === socketId);
 
-    const trap = findAndRemoveTrap(targetPlayer, context.condition);
-
-    if (!trap) {
-        return { canceled: false };
-    }
-
-    addLog(game, {
-        actionType: "trap",
-        playerId: targetPlayer.id,
-        playerName: targetPlayer.name,
-        targetName: sourcePlayer.name,
-        cardName: trap.name,
-        cardType: trap.type,
-        hateText: trap.hateText || "罠が発動した",
-        log: `${targetPlayer.name} の罠が発動した`
-    });
-
-    const counterTrap = findAndRemoveTrap(sourcePlayer, "onTrapEffect");
-
-    if (counterTrap) {
-        addLog(game, {
-            actionType: "trap",
-            playerId: sourcePlayer.id,
-            playerName: sourcePlayer.name,
-            targetName: targetPlayer.name,
-            cardName: counterTrap.name,
-            cardType: counterTrap.type,
-            hateText: counterTrap.hateText || "罠効果を打ち消した",
-            log: `${sourcePlayer.name} の罠が発動した`
-        });
-
-        if (counterTrap.trapEffect === "cancelTrapAndDestroyEnemyTraps") {
-            targetPlayer.fieldCards = [];
-
-            addLog(game, {
-                actionType: "trapEffect",
-                playerId: sourcePlayer.id,
-                playerName: sourcePlayer.name,
-                targetName: targetPlayer.name,
-                cardName: counterTrap.name,
-                cardType: counterTrap.type,
-                hateText: "相手の伏せカードをすべて破壊した",
-                log: `${sourcePlayer.name} は相手の伏せカードをすべて破壊した`
-            });
+        if (player) {
+            return {
+                roomId,
+                room
+            };
         }
-
-        return { canceled: true };
     }
 
-    if (trap.trapEffect === "reflectDamage") {
-        const damage = context.amount || 0;
+    return null;
+}
 
-        applyDamage(game, sourcePlayer, damage);
+function getMatchingTraps(player, condition) {
+    return player.fieldCards.filter(card => {
+        return card.trapCondition === condition;
+    });
+}
 
-        addLog(game, {
-            actionType: "trapEffect",
-            playerId: targetPlayer.id,
-            playerName: targetPlayer.name,
-            targetName: sourcePlayer.name,
-            cardName: trap.name,
-            cardType: trap.type,
-            hateText: `${damage.toLocaleString()}ダメージを跳ね返した`,
-            log: `${targetPlayer.name} はダメージを跳ね返した`
-        });
+function removeTrapByFieldId(player, fieldId) {
+    const index = player.fieldCards.findIndex(card => card.fieldId === fieldId);
 
-        return { canceled: true };
-    }
+    if (index === -1) return null;
 
-    if (trap.trapEffect === "cancelHate") {
-        addLog(game, {
-            actionType: "trapEffect",
-            playerId: targetPlayer.id,
-            playerName: targetPlayer.name,
-            targetName: sourcePlayer.name,
-            cardName: trap.name,
-            cardType: trap.type,
-            hateText: "ヘイト変動を打ち消した",
-            log: `${targetPlayer.name} はヘイト変動を打ち消した`
-        });
+    const trap = player.fieldCards[index];
 
-        return { canceled: true };
-    }
+    player.fieldCards.splice(index, 1);
 
-    if (trap.trapEffect === "damageAndHate") {
-        const damage = trap.trapDamage || 0;
-        const hateChange = trap.trapHateChange || 0;
-
-        applyDamage(game, sourcePlayer, damage);
-        changeHate(sourcePlayer, hateChange);
-
-        addLog(game, {
-            actionType: "trapEffect",
-            playerId: targetPlayer.id,
-            playerName: targetPlayer.name,
-            targetName: sourcePlayer.name,
-            cardName: trap.name,
-            cardType: trap.type,
-            hateText: `${sourcePlayer.name} に ${damage.toLocaleString()}ダメージ / ヘイト +${hateChange}`,
-            log: `${targetPlayer.name} の罠が ${sourcePlayer.name} に反撃した`
-        });
-
-        return { canceled: false };
-    }
-
-    return { canceled: false };
+    return trap;
 }
 
 function createGameViewForPlayer(game, viewerId) {
@@ -314,20 +231,6 @@ function createGameViewForPlayer(game, viewerId) {
     return view;
 }
 
-function findRoomBySocketId(socketId) {
-    for (const roomId in rooms) {
-        const room = rooms[roomId];
-
-        const playerInLobby = room.players.find(player => player.id === socketId);
-
-        if (playerInLobby) {
-            return { roomId, room };
-        }
-    }
-
-    return null;
-}
-
 function emitGameUpdate(roomId) {
     const room = rooms[roomId];
 
@@ -350,6 +253,189 @@ function emitGameUpdate(roomId) {
             clientSocket.emit("devGameState", view);
         }
     });
+}
+
+function finishGameIfNeeded(roomId) {
+    const room = rooms[roomId];
+
+    if (!room || !room.game) return;
+
+    checkGameOver(room.game);
+
+    emitGameUpdate(roomId);
+
+    if (room.game.gameOver) {
+        io.to(roomId).emit("gameOver", room.game.winner);
+    }
+}
+
+function requestTrapChoice({
+    roomId,
+    targetPlayer,
+    sourcePlayer,
+    condition,
+    context,
+    onResolved
+}) {
+    const room = rooms[roomId];
+
+    if (!room || !room.game) return false;
+
+    if (!targetPlayer || !sourcePlayer) return false;
+
+    if (targetPlayer.id === sourcePlayer.id) return false;
+
+    const matchingTraps = getMatchingTraps(targetPlayer, condition);
+
+    if (matchingTraps.length === 0) return false;
+
+    const choiceId = generateChoiceId();
+
+    pendingTrapChoices[choiceId] = {
+        roomId,
+        targetPlayerId: targetPlayer.id,
+        sourcePlayerId: sourcePlayer.id,
+        condition,
+        context,
+        onResolved
+    };
+
+    const targetSocket = io.sockets.sockets.get(targetPlayer.id);
+
+    if (!targetSocket) {
+        delete pendingTrapChoices[choiceId];
+        return false;
+    }
+
+    targetSocket.emit("chooseTrap", {
+        choiceId,
+        sourcePlayerName: sourcePlayer.name,
+        condition,
+        context,
+        traps: matchingTraps.map(card => ({
+            fieldId: card.fieldId,
+            name: card.name,
+            type: card.type,
+            effect: card.effect,
+            hateText: card.hateText
+        }))
+    });
+
+    return true;
+}
+
+function resolveTrapEffect(game, roomId, trapOwner, sourcePlayer, trap, context) {
+    addLog(game, {
+        actionType: "trap",
+        playerId: trapOwner.id,
+        playerName: trapOwner.name,
+        targetName: sourcePlayer.name,
+        cardName: trap.name,
+        cardType: trap.type,
+        hateText: trap.hateText || "罠が発動した",
+        log: `${trapOwner.name} の罠が発動した`
+    });
+
+    if (trap.trapEffect === "reflectDamage") {
+        const damage = context.amount || 0;
+
+        applyDamage(game, sourcePlayer, damage);
+
+        addLog(game, {
+            actionType: "trapEffect",
+            playerId: trapOwner.id,
+            playerName: trapOwner.name,
+            targetName: sourcePlayer.name,
+            cardName: trap.name,
+            cardType: trap.type,
+            hateText: `${damage.toLocaleString()}ダメージを跳ね返した`,
+            log: `${trapOwner.name} はダメージを跳ね返した`
+        });
+
+        return {
+            canceled: true
+        };
+    }
+
+    if (trap.trapEffect === "cancelHate") {
+        addLog(game, {
+            actionType: "trapEffect",
+            playerId: trapOwner.id,
+            playerName: trapOwner.name,
+            targetName: sourcePlayer.name,
+            cardName: trap.name,
+            cardType: trap.type,
+            hateText: "ヘイト変動を打ち消した",
+            log: `${trapOwner.name} はヘイト変動を打ち消した`
+        });
+
+        return {
+            canceled: true
+        };
+    }
+
+    if (trap.trapEffect === "cancelTrap") {
+        addLog(game, {
+            actionType: "trapEffect",
+            playerId: trapOwner.id,
+            playerName: trapOwner.name,
+            targetName: sourcePlayer.name,
+            cardName: trap.name,
+            cardType: trap.type,
+            hateText: "罠効果を打ち消した",
+            log: `${trapOwner.name} は罠効果を打ち消した`
+        });
+
+        return {
+            canceled: true
+        };
+    }
+
+    if (trap.trapEffect === "cancelTrapAndDestroyEnemyTraps") {
+        sourcePlayer.fieldCards = [];
+
+        addLog(game, {
+            actionType: "trapEffect",
+            playerId: trapOwner.id,
+            playerName: trapOwner.name,
+            targetName: sourcePlayer.name,
+            cardName: trap.name,
+            cardType: trap.type,
+            hateText: "罠効果を打ち消し、相手の伏せカードを全破壊",
+            log: `${trapOwner.name} は罠効果を打ち消し、相手の伏せカードをすべて破壊した`
+        });
+
+        return {
+            canceled: true
+        };
+    }
+
+    if (trap.trapEffect === "damageAndHate") {
+        const damage = trap.trapDamage || 0;
+        const hateChange = trap.trapHateChange || 0;
+
+        applyDamage(game, sourcePlayer, damage);
+        changeHate(sourcePlayer, hateChange);
+
+        addLog(game, {
+            actionType: "trapEffect",
+            playerId: trapOwner.id,
+            playerName: trapOwner.name,
+            targetName: sourcePlayer.name,
+            cardName: trap.name,
+            cardType: trap.type,
+            hateText: `${sourcePlayer.name} に ${damage.toLocaleString()}ダメージ / ヘイト +${hateChange}`,
+            log: `${trapOwner.name} の罠が ${sourcePlayer.name} に反撃した`
+        });
+
+        return {
+            canceled: false
+        };
+    }
+
+    return {
+        canceled: false
+    };
 }
 
 io.on("connection", socket => {
@@ -447,6 +533,54 @@ io.on("connection", socket => {
         emitGameUpdate(roomId);
     });
 
+    socket.on("chooseTrapResponse", ({ choiceId, fieldId }) => {
+        const pending = pendingTrapChoices[choiceId];
+
+        if (!pending) return;
+
+        const room = rooms[pending.roomId];
+
+        if (!room || !room.game) {
+            delete pendingTrapChoices[choiceId];
+            return;
+        }
+
+        const game = room.game;
+
+        const trapOwner = game.turnOrder.find(player => player.id === pending.targetPlayerId);
+        const sourcePlayer = game.turnOrder.find(player => player.id === pending.sourcePlayerId);
+
+        if (!trapOwner || !sourcePlayer) {
+            delete pendingTrapChoices[choiceId];
+            return;
+        }
+
+        let result = {
+            canceled: false
+        };
+
+        if (fieldId) {
+            const trap = removeTrapByFieldId(trapOwner, fieldId);
+
+            if (trap) {
+                result = resolveTrapEffect(
+                    game,
+                    pending.roomId,
+                    trapOwner,
+                    sourcePlayer,
+                    trap,
+                    pending.context
+                );
+            }
+        }
+
+        const callback = pending.onResolved;
+
+        delete pendingTrapChoices[choiceId];
+
+        callback(result);
+    });
+
     socket.on("playCard", ({ roomId, cardInstanceId, targetId }) => {
         const room = rooms[roomId];
 
@@ -489,6 +623,7 @@ io.on("connection", socket => {
             }
 
             caster.fieldCards.push({
+                fieldId: `field-${usedCard.instanceId}`,
                 id: usedCard.id,
                 name: usedCard.name,
                 type: usedCard.type,
@@ -549,93 +684,107 @@ io.on("connection", socket => {
             return;
         }
 
-        let damageText = "";
+        const finishCardPlay = () => {
+            addLog(game, {
+                actionType: "play",
+                playerId: caster.id,
+                playerName: caster.name,
+                targetName: finalTarget.name,
+                cardName: usedCard.name,
+                cardType: usedCard.type,
+                hateText: usedCard.hateText,
+                log: `${caster.name} → ${finalTarget.name}：${usedCard.name}`
+            });
+
+            finishGameIfNeeded(roomId);
+        };
 
         if (usedCard.kind === "attack") {
             let damage = usedCard.damage;
 
             if (finalTarget.hate >= 3) {
                 damage *= 2;
-                damageText = " / ヘイト3のためダメージ2倍";
             }
 
-            const trapResult = triggerTrapIfNeeded(
-                game,
-                finalTarget,
-                caster,
-                {
-                    condition: "onDamage",
-                    amount: damage
+            const requested = requestTrapChoice({
+                roomId,
+                targetPlayer: finalTarget,
+                sourcePlayer: caster,
+                condition: "onDamage",
+                context: {
+                    amount: damage,
+                    cardName: usedCard.name
+                },
+                onResolved: result => {
+                    if (!result.canceled) {
+                        applyDamage(game, finalTarget, damage);
+                    }
+
+                    if (usedCard.hateTarget === "self") {
+                        changeHate(caster, usedCard.hateChange);
+                    }
+
+                    finishCardPlay();
                 }
-            );
+            });
 
-            if (!trapResult.canceled) {
+            if (!requested) {
                 applyDamage(game, finalTarget, damage);
+
+                if (usedCard.hateTarget === "self") {
+                    changeHate(caster, usedCard.hateChange);
+                }
+
+                finishCardPlay();
             }
+
+            return;
         }
 
         if (usedCard.kind === "support") {
             caster.followers =
                 Math.min(10000, caster.followers + usedCard.heal);
+
+            if (usedCard.hateTarget === "self") {
+                changeHate(caster, usedCard.hateChange);
+            }
+
+            finishCardPlay();
+            return;
         }
 
         if (usedCard.kind === "hate") {
-            const trapResult = triggerTrapIfNeeded(
-                game,
-                finalTarget,
-                caster,
-                {
-                    condition: "onHateChange",
-                    amount: usedCard.hateChange
-                }
-            );
+            const requested = requestTrapChoice({
+                roomId,
+                targetPlayer: finalTarget,
+                sourcePlayer: caster,
+                condition: "onHateChange",
+                context: {
+                    amount: usedCard.hateChange,
+                    cardName: usedCard.name
+                },
+                onResolved: result => {
+                    if (!result.canceled) {
+                        changeHate(finalTarget, usedCard.hateChange);
+                    }
 
-            if (!trapResult.canceled) {
+                    finishCardPlay();
+                }
+            });
+
+            if (!requested) {
                 changeHate(finalTarget, usedCard.hateChange);
+                finishCardPlay();
             }
+
+            return;
         }
 
         if (usedCard.hateTarget === "self") {
             changeHate(caster, usedCard.hateChange);
         }
 
-        if (
-            usedCard.hateTarget === "target" &&
-            usedCard.kind !== "hate"
-        ) {
-            const trapResult = triggerTrapIfNeeded(
-                game,
-                finalTarget,
-                caster,
-                {
-                    condition: "onHateChange",
-                    amount: usedCard.hateChange
-                }
-            );
-
-            if (!trapResult.canceled) {
-                changeHate(finalTarget, usedCard.hateChange);
-            }
-        }
-
-        addLog(game, {
-            actionType: "play",
-            playerId: caster.id,
-            playerName: caster.name,
-            targetName: finalTarget.name,
-            cardName: usedCard.name,
-            cardType: usedCard.type,
-            hateText: `${usedCard.hateText}${damageText}`,
-            log: `${caster.name} → ${finalTarget.name}：${usedCard.name}`
-        });
-
-        checkGameOver(game);
-
-        emitGameUpdate(roomId);
-
-        if (game.gameOver) {
-            io.to(roomId).emit("gameOver", game.winner);
-        }
+        finishCardPlay();
     });
 
     socket.on("discardCard", ({ roomId, cardInstanceId }) => {
@@ -700,34 +849,32 @@ io.on("connection", socket => {
         emitGameUpdate(roomId);
     });
 
-    // =========================
-    // 開発者用テストモード
-    // URL: http://localhost:3000/?dev=1
-    // =========================
-
     socket.on("devSetFollowers", ({ playerId, followers }) => {
         if (!DEV_MODE) return;
 
         const result = findRoomBySocketId(socket.id);
+
         if (!result || !result.room.game) return;
 
         const player = result.room.game.turnOrder.find(p => p.id === playerId);
+
         if (!player) return;
 
         player.followers = clamp(Number(followers), 0, 99999);
         player.defeated = player.followers <= 0;
 
-        checkGameOver(result.room.game);
-        emitGameUpdate(result.roomId);
+        finishGameIfNeeded(result.roomId);
     });
 
     socket.on("devSetHate", ({ playerId, hate }) => {
         if (!DEV_MODE) return;
 
         const result = findRoomBySocketId(socket.id);
+
         if (!result || !result.room.game) return;
 
         const player = result.room.game.turnOrder.find(p => p.id === playerId);
+
         if (!player) return;
 
         player.hate = clamp(Number(hate), 0, 3);
@@ -739,9 +886,11 @@ io.on("connection", socket => {
         if (!DEV_MODE) return;
 
         const result = findRoomBySocketId(socket.id);
+
         if (!result || !result.room.game) return;
 
         const player = result.room.game.turnOrder.find(p => p.id === playerId);
+
         if (!player) return;
 
         if (player.hand.length >= 4) {
@@ -750,6 +899,7 @@ io.on("connection", socket => {
         }
 
         const card = generateCardInstance(cardId);
+
         if (!card) return;
 
         player.hand.push(card);
@@ -761,9 +911,11 @@ io.on("connection", socket => {
         if (!DEV_MODE) return;
 
         const result = findRoomBySocketId(socket.id);
+
         if (!result || !result.room.game) return;
 
         const player = result.room.game.turnOrder.find(p => p.id === playerId);
+
         if (!player) return;
 
         player.hand = [];
@@ -775,9 +927,11 @@ io.on("connection", socket => {
         if (!DEV_MODE) return;
 
         const result = findRoomBySocketId(socket.id);
+
         if (!result || !result.room.game) return;
 
         const player = result.room.game.turnOrder.find(p => p.id === playerId);
+
         if (!player) return;
 
         drawCards(player);
@@ -789,9 +943,11 @@ io.on("connection", socket => {
         if (!DEV_MODE) return;
 
         const result = findRoomBySocketId(socket.id);
+
         if (!result || !result.room.game) return;
 
         const player = result.room.game.turnOrder.find(p => p.id === playerId);
+
         if (!player) return;
 
         player.fieldCards = [];

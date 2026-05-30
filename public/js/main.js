@@ -50,6 +50,94 @@ window.onload = () => {
     let draggedCard = null;
     let selectedTargetId = "";
 
+    createTrapChoiceModalStyle();
+
+    function createTrapChoiceModalStyle() {
+        const style = document.createElement("style");
+
+        style.innerHTML = `
+            .trap-choice-overlay {
+                position: fixed;
+                inset: 0;
+                z-index: 10000;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                background: rgba(0, 0, 0, 0.72);
+                backdrop-filter: blur(4px);
+            }
+
+            .trap-choice-box {
+                width: min(520px, 92vw);
+                padding: 28px;
+                border-radius: 24px;
+                background: rgba(0, 0, 0, 0.9);
+                border: 2px solid rgba(255, 176, 0, 0.85);
+                box-shadow:
+                    0 0 28px rgba(255, 176, 0, 0.55),
+                    0 0 80px rgba(255, 0, 200, 0.18);
+                color: white;
+                text-align: center;
+            }
+
+            .trap-choice-box h2 {
+                margin-bottom: 12px;
+                color: #ffb000;
+                font-size: 26px;
+            }
+
+            .trap-choice-box p {
+                margin-bottom: 18px;
+                line-height: 1.6;
+                color: rgba(255, 255, 255, 0.78);
+            }
+
+            .trap-choice-list {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+                margin-bottom: 18px;
+            }
+
+            .trap-choice-card {
+                padding: 14px;
+                border-radius: 14px;
+                border: 2px solid rgba(0, 255, 225, 0.35);
+                background: rgba(255, 255, 255, 0.06);
+                cursor: pointer;
+                text-align: left;
+                transition: 0.18s;
+            }
+
+            .trap-choice-card:hover {
+                transform: scale(1.02);
+                border-color: #00ffe1;
+                box-shadow: 0 0 18px rgba(0, 255, 225, 0.35);
+            }
+
+            .trap-choice-card strong {
+                display: block;
+                margin-bottom: 6px;
+                color: #00ffe1;
+                font-size: 18px;
+            }
+
+            .trap-choice-card span {
+                font-size: 13px;
+                line-height: 1.5;
+                color: rgba(255, 255, 255, 0.78);
+            }
+
+            .trap-skip-button {
+                width: 100%;
+                margin-top: 4px;
+                background: linear-gradient(135deg, #555, #222);
+            }
+        `;
+
+        document.head.appendChild(style);
+    }
+
     function hateIcons(hate) {
         return "◆".repeat(hate) + "◇".repeat(3 - hate);
     }
@@ -93,6 +181,73 @@ window.onload = () => {
         return battleField;
     }
 
+    function showTrapChoiceModal(data) {
+        const oldOverlay = document.getElementById("trapChoiceOverlay");
+
+        if (oldOverlay) {
+            oldOverlay.remove();
+        }
+
+        const overlay = document.createElement("div");
+
+        overlay.id = "trapChoiceOverlay";
+        overlay.className = "trap-choice-overlay";
+
+        const conditionText =
+            data.condition === "onDamage"
+                ? "ダメージを受けます。発動する罠を選んでください。"
+                : data.condition === "onHateChange"
+                    ? "ヘイトが変動します。発動する罠を選んでください。"
+                    : "罠効果を受けます。発動する罠を選んでください。";
+
+        overlay.innerHTML = `
+            <div class="trap-choice-box">
+                <h2>罠カード発動確認</h2>
+                <p>
+                    ${data.sourcePlayerName} からの行動に反応できます。<br>
+                    ${conditionText}
+                </p>
+
+                <div class="trap-choice-list">
+                    ${data.traps.map(trap => `
+                        <div class="trap-choice-card" data-field-id="${trap.fieldId}">
+                            <strong>${trap.name}</strong>
+                            <span>${trap.effect}</span>
+                        </div>
+                    `).join("")}
+                </div>
+
+                <button class="trap-skip-button" id="trapSkipButton">
+                    発動しない
+                </button>
+            </div>
+        `;
+
+        document.body.appendChild(overlay);
+
+        overlay.querySelectorAll(".trap-choice-card").forEach(cardElement => {
+            cardElement.onclick = () => {
+                const fieldId = cardElement.dataset.fieldId;
+
+                socket.emit("chooseTrapResponse", {
+                    choiceId: data.choiceId,
+                    fieldId
+                });
+
+                overlay.remove();
+            };
+        });
+
+        document.getElementById("trapSkipButton").onclick = () => {
+            socket.emit("chooseTrapResponse", {
+                choiceId: data.choiceId,
+                fieldId: null
+            });
+
+            overlay.remove();
+        };
+    }
+
     function showTurnAnnouncement(playerName, isMyTurn) {
         turnAnnouncement.innerHTML = `
             <div class="turn-announcement-text">
@@ -114,6 +269,7 @@ window.onload = () => {
         const fieldRect = battleField.getBoundingClientRect();
 
         const popup = document.createElement("div");
+
         popup.className = `floating-effect ${className}`;
         popup.innerText = text;
 
@@ -129,6 +285,7 @@ window.onload = () => {
 
     function showCardUseAnimation(text) {
         const effect = document.createElement("div");
+
         effect.className = "card-use-effect";
         effect.innerText = text;
 
@@ -141,6 +298,7 @@ window.onload = () => {
 
     function showDiscardAnimation(cardName) {
         const effect = document.createElement("div");
+
         effect.className = "discard-effect";
         effect.innerText = `捨て札：${cardName}`;
 
@@ -155,6 +313,7 @@ window.onload = () => {
         if (count <= 0) return;
 
         const effect = document.createElement("div");
+
         effect.className = "draw-effect";
         effect.innerText = `+${count} Card`;
 
@@ -219,9 +378,10 @@ window.onload = () => {
 
         if (newGame.playedCards.length > oldGame.playedCards.length) {
             const latestLog = newGame.playedCards[newGame.playedCards.length - 1];
-            const isMyAction = latestLog?.playerId === socket.id;
 
             if (!latestLog) return;
+
+            const isMyAction = latestLog.playerId === socket.id;
 
             if (latestLog.actionType === "discard") {
                 if (isMyAction) {
@@ -233,9 +393,9 @@ window.onload = () => {
 
             if (latestLog.actionType === "trap") {
                 if (isMyAction) {
-                    showCardUseAnimation(`${latestLog.cardName} を伏せた`);
+                    showCardUseAnimation(`${latestLog.cardName} を発動`);
                 } else {
-                    showCardUseAnimation(`${latestLog.playerName} がカードを伏せた`);
+                    showCardUseAnimation(`${latestLog.playerName} の罠が発動`);
                 }
 
                 return;
@@ -246,11 +406,18 @@ window.onload = () => {
     }
 
     const savedName = localStorage.getItem("playerName");
-    if (savedName) nameInput.value = savedName;
+
+    if (savedName) {
+        nameInput.value = savedName;
+    }
 
     createRoomButton.onclick = () => {
         const playerName = nameInput.value.trim();
-        if (!playerName) return alert("名前を入力してください");
+
+        if (!playerName) {
+            alert("名前を入力してください");
+            return;
+        }
 
         localStorage.setItem("playerName", playerName);
         socket.emit("createRoom", playerName);
@@ -258,9 +425,14 @@ window.onload = () => {
 
     joinRoomButton.onclick = () => {
         const playerName = nameInput.value.trim();
-        if (!playerName) return alert("名前を入力してください");
+
+        if (!playerName) {
+            alert("名前を入力してください");
+            return;
+        }
 
         const roomId = prompt("ルームIDを入力してください");
+
         if (!roomId) return;
 
         localStorage.setItem("playerName", playerName);
@@ -271,7 +443,7 @@ window.onload = () => {
         });
     };
 
-    socket.on("roomCreated", (roomId) => {
+    socket.on("roomCreated", roomId => {
         currentRoomId = roomId;
         isHost = true;
         isReady = false;
@@ -290,7 +462,7 @@ window.onload = () => {
         startGameButton.disabled = true;
     });
 
-    socket.on("joinSuccess", (roomId) => {
+    socket.on("joinSuccess", roomId => {
         currentRoomId = roomId;
         isHost = false;
         isReady = false;
@@ -308,7 +480,7 @@ window.onload = () => {
         startGameButton.style.display = "none";
     });
 
-    socket.on("updateRoom", (players) => {
+    socket.on("updateRoom", players => {
         playerList.innerHTML = "";
 
         const me = players.find(player => player.id === socket.id);
@@ -367,7 +539,11 @@ window.onload = () => {
         previousGame = null;
     });
 
-    socket.on("updateGame", (game) => {
+    socket.on("chooseTrap", data => {
+        showTrapChoiceModal(data);
+    });
+
+    socket.on("updateGame", game => {
         const oldGame = previousGame;
 
         latestGame = game;
@@ -380,7 +556,12 @@ window.onload = () => {
             selectedTargetId = enemies[0].id;
         }
 
-        if (selectedTargetId && !latestGame.turnOrder.some(player => player.id === selectedTargetId && !player.defeated)) {
+        if (
+            selectedTargetId &&
+            !latestGame.turnOrder.some(player => {
+                return player.id === selectedTargetId && !player.defeated;
+            })
+        ) {
             selectedTargetId = enemies[0]?.id || "";
         }
 
@@ -444,7 +625,9 @@ window.onload = () => {
 
                 slot.onclick = () => {
                     if (enemy.defeated) return;
+
                     selectedTargetId = enemy.id;
+
                     renderBattlePlayers();
                 };
             } else {
@@ -554,7 +737,9 @@ window.onload = () => {
                     <div class="card-name">空</div>
                     <div class="card-type">次の自分のターンで補充</div>
                 `;
+
                 handArea.appendChild(cardElement);
+
                 continue;
             }
 
@@ -588,11 +773,11 @@ window.onload = () => {
         }
     }
 
-    dropZone.ondragover = (event) => {
+    dropZone.ondragover = event => {
         event.preventDefault();
     };
 
-    dropZone.ondrop = (event) => {
+    dropZone.ondrop = event => {
         event.preventDefault();
 
         if (!latestGame || latestGame.gameOver) return;
@@ -626,11 +811,11 @@ window.onload = () => {
         draggedCard = null;
     };
 
-    discardZone.ondragover = (event) => {
+    discardZone.ondragover = event => {
         event.preventDefault();
     };
 
-    discardZone.ondrop = (event) => {
+    discardZone.ondrop = event => {
         event.preventDefault();
 
         if (!latestGame || latestGame.gameOver) return;
@@ -680,6 +865,12 @@ window.onload = () => {
         selectedTargetId = "";
         draggedCard = null;
 
+        const trapOverlay = document.getElementById("trapChoiceOverlay");
+
+        if (trapOverlay) {
+            trapOverlay.remove();
+        }
+
         lobbyScreen.style.display = "none";
         battleScreen.style.display = "none";
         titleScreen.style.display = "flex";
@@ -689,7 +880,7 @@ window.onload = () => {
         readyButton.classList.remove("cancel-ready");
     }
 
-    socket.on("gameOver", (winner) => {
+    socket.on("gameOver", winner => {
         if (winner) {
             showGameOver(winner);
         }
@@ -705,7 +896,7 @@ window.onload = () => {
         resetToTitle();
     });
 
-    socket.on("errorMessage", (message) => {
+    socket.on("errorMessage", message => {
         alert(message);
     });
 };
