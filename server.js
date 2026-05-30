@@ -280,9 +280,7 @@ function requestTrapChoice({
     const room = rooms[roomId];
 
     if (!room || !room.game) return false;
-
     if (!targetPlayer || !sourcePlayer) return false;
-
     if (targetPlayer.id === sourcePlayer.id) return false;
 
     const matchingTraps = getMatchingTraps(targetPlayer, condition);
@@ -291,21 +289,31 @@ function requestTrapChoice({
 
     const choiceId = generateChoiceId();
 
+    const targetSocket = io.sockets.sockets.get(targetPlayer.id);
+
+    if (!targetSocket) return false;
+
+    const timer = setTimeout(() => {
+        const pending = pendingTrapChoices[choiceId];
+
+        if (!pending) return;
+
+        delete pendingTrapChoices[choiceId];
+
+        pending.onResolved({
+            canceled: false
+        });
+    }, 10000);
+
     pendingTrapChoices[choiceId] = {
         roomId,
         targetPlayerId: targetPlayer.id,
         sourcePlayerId: sourcePlayer.id,
         condition,
         context,
-        onResolved
+        onResolved,
+        timer
     };
-
-    const targetSocket = io.sockets.sockets.get(targetPlayer.id);
-
-    if (!targetSocket) {
-        delete pendingTrapChoices[choiceId];
-        return false;
-    }
 
     targetSocket.emit("chooseTrap", {
         choiceId,
@@ -573,6 +581,8 @@ io.on("connection", socket => {
                 );
             }
         }
+
+        clearTimeout(pending.timer);
 
         const callback = pending.onResolved;
 
