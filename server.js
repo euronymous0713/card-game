@@ -109,6 +109,7 @@ function checkGameOver(game) {
 
 function removeCardFromHand(player, instanceId) {
     const index = player.hand.findIndex(card => card.instanceId === instanceId);
+
     if (index === -1) return null;
 
     const usedCard = player.hand[index];
@@ -123,7 +124,11 @@ function addLog(game, log) {
 
 function applyDamage(game, target, amount) {
     target.followers = Math.max(0, target.followers - amount);
-    if (target.followers <= 0) target.defeated = true;
+
+    if (target.followers <= 0) {
+        target.defeated = true;
+    }
+
     checkGameOver(game);
 }
 
@@ -144,12 +149,9 @@ function findRoomBySocketId(socketId) {
     return null;
 }
 
-function getMatchingTraps(player, condition) {
-    return player.fieldCards.filter(card => card.trapCondition === condition);
-}
-
 function removeTrapByFieldId(player, fieldId) {
     const index = player.fieldCards.findIndex(card => card.fieldId === fieldId);
+
     if (index === -1) return null;
 
     const trap = player.fieldCards[index];
@@ -209,13 +211,16 @@ function createGameViewForPlayer(game, viewerId) {
 
 function emitGameUpdate(roomId) {
     const room = rooms[roomId];
+
     if (!room || !room.game) return;
 
     const clients = io.sockets.adapter.rooms.get(roomId);
+
     if (!clients) return;
 
     clients.forEach(clientId => {
         const clientSocket = io.sockets.sockets.get(clientId);
+
         if (!clientSocket) return;
 
         const view = createGameViewForPlayer(room.game, clientId);
@@ -230,6 +235,7 @@ function emitGameUpdate(roomId) {
 
 function finishGameIfNeeded(roomId) {
     const room = rooms[roomId];
+
     if (!room || !room.game) return;
 
     checkGameOver(room.game);
@@ -238,6 +244,13 @@ function finishGameIfNeeded(roomId) {
     if (room.game.gameOver) {
         io.to(roomId).emit("gameOver", room.game.winner);
     }
+}
+
+function conditionText(condition) {
+    if (condition === "onDamage") return "ダメージを受けたとき";
+    if (condition === "onHateChange") return "ヘイトを変動させられたとき";
+    if (condition === "onTrapEffect") return "罠カードの効果を受けたとき";
+    return "条件不明";
 }
 
 function createTrapChoiceBoardView(game, viewerId) {
@@ -270,8 +283,29 @@ function requestTrapChoice({
     if (!targetPlayer || !sourcePlayer) return false;
     if (targetPlayer.id === sourcePlayer.id) return false;
 
-    const matchingTraps = getMatchingTraps(targetPlayer, condition);
-    if (matchingTraps.length === 0) return false;
+    if (targetPlayer.fieldCards.length === 0) return false;
+
+    const allTraps = targetPlayer.fieldCards.map(card => {
+        const canActivate = card.trapCondition === condition;
+
+        return {
+            fieldId: card.fieldId,
+            name: card.name,
+            type: card.type,
+            effect: card.effect,
+            hateText: card.hateText,
+            trapCondition: card.trapCondition,
+            conditionText: conditionText(card.trapCondition),
+            canActivate,
+            disabledReason: canActivate
+                ? ""
+                : `発動条件が違います：${conditionText(card.trapCondition)}`
+        };
+    });
+
+    const hasActivatableTrap = allTraps.some(card => card.canActivate);
+
+    if (!hasActivatableTrap) return false;
 
     const choiceId = generateChoiceId();
     const targetSocket = io.sockets.sockets.get(targetPlayer.id);
@@ -280,6 +314,7 @@ function requestTrapChoice({
 
     const timer = setTimeout(() => {
         const pending = pendingTrapChoices[choiceId];
+
         if (!pending) return;
 
         delete pendingTrapChoices[choiceId];
@@ -287,7 +322,7 @@ function requestTrapChoice({
         pending.onResolved({
             canceled: false
         });
-    }, 10000);
+    }, 30000);
 
     pendingTrapChoices[choiceId] = {
         roomId,
@@ -303,15 +338,10 @@ function requestTrapChoice({
         choiceId,
         sourcePlayerName: sourcePlayer.name,
         condition,
+        conditionText: conditionText(condition),
         context,
         board: createTrapChoiceBoardView(room.game, targetPlayer.id),
-        traps: matchingTraps.map(card => ({
-            fieldId: card.fieldId,
-            name: card.name,
-            type: card.type,
-            effect: card.effect,
-            hateText: card.hateText
-        }))
+        traps: allTraps
     });
 
     return true;
@@ -511,7 +541,10 @@ io.on("connection", socket => {
 
     socket.on("chooseTrapResponse", ({ choiceId, fieldId }) => {
         const pending = pendingTrapChoices[choiceId];
+
         if (!pending) return;
+
+        if (socket.id !== pending.targetPlayerId) return;
 
         const room = rooms[pending.roomId];
 
@@ -535,17 +568,24 @@ io.on("connection", socket => {
         let result = { canceled: false };
 
         if (fieldId) {
-            const trap = removeTrapByFieldId(trapOwner, fieldId);
+            const selectedTrap = trapOwner.fieldCards.find(card => card.fieldId === fieldId);
 
-            if (trap) {
-                result = resolveTrapEffect(
-                    game,
-                    pending.roomId,
-                    trapOwner,
-                    sourcePlayer,
-                    trap,
-                    pending.context
-                );
+            if (
+                selectedTrap &&
+                selectedTrap.trapCondition === pending.condition
+            ) {
+                const trap = removeTrapByFieldId(trapOwner, fieldId);
+
+                if (trap) {
+                    result = resolveTrapEffect(
+                        game,
+                        pending.roomId,
+                        trapOwner,
+                        sourcePlayer,
+                        trap,
+                        pending.context
+                    );
+                }
             }
         }
 

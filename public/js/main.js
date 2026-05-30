@@ -133,6 +133,115 @@ window.onload = () => {
                 margin-top: 4px;
                 background: linear-gradient(135deg, #555, #222);
             }
+            .disabled-trap-choice {
+                opacity: 0.35;
+                filter: grayscale(1);
+                cursor: not-allowed;
+                border-color: rgba(255, 255, 255, 0.15) !important;
+                box-shadow: none !important;
+            }
+
+            .disabled-trap-choice:hover {
+                transform: none !important;
+                border-color: rgba(255, 255, 255, 0.15) !important;
+                box-shadow: none !important;
+            }
+
+            .trap-choice-card small {
+                display: block;
+                margin-top: 8px;
+                font-size: 11px;
+                line-height: 1.5;
+                color: rgba(255, 255, 255, 0.55);
+            }
+
+            .large-trap-choice-box {
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+
+            .trap-source-box,
+            .trap-board-box {
+                margin: 14px 0;
+                padding: 14px;
+                border-radius: 16px;
+                background: rgba(255, 255, 255, 0.06);
+                border: 1px solid rgba(0, 255, 225, 0.25);
+                text-align: left;
+            }
+
+            .trap-section-title {
+                margin-bottom: 8px;
+                font-size: 13px;
+                color: #00ffe1;
+                letter-spacing: 1px;
+            }
+
+            .trap-source-card-name {
+                margin-bottom: 8px;
+                font-size: 22px;
+                font-weight: bold;
+                color: #ffb000;
+            }
+
+            .trap-source-card-name span {
+                margin-left: 8px;
+                font-size: 13px;
+                color: rgba(255, 255, 255, 0.65);
+            }
+
+            .trap-source-effect {
+                font-size: 13px;
+                color: rgba(255, 255, 255, 0.78);
+            }
+
+            .trap-danger-text {
+                margin-top: 8px;
+                font-weight: bold;
+                color: #ff4d4d !important;
+            }
+
+            .trap-current-turn {
+                margin-bottom: 10px;
+                font-size: 13px;
+                color: rgba(255, 255, 255, 0.72);
+            }
+
+            .trap-board-list {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+
+            .trap-board-player {
+                padding: 10px;
+                border-radius: 12px;
+                background: rgba(0, 0, 0, 0.38);
+                border: 1px solid rgba(255, 255, 255, 0.12);
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+                font-size: 12px;
+            }
+
+            .trap-board-player strong {
+                color: #ff7bff;
+            }
+
+            .trap-board-player span {
+                color: rgba(255, 255, 255, 0.76);
+            }
+
+            .trap-board-defeated {
+                opacity: 0.45;
+                filter: grayscale(1);
+            }
+
+            .trap-choice-message {
+                margin-top: 12px;
+                font-weight: bold;
+                color: #ffb000 !important;
+            }
         `;
 
         document.head.appendChild(style);
@@ -247,9 +356,17 @@ window.onload = () => {
 
             <div class="trap-choice-list">
                 ${data.traps.map(trap => `
-                    <div class="trap-choice-card" data-field-id="${trap.fieldId}">
+                    <div
+                        class="trap-choice-card ${trap.canActivate ? "" : "disabled-trap-choice"}"
+                        data-field-id="${trap.fieldId}"
+                        data-can-activate="${trap.canActivate}"
+                    >
                         <strong>${trap.name}</strong>
                         <span>${trap.effect}</span>
+                        <small>
+                            発動条件：${trap.conditionText}
+                            ${trap.canActivate ? "" : `<br>${trap.disabledReason}`}
+                        </small>
                     </div>
                 `).join("")}
             </div>
@@ -264,6 +381,10 @@ window.onload = () => {
 
         overlay.querySelectorAll(".trap-choice-card").forEach(cardElement => {
             cardElement.onclick = () => {
+                const canActivate = cardElement.dataset.canActivate === "true";
+
+                if (!canActivate) return;
+
                 const fieldId = cardElement.dataset.fieldId;
 
                 socket.emit("chooseTrapResponse", {
