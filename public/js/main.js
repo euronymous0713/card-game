@@ -56,193 +56,133 @@ window.onload = () => {
         const style = document.createElement("style");
 
         style.innerHTML = `
-            .trap-choice-overlay {
-                position: fixed;
-                inset: 0;
-                z-index: 10000;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                background: rgba(0, 0, 0, 0.72);
-                backdrop-filter: blur(4px);
-            }
+        .trap-choice-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 10000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.72);
+        }
 
-            .trap-choice-box {
-                width: min(520px, 92vw);
-                padding: 28px;
-                border-radius: 24px;
-                background: rgba(0, 0, 0, 0.9);
-                border: 2px solid rgba(255, 176, 0, 0.85);
-                box-shadow:
-                    0 0 28px rgba(255, 176, 0, 0.55),
-                    0 0 80px rgba(255, 0, 200, 0.18);
-                color: white;
-                text-align: center;
-            }
+        .trap-choice-box {
+            width: min(520px, 92vw);
+            padding: 24px;
+            border-radius: 22px;
+            background: rgba(0, 0, 0, 0.92);
+            border: 2px solid rgba(255, 176, 0, 0.85);
+            box-shadow: 0 0 28px rgba(255, 176, 0, 0.45);
+            color: white;
+            text-align: center;
+        }
 
-            .trap-choice-box h2 {
-                margin-bottom: 12px;
-                color: #ffb000;
-                font-size: 26px;
-            }
+        .trap-choice-box h2 {
+            margin-bottom: 12px;
+            color: #ffb000;
+            font-size: 24px;
+        }
 
-            .trap-choice-box p {
-                margin-bottom: 18px;
-                line-height: 1.6;
-                color: rgba(255, 255, 255, 0.78);
-            }
+        .trap-source-box {
+            margin: 12px 0;
+            padding: 12px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(0, 255, 225, 0.25);
+            text-align: left;
+        }
 
-            .trap-choice-list {
-                display: flex;
-                flex-direction: column;
-                gap: 12px;
-                margin-bottom: 18px;
-            }
+        .trap-section-title {
+            margin-bottom: 6px;
+            font-size: 12px;
+            color: #00ffe1;
+        }
 
-            .trap-choice-card {
-                padding: 14px;
-                border-radius: 14px;
-                border: 2px solid rgba(0, 255, 225, 0.35);
-                background: rgba(255, 255, 255, 0.06);
-                cursor: pointer;
-                text-align: left;
-                transition: 0.18s;
-            }
+        .trap-source-card-name {
+            margin-bottom: 6px;
+            font-size: 20px;
+            font-weight: bold;
+            color: #ffb000;
+        }
 
-            .trap-choice-card:hover {
-                transform: scale(1.02);
-                border-color: #00ffe1;
-                box-shadow: 0 0 18px rgba(0, 255, 225, 0.35);
-            }
+        .trap-source-card-name span {
+            margin-left: 8px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.65);
+        }
 
-            .trap-choice-card strong {
-                display: block;
-                margin-bottom: 6px;
-                color: #00ffe1;
-                font-size: 18px;
-            }
+        .trap-danger-text {
+            margin-top: 6px;
+            font-weight: bold;
+            color: #ff4d4d !important;
+        }
 
-            .trap-choice-card span {
-                font-size: 13px;
-                line-height: 1.5;
-                color: rgba(255, 255, 255, 0.78);
-            }
+        .trap-choice-message {
+            margin: 12px 0;
+            font-weight: bold;
+            color: #ffb000 !important;
+        }
 
-            .trap-skip-button {
-                width: 100%;
-                margin-top: 4px;
-                background: linear-gradient(135deg, #555, #222);
-            }
-            .disabled-trap-choice {
-                opacity: 0.35;
-                filter: grayscale(1);
-                cursor: not-allowed;
-                border-color: rgba(255, 255, 255, 0.15) !important;
-                box-shadow: none !important;
-            }
+        .trap-choice-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
 
-            .disabled-trap-choice:hover {
-                transform: none !important;
-                border-color: rgba(255, 255, 255, 0.15) !important;
-                box-shadow: none !important;
-            }
+        .trap-choice-card {
+            padding: 12px;
+            border-radius: 14px;
+            border: 2px solid rgba(0, 255, 225, 0.35);
+            background: rgba(255, 255, 255, 0.06);
+            cursor: pointer;
+            text-align: left;
+        }
 
-            .trap-choice-card small {
-                display: block;
-                margin-top: 8px;
-                font-size: 11px;
-                line-height: 1.5;
-                color: rgba(255, 255, 255, 0.55);
-            }
+        .trap-choice-card:hover {
+            border-color: #00ffe1;
+            box-shadow: 0 0 14px rgba(0, 255, 225, 0.28);
+        }
 
-            .large-trap-choice-box {
-                max-height: 90vh;
-                overflow-y: auto;
-            }
+        .trap-choice-card strong {
+            display: block;
+            margin-bottom: 5px;
+            color: #00ffe1;
+            font-size: 17px;
+        }
 
-            .trap-source-box,
-            .trap-board-box {
-                margin: 14px 0;
-                padding: 14px;
-                border-radius: 16px;
-                background: rgba(255, 255, 255, 0.06);
-                border: 1px solid rgba(0, 255, 225, 0.25);
-                text-align: left;
-            }
+        .trap-choice-card span {
+            display: block;
+            font-size: 13px;
+            line-height: 1.45;
+            color: rgba(255, 255, 255, 0.78);
+        }
 
-            .trap-section-title {
-                margin-bottom: 8px;
-                font-size: 13px;
-                color: #00ffe1;
-                letter-spacing: 1px;
-            }
+        .trap-choice-card small {
+            display: block;
+            margin-top: 6px;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.52);
+        }
 
-            .trap-source-card-name {
-                margin-bottom: 8px;
-                font-size: 22px;
-                font-weight: bold;
-                color: #ffb000;
-            }
+        .disabled-trap-choice {
+            opacity: 0.35;
+            filter: grayscale(1);
+            cursor: not-allowed;
+            border-color: rgba(255, 255, 255, 0.15) !important;
+            box-shadow: none !important;
+        }
 
-            .trap-source-card-name span {
-                margin-left: 8px;
-                font-size: 13px;
-                color: rgba(255, 255, 255, 0.65);
-            }
+        .disabled-trap-choice:hover {
+            border-color: rgba(255, 255, 255, 0.15) !important;
+            box-shadow: none !important;
+        }
 
-            .trap-source-effect {
-                font-size: 13px;
-                color: rgba(255, 255, 255, 0.78);
-            }
-
-            .trap-danger-text {
-                margin-top: 8px;
-                font-weight: bold;
-                color: #ff4d4d !important;
-            }
-
-            .trap-current-turn {
-                margin-bottom: 10px;
-                font-size: 13px;
-                color: rgba(255, 255, 255, 0.72);
-            }
-
-            .trap-board-list {
-                display: grid;
-                grid-template-columns: repeat(2, 1fr);
-                gap: 8px;
-            }
-
-            .trap-board-player {
-                padding: 10px;
-                border-radius: 12px;
-                background: rgba(0, 0, 0, 0.38);
-                border: 1px solid rgba(255, 255, 255, 0.12);
-                display: flex;
-                flex-direction: column;
-                gap: 4px;
-                font-size: 12px;
-            }
-
-            .trap-board-player strong {
-                color: #ff7bff;
-            }
-
-            .trap-board-player span {
-                color: rgba(255, 255, 255, 0.76);
-            }
-
-            .trap-board-defeated {
-                opacity: 0.45;
-                filter: grayscale(1);
-            }
-
-            .trap-choice-message {
-                margin-top: 12px;
-                font-weight: bold;
-                color: #ffb000 !important;
-            }
-        `;
+        .trap-skip-button {
+            width: 100%;
+            background: linear-gradient(135deg, #555, #222);
+        }
+    `;
 
         document.head.appendChild(style);
     }
@@ -302,71 +242,41 @@ window.onload = () => {
         overlay.id = "trapChoiceOverlay";
         overlay.className = "trap-choice-overlay";
 
-        const conditionText =
-            data.condition === "onDamage"
-                ? "ダメージを受けます。発動する罠を選んでください。"
-                : data.condition === "onHateChange"
-                    ? "ヘイトが変動します。発動する罠を選んでください。"
-                    : "罠効果を受けます。発動する罠を選んでください。";
-
         const sourceCardName = data.context?.cardName || "不明なカード";
         const sourceCardType = data.context?.cardType || "";
-        const sourceEffect = data.context?.effect || "";
         const sourceResultText = data.context?.resultText || "";
         const sourceActionText =
             data.context?.sourceActionText ||
             `${data.sourcePlayerName} のカードに反応できます。`;
 
-        const boardPlayers = data.board?.turnOrder || [];
-        const currentTurnPlayer =
-            boardPlayers[data.board?.currentTurnIndex]?.name || "-";
-
         overlay.innerHTML = `
-        <div class="trap-choice-box large-trap-choice-box">
+        <div class="trap-choice-box light-trap-choice-box">
             <h2>罠カード発動確認</h2>
 
-            <div class="trap-source-box">
+            <div class="trap-source-box compact-source-box">
                 <div class="trap-section-title">反応元カード</div>
                 <div class="trap-source-card-name">
                     ${sourceCardName}
                     ${sourceCardType ? `<span>${sourceCardType}</span>` : ""}
                 </div>
                 <p>${sourceActionText}</p>
-                ${sourceEffect ? `<p class="trap-source-effect">${sourceEffect}</p>` : ""}
                 ${sourceResultText ? `<p class="trap-danger-text">${sourceResultText}</p>` : ""}
             </div>
 
-            <div class="trap-board-box">
-                <div class="trap-section-title">現在の盤面</div>
-                <div class="trap-current-turn">現在のターン：${currentTurnPlayer}</div>
+            <p class="trap-choice-message">
+                ${data.conditionText} に反応できる罠カードを選択してください。
+            </p>
 
-                <div class="trap-board-list">
-                    ${boardPlayers.map(player => `
-                        <div class="trap-board-player ${player.defeated ? "trap-board-defeated" : ""}">
-                            <strong>${player.name}</strong>
-                            <span>${player.defeated ? "オワコン" : `${player.followers.toLocaleString()} フォロワー`}</span>
-                            <span>ヘイト ${"◆".repeat(player.hate)}${"◇".repeat(3 - player.hate)}</span>
-                            <span>伏せ ${player.fieldCardCount}枚</span>
-                        </div>
-                    `).join("")}
-                </div>
-            </div>
-
-            <p class="trap-choice-message">${conditionText}</p>
-
-            <div class="trap-choice-list">
+            <div class="trap-choice-list compact-trap-choice-list">
                 ${data.traps.map(trap => `
                     <div
-                        class="trap-choice-card ${trap.canActivate ? "" : "disabled-trap-choice"}"
+                        class="trap-choice-card compact-trap-card ${trap.canActivate ? "" : "disabled-trap-choice"}"
                         data-field-id="${trap.fieldId}"
                         data-can-activate="${trap.canActivate}"
                     >
                         <strong>${trap.name}</strong>
-                        <span>${trap.effect}</span>
-                        <small>
-                            発動条件：${trap.conditionText}
-                            ${trap.canActivate ? "" : `<br>${trap.disabledReason}`}
-                        </small>
+                        <span>${trap.canActivate ? trap.effect : trap.disabledReason}</span>
+                        <small>発動条件：${trap.conditionText}</small>
                     </div>
                 `).join("")}
             </div>
