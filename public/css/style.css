@@ -3872,3 +3872,36 @@ button:disabled {
         display: none !important;
     }
 }
+
+
+/* ===== 修正：PCの謎の×を完全削除 / 使用履歴の詳細表示 ===== */
+.mobile-history-close-button {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
+.history-panel h3::after {
+    content: "" !important;
+}
+
+.played-card-extra {
+    display: block;
+    margin-top: 4px;
+    color: #ffb000;
+    font-size: 11px;
+    font-weight: 800;
+    line-height: 1.4;
+}
+
+@media (max-width: 768px) {
+    body.battle-active .mobile-history-close-button {
+        display: none !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+    }
+
+    body.battle-active .history-panel h3::after {
+        content: "" !important;
+    }
+}

@@ -68,17 +68,8 @@ window.onload = () => {
     mobileTrapWaitingNotice.innerText = "罠カード選択待ち";
     document.body.appendChild(mobileTrapWaitingNotice);
 
-    let mobileHistoryCloseButton = null;
-
-    if (historyPanel) {
-        mobileHistoryCloseButton = document.createElement("button");
-        mobileHistoryCloseButton.id = "mobileHistoryCloseButton";
-        mobileHistoryCloseButton.className = "mobile-history-close-button";
-        mobileHistoryCloseButton.type = "button";
-        mobileHistoryCloseButton.innerText = "×";
-        mobileHistoryCloseButton.setAttribute("aria-label", "使用履歴を閉じる");
-        historyPanel.appendChild(mobileHistoryCloseButton);
-    }
+    // 使用履歴はPCで謎の「×」が出ないよう、閉じるボタンを生成しません。
+    // スマホでは履歴見出しタップ、または履歴背景タップで閉じます。
 
     let currentRoomId = "";
     let isHost = false;
@@ -705,13 +696,6 @@ window.onload = () => {
         toggleMobileHistory();
     };
 
-    if (mobileHistoryCloseButton) {
-        mobileHistoryCloseButton.onclick = event => {
-            event.stopPropagation();
-            closeMobileHistory();
-        };
-    }
-
     if (historyPanel) {
         historyPanel.onclick = event => {
             if (!isMobileLayout()) return;
@@ -1111,6 +1095,37 @@ window.onload = () => {
         endTurnButton.disabled = !isMyTurn;
     }
 
+    function playedCardExtraText(card) {
+        const lines = [];
+
+        if (card.damageText) {
+            lines.push(card.damageText);
+        } else if (typeof card.damageAmount === "number") {
+            if (card.damageCanceled) {
+                lines.push(`ダメージ：0（無効 / 元ダメージ ${Number(card.originalDamageAmount || 0).toLocaleString()}）`);
+            } else {
+                lines.push(`ダメージ：${Number(card.damageAmount).toLocaleString()}`);
+            }
+        } else {
+            const damageSourceText = `${card.hateText || ""} ${card.log || ""}`;
+            const damageMatch = damageSourceText.match(/([0-9,]+)ダメージ/);
+
+            if (damageMatch) {
+                lines.push(`ダメージ：${damageMatch[1]}`);
+            }
+        }
+
+        if (typeof card.healAmount === "number" && card.healAmount > 0) {
+            lines.push(`回復：${Number(card.healAmount).toLocaleString()}`);
+        }
+
+        if (typeof card.hateAmount === "number" && card.hateAmount !== 0) {
+            lines.push(`ヘイト：${card.hateAmount > 0 ? "+" : ""}${card.hateAmount}`);
+        }
+
+        return lines.map(line => `<div class="played-card-extra">${line}</div>`).join("");
+    }
+
     function renderPlayedCards() {
         if (!latestGame) return;
 
@@ -1120,7 +1135,8 @@ window.onload = () => {
             playedCardList.innerHTML += `
                 <div class="played-card">
                     <strong>${card.log || `${card.playerName} → ${card.targetName}`}</strong><br>
-                    ${card.hateText}
+                    ${card.hateText || ""}
+                    ${playedCardExtraText(card)}
                 </div>
             `;
         });

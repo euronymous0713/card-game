@@ -898,7 +898,7 @@ io.on("connection", socket => {
             return;
         }
 
-        const finishCardPlay = () => {
+        const finishCardPlay = (extraLog = {}) => {
             addLog(game, {
                 actionType: "play",
                 playerId: caster.id,
@@ -908,7 +908,8 @@ io.on("connection", socket => {
                 cardType: usedCard.type,
                 cardRarity: normalizeRarity(usedCard.rarity),
                 hateText: usedCard.hateText,
-                log: `${caster.name} → ${finalTarget.name}：${usedCard.name}`
+                log: `${caster.name} → ${finalTarget.name}：${usedCard.name}`,
+                ...extraLog
             });
 
             finishGameIfNeeded(roomId);
@@ -947,7 +948,17 @@ io.on("connection", socket => {
                         changeHate(caster, usedCard.hateChange);
                     }
 
-                    finishCardPlay();
+                    finishCardPlay({
+                        log: result.canceled
+                            ? `${caster.name} → ${finalTarget.name}：${usedCard.name}（ダメージ無効）`
+                            : `${caster.name} → ${finalTarget.name}：${usedCard.name}（${damage.toLocaleString()}ダメージ）`,
+                        damageText: result.canceled
+                            ? `ダメージ：0（無効 / 元ダメージ ${damage.toLocaleString()}）`
+                            : `ダメージ：${damage.toLocaleString()}`,
+                        damageAmount: result.canceled ? 0 : damage,
+                        originalDamageAmount: damage,
+                        damageCanceled: Boolean(result.canceled)
+                    });
                 }
             });
 
@@ -958,7 +969,13 @@ io.on("connection", socket => {
                     changeHate(caster, usedCard.hateChange);
                 }
 
-                finishCardPlay();
+                finishCardPlay({
+                    log: `${caster.name} → ${finalTarget.name}：${usedCard.name}（${damage.toLocaleString()}ダメージ）`,
+                    damageText: `ダメージ：${damage.toLocaleString()}`,
+                    damageAmount: damage,
+                    originalDamageAmount: damage,
+                    damageCanceled: false
+                });
             }
 
             return;
