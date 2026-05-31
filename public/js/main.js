@@ -62,6 +62,12 @@ window.onload = () => {
     mobileEffectOverlay.className = "mobile-effect-overlay";
     document.body.appendChild(mobileEffectOverlay);
 
+    const mobileTrapWaitingNotice = document.createElement("div");
+    mobileTrapWaitingNotice.id = "mobileTrapWaitingNotice";
+    mobileTrapWaitingNotice.className = "mobile-trap-waiting-notice";
+    mobileTrapWaitingNotice.innerText = "罠カード選択待ち";
+    document.body.appendChild(mobileTrapWaitingNotice);
+
     let mobileHistoryCloseButton = null;
 
     if (historyPanel) {
@@ -82,6 +88,7 @@ window.onload = () => {
     let draggedCard = null;
     let selectedTargetId = "";
     let selectedMobileCardInstanceId = "";
+    let selectedMobileFieldCardKey = "";
 
     function setScreenMode(mode) {
         document.body.classList.toggle("title-active", mode === "title");
@@ -603,6 +610,32 @@ window.onload = () => {
         mobileEffectOverlay.innerHTML = "";
     }
 
+    function showTrapWaitingNotice(message = "罠カード選択待ち") {
+        if (!mobileTrapWaitingNotice) return;
+
+        mobileTrapWaitingNotice.innerText = message;
+        mobileTrapWaitingNotice.classList.add("show");
+    }
+
+    function hideTrapWaitingNotice() {
+        if (!mobileTrapWaitingNotice) return;
+
+        mobileTrapWaitingNotice.classList.remove("show");
+    }
+
+    function updateTrapWaitingNotice() {
+        if (!isMobileLayout() || !latestGame || latestGame.gameOver) {
+            hideTrapWaitingNotice();
+            return;
+        }
+
+        if (latestGame.waitingTrapChoice) {
+            showTrapWaitingNotice("罠カード選択待ち");
+        } else {
+            hideTrapWaitingNotice();
+        }
+    }
+
     mobileEffectOverlay.onclick = event => {
         if (event.target === mobileEffectOverlay) {
             clearMobileCardSelection();
@@ -611,6 +644,7 @@ window.onload = () => {
 
     function clearMobileCardSelection() {
         selectedMobileCardInstanceId = "";
+        selectedMobileFieldCardKey = "";
         hideMobileEffect();
         document.body.classList.remove("mobile-card-action-open");
         updateMobileActionPanel();
@@ -625,10 +659,28 @@ window.onload = () => {
             return;
         }
 
+        selectedMobileFieldCardKey = "";
         selectedMobileCardInstanceId = card.instanceId;
         showMobileEffect(card);
         renderHand();
         updateMobileActionPanel();
+    }
+
+    function toggleMobileFieldCardEffect(card, fieldKey) {
+        if (!isMobileLayout() || !card) return;
+
+        if (selectedMobileFieldCardKey === fieldKey && mobileEffectOverlay.classList.contains("show")) {
+            selectedMobileFieldCardKey = "";
+            hideMobileEffect();
+            return;
+        }
+
+        selectedMobileCardInstanceId = "";
+        selectedMobileFieldCardKey = fieldKey;
+        document.body.classList.remove("mobile-card-action-open");
+        updateMobileActionPanel();
+        showMobileEffect(card);
+        renderHand();
     }
 
     function closeMobileHistory() {
@@ -756,6 +808,7 @@ window.onload = () => {
         });
 
         selectedMobileCardInstanceId = "";
+        selectedMobileFieldCardKey = "";
         hideMobileEffect();
         updateMobileActionPanel();
     }
@@ -778,6 +831,7 @@ window.onload = () => {
         });
 
         selectedMobileCardInstanceId = "";
+        selectedMobileFieldCardKey = "";
         hideMobileEffect();
         updateMobileActionPanel();
     }
@@ -920,6 +974,7 @@ window.onload = () => {
     });
 
     socket.on("chooseTrap", data => {
+        showTrapWaitingNotice("罠カードを選択してください");
         showTrapChoiceModal(data);
     });
 
@@ -927,6 +982,8 @@ window.onload = () => {
         const oldGame = previousGame;
 
         latestGame = game;
+
+        updateTrapWaitingNotice();
 
         if (isMobileLayout() && selectedMobileCardInstanceId && !getSelectedMobileCard()) {
             selectedMobileCardInstanceId = "";
@@ -1099,7 +1156,7 @@ window.onload = () => {
 
                 setCard.onclick = () => {
                     if (isMobileLayout()) {
-                        showMobileEffect(card);
+                        toggleMobileFieldCardEffect(card, card.fieldId || `field-card-${i}`);
                     } else {
                         cardDetail.innerHTML = cardDetailHtml(card);
                     }
@@ -1265,6 +1322,7 @@ window.onload = () => {
         draggedCard = null;
         document.body.classList.remove("mobile-card-action-open");
         closeMobileHistory();
+        hideTrapWaitingNotice();
         updateMobileActionPanel();
 
         const trapOverlay = document.getElementById("trapChoiceOverlay");

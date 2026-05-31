@@ -1083,13 +1083,6 @@ button:disabled {
     }
 }
 
-
-/* PC版ではスマホ用の閉じるボタンを表示しない */
-.mobile-history-close-button,
-.mobile-effect-close {
-    display: none;
-}
-
 /* =========================================================
    スマホ版レイアウト
    PC版を縮小せず、縦画面用の別レイアウトに切り替える
@@ -3816,6 +3809,66 @@ button:disabled {
 @media (max-width: 768px) {
     body.battle-active .mobile-effect-close,
     .mobile-effect-close {
+        display: none !important;
+    }
+}
+
+/* ===== スマホ修正：伏せカード効果トグル・罠選択待ち表示・手札黒つぶれ防止 ===== */
+.mobile-trap-waiting-notice {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    body.battle-active .mobile-trap-waiting-notice {
+        position: fixed;
+        left: 50%;
+        top: 52%;
+        z-index: 10020;
+        display: none;
+        transform: translate(-50%, -50%);
+        width: min(300px, 82vw);
+        padding: 10px 14px;
+        border-radius: 999px;
+        color: #ffb000;
+        font-size: 14px;
+        font-weight: 900;
+        text-align: center;
+        background: rgba(0, 0, 0, 0.62);
+        border: 1px solid rgba(255, 176, 0, 0.72);
+        box-shadow:
+            0 0 16px rgba(255, 176, 0, 0.36),
+            0 0 28px rgba(0, 255, 225, 0.18);
+        pointer-events: none;
+    }
+
+    body.battle-active .mobile-trap-waiting-notice.show {
+        display: block;
+    }
+
+    body.battle-active .trap-choice-overlay {
+        background: rgba(0, 0, 0, 0.24) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+
+    body.battle-active .trap-choice-box {
+        background: rgba(0, 0, 0, 0.88) !important;
+    }
+
+    body.battle-active .hand-card,
+    body.battle-active .hand-area {
+        filter: none !important;
+    }
+
+    body.battle-active .mobile-effect-overlay.show {
+        pointer-events: none !important;
+    }
+
+    body.battle-active .mobile-effect-card {
+        pointer-events: auto !important;
+    }
+
+    body:not(.battle-active) .mobile-trap-waiting-notice {
         display: none !important;
     }
 }
