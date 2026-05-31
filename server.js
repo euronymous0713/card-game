@@ -950,8 +950,8 @@ io.on("connection", socket => {
 
                     finishCardPlay({
                         log: result.canceled
-                            ? `${caster.name} → ${finalTarget.name}：${usedCard.name}（ダメージ無効）`
-                            : `${caster.name} → ${finalTarget.name}：${usedCard.name}（${damage.toLocaleString()}ダメージ）`,
+                            ? `${caster.name} → ${finalTarget.name}：${usedCard.name}`
+                            : `${caster.name} → ${finalTarget.name}：${usedCard.name}`,
                         damageText: result.canceled
                             ? `ダメージ：0（無効 / 元ダメージ ${damage.toLocaleString()}）`
                             : `ダメージ：${damage.toLocaleString()}`,
@@ -970,7 +970,7 @@ io.on("connection", socket => {
                 }
 
                 finishCardPlay({
-                    log: `${caster.name} → ${finalTarget.name}：${usedCard.name}（${damage.toLocaleString()}ダメージ）`,
+                    log: `${caster.name} → ${finalTarget.name}：${usedCard.name}`,
                     damageText: `ダメージ：${damage.toLocaleString()}`,
                     damageAmount: damage,
                     originalDamageAmount: damage,
@@ -982,14 +982,19 @@ io.on("connection", socket => {
         }
 
         if (usedCard.kind === "support") {
+            const beforeFollowers = caster.followers;
             caster.followers =
                 Math.min(10000, caster.followers + usedCard.heal);
+            const healAmount = Math.max(0, caster.followers - beforeFollowers);
 
             if (usedCard.hateTarget === "self") {
                 changeHate(caster, usedCard.hateChange);
             }
 
-            finishCardPlay();
+            finishCardPlay({
+                healText: `回復：${healAmount.toLocaleString()}`,
+                healAmount
+            });
             return;
         }
 
