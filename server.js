@@ -186,6 +186,16 @@ function createGameViewForPlayer(game, viewerId) {
     });
 
     view.playedCards = view.playedCards.map(log => {
+        if (log.actionType === "setTrap" && log.playerId !== viewerId) {
+            return {
+                ...log,
+                cardName: "伏せカード",
+                cardType: "罠",
+                hateText: "カードを1枚伏せた",
+                log: `${log.playerName} はカードを伏せた`
+            };
+        }
+
         if (
             ["trap", "trapEffect", "discard"].includes(log.actionType) &&
             log.playerId !== viewerId
@@ -471,9 +481,7 @@ function resolveTrapEffect(game, roomId, trapOwner, sourcePlayer, trap, context,
             };
         }
 
-        return {
-            canceled: true
-        };
+        return { canceled: true };
     }
 
     if (trap.trapEffect === "cancelHate") {
@@ -564,9 +572,7 @@ function resolveTrapEffect(game, roomId, trapOwner, sourcePlayer, trap, context,
             };
         }
 
-        return {
-            canceled: false
-        };
+        return { canceled: false };
     }
 
     return { canceled: false };
@@ -718,9 +724,7 @@ io.on("connection", socket => {
             }
         }
 
-        if (result.pending) {
-            return;
-        }
+        if (result.pending) return;
 
         finishPending(result);
     });
@@ -786,7 +790,7 @@ io.on("connection", socket => {
             }
 
             addLog(game, {
-                actionType: "trap",
+                actionType: "setTrap",
                 playerId: caster.id,
                 playerName: caster.name,
                 targetName: "自分の場",

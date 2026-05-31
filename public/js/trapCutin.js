@@ -59,9 +59,6 @@
             font-weight: 900;
             color: #ffb000;
             letter-spacing: 6px;
-            text-shadow:
-                0 0 14px rgba(255, 176, 0, 0.95),
-                0 0 28px rgba(255, 0, 200, 0.65);
         }
 
         .trap-cutin-player {
@@ -74,10 +71,6 @@
         .trap-cutin-card {
             font-size: clamp(24px, 4vw, 46px);
             font-weight: 900;
-            color: white;
-            text-shadow:
-                0 0 10px rgba(255, 255, 255, 0.8),
-                0 0 24px rgba(0, 255, 225, 0.55);
         }
 
         .trap-cutin-effect {
@@ -88,79 +81,25 @@
         }
 
         @keyframes trapCutinFade {
-            0% {
-                opacity: 0;
-            }
-
-            12% {
-                opacity: 1;
-            }
-
-            78% {
-                opacity: 1;
-            }
-
-            100% {
-                opacity: 0;
-            }
+            0% { opacity: 0; }
+            12% { opacity: 1; }
+            78% { opacity: 1; }
+            100% { opacity: 0; }
         }
 
         @keyframes trapSlashMove {
-            0% {
-                transform: translateX(-120%) rotate(-8deg);
-            }
-
-            24% {
-                transform: translateX(0) rotate(-8deg);
-            }
-
-            78% {
-                transform: translateX(0) rotate(-8deg);
-            }
-
-            100% {
-                transform: translateX(120%) rotate(-8deg);
-            }
+            0% { transform: translateX(-120%) rotate(-8deg); }
+            24% { transform: translateX(0) rotate(-8deg); }
+            78% { transform: translateX(0) rotate(-8deg); }
+            100% { transform: translateX(120%) rotate(-8deg); }
         }
 
         @keyframes trapBoxPop {
-            0% {
-                opacity: 0;
-                transform: translateY(28px) scale(0.82);
-            }
-
-            18% {
-                opacity: 1;
-                transform: translateY(0) scale(1.04);
-            }
-
-            40% {
-                transform: translateY(0) scale(1);
-            }
-
-            82% {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-
-            100% {
-                opacity: 0;
-                transform: translateY(-18px) scale(0.96);
-            }
-        }
-
-        @media screen and (max-width: 768px) {
-            .trap-cutin-box {
-                padding: 20px 18px;
-            }
-
-            .trap-cutin-label {
-                letter-spacing: 3px;
-            }
-
-            .trap-cutin-slash {
-                height: 130px;
-            }
+            0% { opacity: 0; transform: translateY(28px) scale(0.82); }
+            18% { opacity: 1; transform: translateY(0) scale(1.04); }
+            40% { transform: translateY(0) scale(1); }
+            82% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-18px) scale(0.96); }
         }
     `;
 
@@ -188,7 +127,6 @@
         }
 
         const newLogs = trapLogs.slice(latestTrapLogCount);
-
         latestTrapLogCount = trapLogs.length;
 
         newLogs.forEach(log => {
@@ -217,18 +155,14 @@
                 ? "TRAP ACTIVATED"
                 : "TRAP EFFECT";
 
-        const playerName = log.playerName || "プレイヤー";
-        const cardName = log.cardName || "伏せカード";
-        const effectText = log.hateText || log.log || "罠が発動した";
-
         overlay.innerHTML = `
             <div class="trap-cutin-slash"></div>
 
             <div class="trap-cutin-box">
                 <div class="trap-cutin-label">${label}</div>
-                <div class="trap-cutin-player">${playerName}</div>
-                <div class="trap-cutin-card">${cardName}</div>
-                <div class="trap-cutin-effect">${effectText}</div>
+                <div class="trap-cutin-player">${log.playerName || "プレイヤー"}</div>
+                <div class="trap-cutin-card">${log.cardName || "伏せカード"}</div>
+                <div class="trap-cutin-effect">${log.hateText || log.log || "罠が発動した"}</div>
             </div>
         `;
 
