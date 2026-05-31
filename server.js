@@ -196,26 +196,26 @@ function createGameViewForPlayer(game, viewerId) {
             };
         }
 
-        if (
-            ["trap", "trapEffect", "discard"].includes(log.actionType) &&
-            log.playerId !== viewerId
-        ) {
-            if (log.actionType === "discard") {
-                return {
-                    ...log,
-                    cardName: "不明",
-                    cardType: "不明",
-                    hateText: "カードを捨てた",
-                    log: `${log.playerName} はカードを捨てた`
-                };
-            }
-
+        if (log.actionType === "discard" && log.playerId !== viewerId) {
             return {
                 ...log,
-                cardName: "伏せカード",
-                cardType: "罠",
-                hateText: "罠が発動した",
-                log: `${log.playerName} の罠が発動した`
+                cardName: "不明",
+                cardType: "不明",
+                hateText: "カードを捨てた",
+                log: `${log.playerName} はカードを捨てた`
+            };
+        }
+
+        if (log.actionType === "trap" && log.playerId !== viewerId) {
+            return {
+                ...log,
+                log: `${log.playerName} の ${log.cardName} が発動した`
+            };
+        }
+
+        if (log.actionType === "trapEffect" && log.playerId !== viewerId) {
+            return {
+                ...log
             };
         }
 
