@@ -42,6 +42,11 @@ window.onload = () => {
 
     const myPanel = document.getElementById("myPanel");
 
+    const mobileActionPanel = document.createElement("div");
+    mobileActionPanel.id = "mobileActionPanel";
+    mobileActionPanel.className = "mobile-action-panel";
+    document.body.appendChild(mobileActionPanel);
+
     let currentRoomId = "";
     let isHost = false;
     let isReady = false;
@@ -49,6 +54,7 @@ window.onload = () => {
     let previousGame = null;
     let draggedCard = null;
     let selectedTargetId = "";
+    let selectedMobileCardInstanceId = "";
 
     createTrapChoiceModalStyle();
 
@@ -508,6 +514,154 @@ window.onload = () => {
         }
     }
 
+    function isMobileLayout() {
+        return window.matchMedia("(max-width: 768px)").matches;
+    }
+
+    function getMe() {
+        if (!latestGame) return null;
+        return latestGame.turnOrder.find(player => player.id === socket.id);
+    }
+
+    function isMyTurnNow() {
+        if (!latestGame || latestGame.gameOver) return false;
+
+        const currentPlayer = latestGame.turnOrder[latestGame.currentTurnIndex];
+
+        return currentPlayer && currentPlayer.id === socket.id;
+    }
+
+    function getSelectedMobileCard() {
+        const me = getMe();
+
+        if (!me || !selectedMobileCardInstanceId) return null;
+
+        return me.hand.find(card => card.instanceId === selectedMobileCardInstanceId) || null;
+    }
+
+    function clearMobileCardSelection() {
+        selectedMobileCardInstanceId = "";
+        updateMobileActionPanel();
+        renderHand();
+    }
+
+    function selectMobileCard(card) {
+        if (!isMobileLayout()) return;
+
+        if (selectedMobileCardInstanceId === card.instanceId) {
+            clearMobileCardSelection();
+            return;
+        }
+
+        selectedMobileCardInstanceId = card.instanceId;
+        cardDetail.innerHTML = cardDetailHtml(card);
+        renderHand();
+        updateMobileActionPanel();
+    }
+
+    function updateMobileActionPanel() {
+        if (!mobileActionPanel) return;
+
+        const card = getSelectedMobileCard();
+
+        if (!isMobileLayout() || !card) {
+            mobileActionPanel.classList.remove("show");
+            mobileActionPanel.innerHTML = "";
+            return;
+        }
+
+        const isMyTurn = isMyTurnNow();
+        const needsEnemyTarget = card.targetType === "enemy";
+        const selectedEnemy = latestGame?.turnOrder.find(player => player.id === selectedTargetId);
+
+        mobileActionPanel.innerHTML = `
+            <div class="mobile-selected-card-name">
+                選択中：${card.name}
+                ${needsEnemyTarget && selectedEnemy ? ` → ${selectedEnemy.name}` : ""}
+            </div>
+            <div class="mobile-action-buttons">
+                <button id="mobileUseCardButton" ${isMyTurn ? "" : "disabled"}>
+                    使用する
+                </button>
+                <button id="mobileDiscardCardButton" ${isMyTurn ? "" : "disabled"}>
+                    捨てる
+                </button>
+                <button id="mobileCancelCardButton">
+                    キャンセル
+                </button>
+            </div>
+        `;
+
+        mobileActionPanel.classList.add("show");
+
+        document.getElementById("mobileUseCardButton").onclick = () => {
+            playSelectedMobileCard();
+        };
+
+        document.getElementById("mobileDiscardCardButton").onclick = () => {
+            discardSelectedMobileCard();
+        };
+
+        document.getElementById("mobileCancelCardButton").onclick = () => {
+            clearMobileCardSelection();
+            resetCardDetail();
+        };
+    }
+
+    function playSelectedMobileCard() {
+        if (!latestGame || latestGame.gameOver) return;
+
+        if (!isMyTurnNow()) {
+            alert("今はあなたのターンではありません");
+            return;
+        }
+
+        const card = getSelectedMobileCard();
+
+        if (!card) return;
+
+        let targetId = selectedTargetId;
+
+        if (card.targetType === "self") {
+            targetId = socket.id;
+        }
+
+        if (card.targetType === "enemy" && !targetId) {
+            alert("対象プレイヤーを選択してください");
+            return;
+        }
+
+        socket.emit("playCard", {
+            roomId: currentRoomId,
+            cardInstanceId: card.instanceId,
+            targetId
+        });
+
+        selectedMobileCardInstanceId = "";
+        updateMobileActionPanel();
+    }
+
+    function discardSelectedMobileCard() {
+        if (!latestGame || latestGame.gameOver) return;
+
+        if (!isMyTurnNow()) {
+            alert("今はあなたのターンではありません");
+            return;
+        }
+
+        const card = getSelectedMobileCard();
+
+        if (!card) return;
+
+        socket.emit("discardCard", {
+            roomId: currentRoomId,
+            cardInstanceId: card.instanceId
+        });
+
+        selectedMobileCardInstanceId = "";
+        updateMobileActionPanel();
+    }
+
     const savedName = localStorage.getItem("playerName");
 
     if (savedName) {
@@ -673,6 +827,7 @@ window.onload = () => {
         renderPlayedCards();
         renderMyFieldCards();
         renderHand();
+        updateMobileActionPanel();
 
         runAnimations(oldGame, latestGame);
 
@@ -732,6 +887,7 @@ window.onload = () => {
                     selectedTargetId = enemy.id;
 
                     renderBattlePlayers();
+                    updateMobileActionPanel();
                 };
             } else {
                 slot.classList.add("empty-enemy");
@@ -841,8 +997,10 @@ window.onload = () => {
                 continue;
             }
 
-            cardElement.className = `hand-card ${rarityClass(card.rarity)}`;
-            cardElement.draggable = true;
+            const isSelectedMobileCard = selectedMobileCardInstanceId === card.instanceId;
+
+            cardElement.className = `hand-card ${rarityClass(card.rarity)} ${isSelectedMobileCard ? "selected-mobile-hand-card" : ""}`;
+            cardElement.draggable = !isMobileLayout();
 
             cardElement.innerHTML = `
                 <div class="card-rarity-badge ${rarityClass(card.rarity)}">${normalizeRarity(card.rarity)}</div>
@@ -856,10 +1014,17 @@ window.onload = () => {
             };
 
             cardElement.onmouseleave = () => {
-                resetCardDetail();
+                if (!isMobileLayout() || selectedMobileCardInstanceId !== card.instanceId) {
+                    resetCardDetail();
+                }
+            };
+
+            cardElement.onclick = () => {
+                selectMobileCard(card);
             };
 
             cardElement.ondragstart = () => {
+                if (isMobileLayout()) return false;
                 draggedCard = card;
             };
 
@@ -957,7 +1122,9 @@ window.onload = () => {
         latestGame = null;
         previousGame = null;
         selectedTargetId = "";
+        selectedMobileCardInstanceId = "";
         draggedCard = null;
+        updateMobileActionPanel();
 
         const trapOverlay = document.getElementById("trapChoiceOverlay");
 
@@ -992,5 +1159,10 @@ window.onload = () => {
 
     socket.on("errorMessage", message => {
         alert(message);
+    });
+
+    window.addEventListener("resize", () => {
+        renderHand();
+        updateMobileActionPanel();
     });
 };
