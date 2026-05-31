@@ -1,6 +1,7 @@
 module.exports = [
     {
         id: "card-1",
+        rarity: "C",
         name: "誹謗中傷",
         type: "攻撃",
         kind: "attack",
@@ -14,6 +15,7 @@ module.exports = [
     },
     {
         id: "card-2",
+        rarity: "C",
         name: "お気持ち表明",
         type: "防御",
         kind: "support",
@@ -27,6 +29,7 @@ module.exports = [
     },
     {
         id: "card-3",
+        rarity: "R",
         name: "釣りスレ",
         type: "罠",
         kind: "trap",
@@ -42,6 +45,7 @@ module.exports = [
     },
     {
         id: "card-4",
+        rarity: "C",
         name: "古参アピール",
         type: "補助",
         kind: "support",
@@ -55,6 +59,7 @@ module.exports = [
     },
     {
         id: "card-5",
+        rarity: "C",
         name: "煽りリプ",
         type: "妨害",
         kind: "hate",
@@ -68,6 +73,7 @@ module.exports = [
     },
     {
         id: "card-6",
+        rarity: "UC",
         name: "火消し",
         type: "罠",
         kind: "trap",
@@ -83,6 +89,7 @@ module.exports = [
     },
     {
         id: "card-7",
+        rarity: "SR",
         name: "逆張り",
         type: "罠",
         kind: "trap",
@@ -98,6 +105,7 @@ module.exports = [
     },
     {
         id: "card-8",
+        rarity: "UR",
         name: "通報爆撃",
         type: "罠",
         kind: "trap",
@@ -113,6 +121,7 @@ module.exports = [
     },
     {
         id: "card-9",
+        rarity: "R",
         name: "晒し返し",
         type: "罠",
         kind: "trap",
@@ -121,11 +130,11 @@ module.exports = [
         heal: 0,
         hateTarget: "self",
         hateChange: 0,
-        hateText: "相手に1,500ダメージ / 相手のヘイト +1",
-        effect: "伏せカード。自分が他プレイヤーからダメージを受けた時、相手に1,500ダメージを与え、相手のヘイトを1上げる。",
+        hateText: "相手に2,000ダメージ / 相手のヘイト +1",
+        effect: "伏せカード。自分が他プレイヤーからダメージを受けた時、相手に2,000ダメージを与え、相手のヘイトを1上げる。",
         trapCondition: "onDamage",
         trapEffect: "damageAndHate",
-        trapDamage: 1500,
+        trapDamage: 2000,
         trapHateChange: 1
     }
 ];

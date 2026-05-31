@@ -202,7 +202,7 @@
             const option = document.createElement("option");
 
             option.value = card.id;
-            option.innerText = `${card.name} / ${card.type}`;
+            option.innerText = `[${card.rarity || "C"}] ${card.name} / ${card.type}`;
 
             devCardSelect.appendChild(option);
         });

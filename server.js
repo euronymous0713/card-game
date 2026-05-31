@@ -14,6 +14,53 @@ const rooms = {};
 const pendingTrapChoices = {};
 const DEV_MODE = true;
 
+const RARITY_INFO = {
+    C: { label: "コモン", weight: 55 },
+    UC: { label: "アンコモン", weight: 25 },
+    R: { label: "レア", weight: 13 },
+    SR: { label: "スーパーレア", weight: 5 },
+    UR: { label: "ウルトラレア", weight: 2 }
+};
+
+function normalizeRarity(rarity) {
+    return RARITY_INFO[rarity] ? rarity : "C";
+}
+
+function selectRarityByWeight() {
+    const entries = Object.entries(RARITY_INFO);
+    const totalWeight = entries.reduce((sum, [, info]) => sum + info.weight, 0);
+    let random = Math.random() * totalWeight;
+
+    for (const [rarity, info] of entries) {
+        random -= info.weight;
+
+        if (random < 0) {
+            return rarity;
+        }
+    }
+
+    return "C";
+}
+
+function getCardsByRarity(rarity) {
+    return CARD_MASTER.filter(card => normalizeRarity(card.rarity) === rarity);
+}
+
+function selectRandomCardByRarity() {
+    const selectedRarity = selectRarityByWeight();
+    const candidates = getCardsByRarity(selectedRarity);
+    const cardPool = candidates.length > 0 ? candidates : CARD_MASTER;
+
+    return cardPool[Math.floor(Math.random() * cardPool.length)];
+}
+
+function normalizeCard(baseCard) {
+    return {
+        ...baseCard,
+        rarity: normalizeRarity(baseCard.rarity)
+    };
+}
+
 function generateRoomId() {
     return Math.floor(1000 + Math.random() * 9000).toString();
 }
@@ -25,13 +72,15 @@ function generateChoiceId() {
 function generateCardInstance(cardId = null) {
     const baseCard = cardId
         ? CARD_MASTER.find(card => card.id === cardId)
-        : CARD_MASTER[Math.floor(Math.random() * CARD_MASTER.length)];
+        : selectRandomCardByRarity();
 
     if (!baseCard) return null;
 
+    const normalizedCard = normalizeCard(baseCard);
+
     return {
-        ...baseCard,
-        instanceId: `${baseCard.id}-${Date.now()}-${Math.random()}`
+        ...normalizedCard,
+        instanceId: `${normalizedCard.id}-${Date.now()}-${Math.random()}`
     };
 }
 
@@ -179,6 +228,7 @@ function createGameViewForPlayer(game, viewerId) {
                 hidden: true,
                 name: "伏せカード",
                 type: "罠",
+                rarity: "C",
                 effect: "",
                 hateText: ""
             }))
@@ -280,6 +330,7 @@ function requestTrapChoice({
             fieldId: card.fieldId,
             name: card.name,
             type: card.type,
+            rarity: normalizeRarity(card.rarity),
             effect: card.effect,
             hateText: card.hateText,
             trapCondition: card.trapCondition,
@@ -330,6 +381,7 @@ function requestTrapEffectThenDamage({
     damage,
     trapName,
     trapType,
+    trapRarity = "C",
     trapEffectText,
     trapHateText,
     onComplete
@@ -349,6 +401,7 @@ function requestTrapEffectThenDamage({
             amount: damage,
             cardName: trapName,
             cardType: trapType,
+            cardRarity: normalizeRarity(trapRarity),
             effect: trapEffectText,
             hateText: trapHateText,
             sourceActionText: `${sourcePlayer.name} の罠 ${trapName} の効果`,
@@ -407,6 +460,7 @@ function requestTrapEffectThenDamage({
             amount: damage,
             cardName: trapName,
             cardType: trapType,
+            cardRarity: normalizeRarity(trapRarity),
             effect: trapEffectText,
             hateText: trapHateText,
             sourceActionText: `${sourcePlayer.name} の罠 ${trapName} の効果`,
@@ -439,6 +493,7 @@ function resolveTrapEffect(game, roomId, trapOwner, sourcePlayer, trap, context,
         targetName: sourcePlayer.name,
         cardName: trap.name,
         cardType: trap.type,
+        cardRarity: normalizeRarity(trap.rarity),
         hateText: trap.hateText || "罠が発動した",
         log: `${trapOwner.name} の罠が発動した`
     });
@@ -453,6 +508,7 @@ function resolveTrapEffect(game, roomId, trapOwner, sourcePlayer, trap, context,
             targetName: sourcePlayer.name,
             cardName: trap.name,
             cardType: trap.type,
+            cardRarity: normalizeRarity(trap.rarity),
             hateText: `${damage.toLocaleString()}ダメージを跳ね返した`,
             log: `${trapOwner.name} はダメージを跳ね返した`
         });
@@ -465,6 +521,7 @@ function resolveTrapEffect(game, roomId, trapOwner, sourcePlayer, trap, context,
             damage,
             trapName: trap.name,
             trapType: trap.type,
+            trapRarity: trap.rarity,
             trapEffectText: trap.effect,
             trapHateText: trap.hateText,
             onComplete: () => {
@@ -492,6 +549,7 @@ function resolveTrapEffect(game, roomId, trapOwner, sourcePlayer, trap, context,
             targetName: sourcePlayer.name,
             cardName: trap.name,
             cardType: trap.type,
+            cardRarity: normalizeRarity(trap.rarity),
             hateText: "ヘイト変動を打ち消した",
             log: `${trapOwner.name} はヘイト変動を打ち消した`
         });
@@ -507,6 +565,7 @@ function resolveTrapEffect(game, roomId, trapOwner, sourcePlayer, trap, context,
             targetName: sourcePlayer.name,
             cardName: trap.name,
             cardType: trap.type,
+            cardRarity: normalizeRarity(trap.rarity),
             hateText: "罠効果を打ち消した",
             log: `${trapOwner.name} は罠効果を打ち消した`
         });
@@ -524,6 +583,7 @@ function resolveTrapEffect(game, roomId, trapOwner, sourcePlayer, trap, context,
             targetName: sourcePlayer.name,
             cardName: trap.name,
             cardType: trap.type,
+            cardRarity: normalizeRarity(trap.rarity),
             hateText: "罠効果を打ち消し、相手の伏せカードを全破壊",
             log: `${trapOwner.name} は罠効果を打ち消し、相手の伏せカードをすべて破壊した`
         });
@@ -542,6 +602,7 @@ function resolveTrapEffect(game, roomId, trapOwner, sourcePlayer, trap, context,
             targetName: sourcePlayer.name,
             cardName: trap.name,
             cardType: trap.type,
+            cardRarity: normalizeRarity(trap.rarity),
             hateText: `${sourcePlayer.name} に ${damage.toLocaleString()}ダメージ / ヘイト +${hateChange}`,
             log: `${trapOwner.name} の罠が ${sourcePlayer.name} に反撃した`
         });
@@ -556,6 +617,7 @@ function resolveTrapEffect(game, roomId, trapOwner, sourcePlayer, trap, context,
             damage,
             trapName: trap.name,
             trapType: trap.type,
+            trapRarity: trap.rarity,
             trapEffectText: trap.effect,
             trapHateText: trap.hateText,
             onComplete: () => {
@@ -582,7 +644,7 @@ io.on("connection", socket => {
     console.log("接続:", socket.id);
 
     if (DEV_MODE) {
-        socket.emit("devCardList", CARD_MASTER);
+        socket.emit("devCardList", CARD_MASTER.map(normalizeCard));
     }
 
     socket.on("createRoom", playerName => {
@@ -777,6 +839,7 @@ io.on("connection", socket => {
                 id: usedCard.id,
                 name: usedCard.name,
                 type: usedCard.type,
+                rarity: normalizeRarity(usedCard.rarity),
                 effect: usedCard.effect,
                 hateText: usedCard.hateText,
                 trapCondition: usedCard.trapCondition,
@@ -796,6 +859,7 @@ io.on("connection", socket => {
                 targetName: "自分の場",
                 cardName: usedCard.name,
                 cardType: usedCard.type,
+                cardRarity: normalizeRarity(usedCard.rarity),
                 hateText: usedCard.hateText,
                 log: `${caster.name} は ${usedCard.name} を伏せた`
             });
@@ -842,6 +906,7 @@ io.on("connection", socket => {
                 targetName: finalTarget.name,
                 cardName: usedCard.name,
                 cardType: usedCard.type,
+                cardRarity: normalizeRarity(usedCard.rarity),
                 hateText: usedCard.hateText,
                 log: `${caster.name} → ${finalTarget.name}：${usedCard.name}`
             });
@@ -865,6 +930,7 @@ io.on("connection", socket => {
                     amount: damage,
                     cardName: usedCard.name,
                     cardType: usedCard.type,
+                    cardRarity: normalizeRarity(usedCard.rarity),
                     effect: usedCard.effect,
                     hateText: usedCard.hateText,
                     sourceActionText: `${caster.name} が ${usedCard.name} を使用`,
@@ -920,6 +986,7 @@ io.on("connection", socket => {
                     amount: usedCard.hateChange,
                     cardName: usedCard.name,
                     cardType: usedCard.type,
+                    cardRarity: normalizeRarity(usedCard.rarity),
                     effect: usedCard.effect,
                     hateText: usedCard.hateText,
                     sourceActionText: `${caster.name} が ${usedCard.name} を使用`,

@@ -947,3 +947,138 @@ button:disabled {
     font-weight: bold;
     color: #ffb000 !important;
 }
+
+/* レアリティ表示 */
+.card-rarity-badge {
+    align-self: flex-start;
+    min-width: 34px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 900;
+    text-align: center;
+    letter-spacing: 1px;
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.detail-rarity,
+.trap-choice-rarity,
+.trap-source-rarity {
+    display: inline-block;
+    margin-bottom: 6px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 900;
+    font-style: normal;
+    letter-spacing: 1px;
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+.trap-choice-rarity {
+    margin: 0 0 6px 0;
+}
+
+.rarity-c {
+    background: linear-gradient(135deg, #5d6778, #2d3442) !important;
+    border-color: rgba(190, 200, 215, 0.72) !important;
+    box-shadow: 0 0 10px rgba(150, 165, 185, 0.22) !important;
+}
+
+.rarity-uc {
+    background: linear-gradient(135deg, #1fa86b, #0d4f37) !important;
+    border-color: rgba(68, 255, 170, 0.75) !important;
+    box-shadow: 0 0 14px rgba(68, 255, 170, 0.28) !important;
+}
+
+.rarity-r {
+    background: linear-gradient(135deg, #238dff, #193e9f) !important;
+    border-color: rgba(80, 180, 255, 0.85) !important;
+    box-shadow: 0 0 16px rgba(80, 180, 255, 0.35) !important;
+}
+
+.rarity-sr {
+    background: linear-gradient(135deg, #b936ff, #6b18b8) !important;
+    border-color: rgba(220, 120, 255, 0.9) !important;
+    box-shadow: 0 0 20px rgba(210, 80, 255, 0.48) !important;
+}
+
+.hand-card.rarity-sr {
+    box-shadow: 0 0 24px rgba(210, 80, 255, 0.48), inset 0 0 16px rgba(255, 255, 255, 0.06);
+}
+
+.rarity-ur {
+    background: linear-gradient(135deg, #fff2a6, #ffb000 28%, #ff00c8 62%, #00ffe1) !important;
+    border-color: rgba(255, 245, 170, 1) !important;
+    color: #1a1028 !important;
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.75);
+    box-shadow:
+        0 0 18px rgba(255, 176, 0, 0.85),
+        0 0 34px rgba(255, 0, 200, 0.55),
+        0 0 54px rgba(0, 255, 225, 0.35) !important;
+}
+
+.hand-card.rarity-ur {
+    position: relative;
+    overflow: hidden;
+    border-width: 3px;
+    box-shadow:
+        0 0 22px rgba(255, 176, 0, 0.85),
+        0 0 42px rgba(255, 0, 200, 0.5),
+        inset 0 0 22px rgba(255, 255, 255, 0.16);
+}
+
+.hand-card.rarity-ur::before {
+    content: "";
+    position: absolute;
+    inset: -40%;
+    background: linear-gradient(120deg, transparent 35%, rgba(255, 255, 255, 0.65) 50%, transparent 65%);
+    transform: rotate(18deg) translateX(-80%);
+    animation: urShine 2.4s ease-in-out infinite;
+    pointer-events: none;
+}
+
+.hand-card.rarity-ur::after {
+    content: "✦";
+    position: absolute;
+    right: 10px;
+    top: 8px;
+    font-size: 18px;
+    color: #fff2a6;
+    text-shadow:
+        0 0 8px rgba(255, 176, 0, 1),
+        0 0 16px rgba(255, 0, 200, 0.8);
+    pointer-events: none;
+}
+
+.hand-card.rarity-ur .card-name,
+.hand-card.rarity-ur .card-type,
+.hand-card.rarity-ur .card-hate,
+.hand-card.rarity-ur .card-rarity-badge {
+    position: relative;
+    z-index: 1;
+}
+
+@keyframes urShine {
+    0% {
+        transform: rotate(18deg) translateX(-90%);
+        opacity: 0;
+    }
+
+    30% {
+        opacity: 1;
+    }
+
+    58% {
+        transform: rotate(18deg) translateX(90%);
+        opacity: 0;
+    }
+
+    100% {
+        transform: rotate(18deg) translateX(90%);
+        opacity: 0;
+    }
+}

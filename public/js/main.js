@@ -197,6 +197,38 @@ window.onload = () => {
             : `${player.followers.toLocaleString()} フォロワー`;
     }
 
+    function rarityLabel(rarity) {
+        const labels = {
+            C: "C / コモン",
+            UC: "UC / アンコモン",
+            R: "R / レア",
+            SR: "SR / スーパーレア",
+            UR: "UR / ウルトラレア"
+        };
+
+        return labels[rarity] || labels.C;
+    }
+
+    function normalizeRarity(rarity) {
+        return ["C", "UC", "R", "SR", "UR"].includes(rarity) ? rarity : "C";
+    }
+
+    function rarityClass(rarity) {
+        return `rarity-${normalizeRarity(rarity).toLowerCase()}`;
+    }
+
+    function cardDetailHtml(card) {
+        const rarity = normalizeRarity(card.rarity);
+
+        return `
+            <h3>${card.name}</h3>
+            <p class="detail-rarity ${rarityClass(rarity)}">${rarityLabel(rarity)}</p>
+            <p class="detail-type">${card.type}</p>
+            <p>${card.effect}</p>
+            <p class="detail-hate">${card.hateText || ""}</p>
+        `;
+    }
+
     function resetCardDetail() {
         cardDetail.innerHTML = `
             <h3>カード効果</h3>
@@ -245,6 +277,7 @@ window.onload = () => {
         const sourceCardName = data.context?.cardName || "不明なカード";
         const sourceCardType = data.context?.cardType || "";
         const sourceResultText = data.context?.resultText || "";
+        const sourceCardRarity = normalizeRarity(data.context?.cardRarity);
         const sourceActionText =
             data.context?.sourceActionText ||
             `${data.sourcePlayerName} のカードに反応できます。`;
@@ -259,6 +292,7 @@ window.onload = () => {
                     ${sourceCardName}
                     ${sourceCardType ? `<span>${sourceCardType}</span>` : ""}
                 </div>
+                <div class="trap-source-rarity ${rarityClass(sourceCardRarity)}">${rarityLabel(sourceCardRarity)}</div>
                 <p>${sourceActionText}</p>
                 ${sourceResultText ? `<p class="trap-danger-text">${sourceResultText}</p>` : ""}
             </div>
@@ -275,6 +309,7 @@ window.onload = () => {
                         data-can-activate="${trap.canActivate}"
                     >
                         <strong>${trap.name}</strong>
+                        <em class="trap-choice-rarity ${rarityClass(trap.rarity)}">${rarityLabel(normalizeRarity(trap.rarity))}</em>
                         <span>${trap.canActivate ? trap.effect : trap.disabledReason}</span>
                         <small>発動条件：${trap.conditionText}</small>
                     </div>
@@ -768,12 +803,7 @@ window.onload = () => {
 
             if (card && !card.hidden) {
                 setCard.onmouseenter = () => {
-                    cardDetail.innerHTML = `
-                        <h3>${card.name}</h3>
-                        <p class="detail-type">${card.type}</p>
-                        <p>${card.effect}</p>
-                        <p class="detail-hate">${card.hateText || ""}</p>
-                    `;
+                    cardDetail.innerHTML = cardDetailHtml(card);
                 };
 
                 setCard.onmouseleave = () => {
@@ -811,22 +841,18 @@ window.onload = () => {
                 continue;
             }
 
-            cardElement.className = "hand-card";
+            cardElement.className = `hand-card ${rarityClass(card.rarity)}`;
             cardElement.draggable = true;
 
             cardElement.innerHTML = `
+                <div class="card-rarity-badge ${rarityClass(card.rarity)}">${normalizeRarity(card.rarity)}</div>
                 <div class="card-name">${card.name}</div>
                 <div class="card-type">${card.type}</div>
                 <div class="card-hate">${card.hateText}</div>
             `;
 
             cardElement.onmouseenter = () => {
-                cardDetail.innerHTML = `
-                    <h3>${card.name}</h3>
-                    <p class="detail-type">${card.type}</p>
-                    <p>${card.effect}</p>
-                    <p class="detail-hate">${card.hateText}</p>
-                `;
+                cardDetail.innerHTML = cardDetailHtml(card);
             };
 
             cardElement.onmouseleave = () => {
