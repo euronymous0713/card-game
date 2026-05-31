@@ -1083,6 +1083,13 @@ button:disabled {
     }
 }
 
+
+/* PC版ではスマホ用の閉じるボタンを表示しない */
+.mobile-history-close-button,
+.mobile-effect-close {
+    display: none;
+}
+
 /* =========================================================
    スマホ版レイアウト
    PC版を縮小せず、縦画面用の別レイアウトに切り替える
