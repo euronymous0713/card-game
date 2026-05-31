@@ -3776,3 +3776,31 @@ button:disabled {
         font-size: 11px !important;
     }
 }
+
+
+/* ===== スマホ修正：カード効果トグル・操作パネルかぶり防止・履歴時効果非表示 ===== */
+@media (max-width: 768px) {
+    body.battle-active .mobile-action-panel {
+        bottom: 172px !important;
+    }
+
+    body.battle-active .mobile-effect-overlay.show {
+        pointer-events: none !important;
+    }
+
+    body.battle-active .mobile-effect-card {
+        pointer-events: auto !important;
+        transform: translateY(-18px) !important;
+    }
+
+    body.battle-active .history-panel.show-mobile-history ~ .mobile-effect-overlay,
+    body.battle-active .history-panel.show-mobile-history + .mobile-effect-overlay {
+        display: none !important;
+    }
+}
+
+@media (max-width: 380px), (max-height: 720px) {
+    body.battle-active .mobile-action-panel {
+        bottom: 156px !important;
+    }
+}

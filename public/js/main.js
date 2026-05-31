@@ -616,6 +616,7 @@ window.onload = () => {
 
     function clearMobileCardSelection() {
         selectedMobileCardInstanceId = "";
+        hideMobileEffect();
         document.body.classList.remove("mobile-card-action-open");
         updateMobileActionPanel();
         renderHand();
@@ -643,6 +644,12 @@ window.onload = () => {
 
     function toggleMobileHistory() {
         if (!isMobileLayout() || !historyPanel) return;
+
+        const willOpen = !historyPanel.classList.contains("show-mobile-history");
+
+        if (willOpen) {
+            hideMobileEffect();
+        }
 
         historyPanel.classList.toggle("show-mobile-history");
     }
