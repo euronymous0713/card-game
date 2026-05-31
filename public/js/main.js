@@ -47,6 +47,13 @@ window.onload = () => {
     mobileActionPanel.className = "mobile-action-panel";
     document.body.appendChild(mobileActionPanel);
 
+    const mobileHistoryButton = document.createElement("button");
+    mobileHistoryButton.id = "mobileHistoryButton";
+    mobileHistoryButton.className = "mobile-history-button";
+    mobileHistoryButton.type = "button";
+    mobileHistoryButton.innerText = "使用履歴";
+    document.body.appendChild(mobileHistoryButton);
+
     let currentRoomId = "";
     let isHost = false;
     let isReady = false;
@@ -560,6 +567,28 @@ window.onload = () => {
         updateMobileActionPanel();
     }
 
+    function closeMobileHistory() {
+        historyPanel.classList.remove("show-mobile-history");
+    }
+
+    function toggleMobileHistory() {
+        if (!isMobileLayout()) return;
+
+        historyPanel.classList.toggle("show-mobile-history");
+    }
+
+    mobileHistoryButton.onclick = () => {
+        toggleMobileHistory();
+    };
+
+    historyPanel.onclick = event => {
+        if (!isMobileLayout()) return;
+
+        if (event.target === historyPanel) {
+            closeMobileHistory();
+        }
+    };
+
     function updateMobileActionPanel() {
         if (!mobileActionPanel) return;
 
@@ -581,6 +610,9 @@ window.onload = () => {
                 ${card.name}
                 ${needsEnemyTarget && selectedEnemy ? ` / 対象：${selectedEnemy.name}` : ""}
                 ${needsEnemyTarget && !selectedEnemy ? " / 対象を選択してください" : ""}
+            </div>
+            <div class="mobile-selected-card-effect">
+                ${card.effect || "効果なし"}
             </div>
             <div class="mobile-action-buttons">
                 <button id="mobileUseCardButton" ${isMyTurn ? "" : "disabled"}>
@@ -967,7 +999,13 @@ window.onload = () => {
                 };
 
                 setCard.onmouseleave = () => {
-                    resetCardDetail();
+                    if (!isMobileLayout()) {
+                        resetCardDetail();
+                    }
+                };
+
+                setCard.onclick = () => {
+                    cardDetail.innerHTML = cardDetailHtml(card);
                 };
             }
 
@@ -1129,6 +1167,7 @@ window.onload = () => {
         selectedMobileCardInstanceId = "";
         draggedCard = null;
         document.body.classList.remove("mobile-card-action-open");
+        closeMobileHistory();
         updateMobileActionPanel();
 
         const trapOverlay = document.getElementById("trapChoiceOverlay");

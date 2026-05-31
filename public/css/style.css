@@ -2856,3 +2856,572 @@ button:disabled {
         bottom: 78px !important;
     }
 }
+
+/* =========================================================
+   スマホ専用：1画面操作優先レイアウト v4
+   - 上部：プレイヤー情報
+   - 下部：手札4枚
+   - 手札の上：自分情報 / 伏せカード
+   - 使用履歴：ボタンで表示
+   ========================================================= */
+@media (max-width: 768px) {
+    html,
+    body {
+        width: 100% !important;
+        height: 100% !important;
+        min-height: 100% !important;
+        padding: 0 !important;
+        overflow: hidden !important;
+        touch-action: manipulation !important;
+    }
+
+    button:hover {
+        transform: none !important;
+    }
+
+    #battleScreen {
+        width: 100vw !important;
+        height: 100dvh !important;
+        padding: 0 !important;
+        overflow: hidden !important;
+    }
+
+    .battle-field {
+        position: relative !important;
+        display: flex !important;
+        flex-direction: column !important;
+        width: 100vw !important;
+        max-width: none !important;
+        height: 100dvh !important;
+        min-height: 100dvh !important;
+        margin: 0 !important;
+        padding: 5px 5px 104px !important;
+        gap: 4px !important;
+        border: none !important;
+        border-radius: 0 !important;
+        overflow: hidden !important;
+    }
+
+    .enemy-slots {
+        position: static !important;
+        order: 1 !important;
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 4px !important;
+        width: 100% !important;
+        height: 62px !important;
+        min-height: 62px !important;
+        overflow: hidden !important;
+    }
+
+    .enemy-panel {
+        width: 100% !important;
+        height: 62px !important;
+        min-height: 62px !important;
+        padding: 5px 3px !important;
+        border-radius: 10px !important;
+        font-size: 9px !important;
+        line-height: 1.1 !important;
+        overflow: hidden !important;
+    }
+
+    .enemy-name,
+    .my-name {
+        margin-bottom: 2px !important;
+        font-size: 10px !important;
+        line-height: 1.1 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+
+    .follower-line {
+        margin-top: 2px !important;
+        font-size: 12px !important;
+        line-height: 1.1 !important;
+        white-space: nowrap !important;
+    }
+
+    .owakon-text {
+        font-size: 13px !important;
+    }
+
+    .panel-hate {
+        margin-top: 2px !important;
+        font-size: 10px !important;
+        letter-spacing: 1px !important;
+        line-height: 1.1 !important;
+    }
+
+    .enemy-field-cards {
+        margin-top: 2px !important;
+        gap: 3px !important;
+        min-height: 12px !important;
+    }
+
+    .mini-set-card {
+        width: 20px !important;
+        height: 12px !important;
+        border-radius: 4px !important;
+        font-size: 8px !important;
+    }
+
+    .turn-panel {
+        position: static !important;
+        order: 2 !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        height: 26px !important;
+        min-height: 26px !important;
+        padding: 3px 8px !important;
+        border-radius: 9px !important;
+        font-size: 9px !important;
+        line-height: 1.05 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 6px !important;
+        overflow: hidden !important;
+    }
+
+    .turn-panel br {
+        display: none !important;
+    }
+
+    .turn-panel span {
+        font-size: 12px !important;
+        line-height: 1 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+
+    .card-detail {
+        position: static !important;
+        order: 3 !important;
+        width: 100% !important;
+        height: 86px !important;
+        min-height: 86px !important;
+        max-height: 86px !important;
+        padding: 7px 9px !important;
+        border-radius: 12px !important;
+        background: rgba(0, 0, 0, 0.58) !important;
+        border: 1px solid rgba(0, 255, 225, 0.28) !important;
+        box-shadow: 0 0 12px rgba(0, 255, 225, 0.12) !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        z-index: 2 !important;
+    }
+
+    .card-detail h3 {
+        margin-bottom: 3px !important;
+        font-size: 12px !important;
+        line-height: 1.15 !important;
+    }
+
+    .card-detail p {
+        font-size: 9px !important;
+        line-height: 1.32 !important;
+    }
+
+    .detail-rarity,
+    .detail-type,
+    .detail-hate {
+        margin-bottom: 3px !important;
+        font-size: 8px !important;
+        line-height: 1.2 !important;
+    }
+
+    .battle-message {
+        width: 100% !important;
+        height: 24px !important;
+        min-height: 24px !important;
+        max-height: 24px !important;
+        padding: 4px 8px !important;
+        border-radius: 999px !important;
+        font-size: 9px !important;
+        line-height: 1.1 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+
+    .center-zone {
+        position: static !important;
+        order: 4 !important;
+        width: 100% !important;
+        transform: none !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 4px !important;
+        z-index: 2 !important;
+    }
+
+    .drop-zone,
+    .discard-panel {
+        display: none !important;
+    }
+
+    .my-panel {
+        position: fixed !important;
+        left: 5px !important;
+        right: 126px !important;
+        bottom: 103px !important;
+        width: auto !important;
+        height: 50px !important;
+        min-height: 50px !important;
+        padding: 5px 7px !important;
+        border-radius: 11px !important;
+        font-size: 9px !important;
+        line-height: 1.1 !important;
+        z-index: 9300 !important;
+        overflow: hidden !important;
+    }
+
+    .field-card-area {
+        position: fixed !important;
+        right: 5px !important;
+        bottom: 103px !important;
+        width: 116px !important;
+        height: 50px !important;
+        min-height: 50px !important;
+        margin: 0 !important;
+        padding: 5px !important;
+        border-radius: 11px !important;
+        z-index: 9300 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        background: rgba(0, 0, 0, 0.58) !important;
+    }
+
+    .field-card-area h3 {
+        margin-bottom: 4px !important;
+        font-size: 8px !important;
+        line-height: 1 !important;
+        white-space: nowrap !important;
+    }
+
+    #myFieldCards {
+        gap: 5px !important;
+    }
+
+    .set-card {
+        width: 45px !important;
+        height: 22px !important;
+        border-radius: 7px !important;
+        font-size: 9px !important;
+    }
+
+    .hand-area {
+        position: fixed !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        transform: none !important;
+        width: 100vw !important;
+        height: 98px !important;
+        padding: 6px 5px 7px !important;
+        display: grid !important;
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+        gap: 5px !important;
+        align-items: stretch !important;
+        justify-content: stretch !important;
+        overflow: hidden !important;
+        background: linear-gradient(180deg, rgba(10, 10, 20, 0.05), rgba(10, 10, 20, 0.98) 18%) !important;
+        z-index: 9400 !important;
+    }
+
+    .hand-card {
+        width: 100% !important;
+        min-width: 0 !important;
+        height: 85px !important;
+        min-height: 85px !important;
+        padding: 5px !important;
+        border-radius: 11px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: space-between !important;
+        overflow: hidden !important;
+    }
+
+    .hand-card:hover {
+        transform: none !important;
+    }
+
+    .selected-mobile-hand-card {
+        transform: translateY(-3px) !important;
+        border-color: #ffb000 !important;
+        box-shadow: 0 0 18px rgba(255, 176, 0, 0.65) !important;
+    }
+
+    .card-rarity-badge {
+        min-width: 24px !important;
+        padding: 1px 5px !important;
+        font-size: 8px !important;
+        line-height: 1.2 !important;
+    }
+
+    .card-name {
+        font-size: 11px !important;
+        line-height: 1.15 !important;
+        display: -webkit-box !important;
+        -webkit-line-clamp: 2 !important;
+        -webkit-box-orient: vertical !important;
+        overflow: hidden !important;
+    }
+
+    .card-type {
+        font-size: 9px !important;
+        line-height: 1.1 !important;
+    }
+
+    .card-hate {
+        font-size: 8px !important;
+        line-height: 1.1 !important;
+        display: -webkit-box !important;
+        -webkit-line-clamp: 2 !important;
+        -webkit-box-orient: vertical !important;
+        overflow: hidden !important;
+    }
+
+    .battle-buttons {
+        position: fixed !important;
+        left: 5px !important;
+        right: 5px !important;
+        bottom: 154px !important;
+        z-index: 9200 !important;
+    }
+
+    body.mobile-card-action-open .battle-buttons {
+        display: none !important;
+    }
+
+    #endTurnButton {
+        width: 100% !important;
+        min-height: 28px !important;
+        padding: 5px 8px !important;
+        border-radius: 9px !important;
+        font-size: 11px !important;
+    }
+
+    .mobile-action-panel {
+        position: fixed !important;
+        left: 5px !important;
+        right: 5px !important;
+        bottom: 103px !important;
+        display: none !important;
+        padding: 6px !important;
+        border-radius: 12px !important;
+        background: rgba(0, 0, 0, 0.95) !important;
+        border: 1px solid rgba(255, 176, 0, 0.8) !important;
+        box-shadow: 0 0 18px rgba(255, 176, 0, 0.35) !important;
+        z-index: 9600 !important;
+    }
+
+    .mobile-action-panel.show {
+        display: block !important;
+    }
+
+    .mobile-selected-card-name {
+        margin-bottom: 3px !important;
+        font-size: 10px !important;
+        font-weight: 900 !important;
+        line-height: 1.15 !important;
+        color: #ffb000 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+
+    .mobile-selected-card-effect {
+        max-height: 26px !important;
+        margin-bottom: 5px !important;
+        font-size: 9px !important;
+        line-height: 1.35 !important;
+        color: rgba(255, 255, 255, 0.78) !important;
+        overflow-y: auto !important;
+    }
+
+    .mobile-action-buttons {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr 0.75fr !important;
+        gap: 5px !important;
+    }
+
+    .mobile-action-buttons button {
+        min-height: 32px !important;
+        padding: 5px 4px !important;
+        border-radius: 9px !important;
+        font-size: 11px !important;
+    }
+
+    .mobile-history-button {
+        position: fixed !important;
+        right: 7px !important;
+        top: 72px !important;
+        z-index: 9700 !important;
+        display: block !important;
+        min-height: 28px !important;
+        padding: 5px 9px !important;
+        border-radius: 999px !important;
+        font-size: 10px !important;
+        background: linear-gradient(135deg, #222, #555) !important;
+        border: 1px solid rgba(255, 255, 255, 0.22) !important;
+        box-shadow: 0 0 12px rgba(0, 0, 0, 0.45) !important;
+    }
+
+    .history-panel {
+        position: fixed !important;
+        inset: 0 !important;
+        z-index: 9800 !important;
+        display: none !important;
+        width: 100vw !important;
+        height: 100dvh !important;
+        max-height: none !important;
+        padding: 54px 12px 16px !important;
+        border-radius: 0 !important;
+        background: rgba(0, 0, 0, 0.84) !important;
+        border: none !important;
+        box-shadow: none !important;
+        overflow: hidden !important;
+    }
+
+    .history-panel.show-mobile-history {
+        display: block !important;
+    }
+
+    .history-panel h3 {
+        position: absolute !important;
+        top: 14px !important;
+        left: 12px !important;
+        right: 12px !important;
+        margin: 0 !important;
+        padding: 10px 12px !important;
+        border-radius: 12px !important;
+        background: rgba(255, 176, 0, 0.16) !important;
+        border: 1px solid rgba(255, 176, 0, 0.45) !important;
+        color: #ffb000 !important;
+        font-size: 15px !important;
+        text-align: center !important;
+    }
+
+    .history-panel h3::after {
+        content: "タップで閉じる";
+        display: block;
+        margin-top: 2px;
+        font-size: 9px;
+        color: rgba(255, 255, 255, 0.55);
+    }
+
+    .played-card-list {
+        width: 100% !important;
+        height: calc(100dvh - 72px) !important;
+        max-height: none !important;
+        padding: 4px 2px 18px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 7px !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+
+    .played-card {
+        padding: 9px 10px !important;
+        border-radius: 11px !important;
+        font-size: 11px !important;
+        line-height: 1.45 !important;
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
+        background: rgba(255, 255, 255, 0.08) !important;
+    }
+}
+
+@media (max-width: 380px), (max-height: 720px) {
+    .battle-field {
+        padding: 4px 4px 94px !important;
+        gap: 3px !important;
+    }
+
+    .enemy-slots,
+    .enemy-panel {
+        height: 56px !important;
+        min-height: 56px !important;
+    }
+
+    .card-detail {
+        height: 72px !important;
+        min-height: 72px !important;
+        max-height: 72px !important;
+        padding: 5px 7px !important;
+    }
+
+    .battle-message {
+        height: 21px !important;
+        min-height: 21px !important;
+        max-height: 21px !important;
+    }
+
+    .my-panel {
+        right: 112px !important;
+        bottom: 93px !important;
+        height: 44px !important;
+        min-height: 44px !important;
+        padding: 4px 6px !important;
+    }
+
+    .field-card-area {
+        width: 104px !important;
+        height: 44px !important;
+        min-height: 44px !important;
+        bottom: 93px !important;
+        padding: 4px !important;
+    }
+
+    .set-card {
+        width: 39px !important;
+        height: 19px !important;
+        font-size: 8px !important;
+    }
+
+    .hand-area {
+        height: 88px !important;
+        padding: 5px 4px 6px !important;
+        gap: 4px !important;
+    }
+
+    .hand-card {
+        height: 77px !important;
+        min-height: 77px !important;
+        padding: 4px !important;
+    }
+
+    .card-name {
+        font-size: 10px !important;
+    }
+
+    .card-type,
+    .card-hate {
+        font-size: 8px !important;
+    }
+
+    .battle-buttons {
+        bottom: 140px !important;
+    }
+
+    .mobile-action-panel {
+        bottom: 93px !important;
+    }
+
+    .mobile-action-buttons button {
+        min-height: 29px !important;
+        font-size: 10px !important;
+    }
+}
+
+@media (min-width: 769px) {
+    .mobile-history-button {
+        display: none !important;
+    }
+}
