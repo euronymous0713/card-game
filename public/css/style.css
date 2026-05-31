@@ -4154,3 +4154,93 @@ body.battle-active .mobile-trap-waiting-notice.show {
         min-height: auto;
     }
 }
+
+
+/* タイトル画面：カード一覧ボタン */
+.title-sub-buttons {
+    width: 100%;
+    margin-top: 14px;
+    display: flex;
+    justify-content: center;
+}
+
+.card-list-title-button {
+    min-width: 220px;
+    background: linear-gradient(135deg, #00ffd5, #006eff);
+    box-shadow: 0 0 18px rgba(0, 255, 225, 0.35);
+}
+
+.card-list-search-box {
+    width: 100%;
+    margin: 12px 0 10px;
+}
+
+#cardListSearchInput {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid rgba(0, 255, 225, 0.26);
+    border-radius: 12px;
+    outline: none;
+    color: white;
+    background: rgba(255, 255, 255, 0.08);
+    font-size: 15px;
+}
+
+#cardListSearchInput::placeholder {
+    color: rgba(255, 255, 255, 0.45);
+}
+
+.card-list-filter-section {
+    margin-top: 10px;
+}
+
+.card-list-filter-label {
+    margin-bottom: 6px;
+    color: #00ffe1;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 1px;
+}
+
+.card-list-filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.card-list-filter-button {
+    width: auto;
+    min-height: 34px;
+    padding: 7px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.active-card-list-filter {
+    background: linear-gradient(135deg, #ffb000, #ff00c8) !important;
+    box-shadow: 0 0 14px rgba(255, 176, 0, 0.38);
+}
+
+@media (max-width: 768px) {
+    .title-sub-buttons {
+        margin-top: 10px;
+    }
+
+    .card-list-title-button {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .card-list-filter-row {
+        gap: 6px;
+    }
+
+    .card-list-filter-button {
+        flex: 1 1 auto;
+        min-width: 58px;
+        padding: 7px 9px;
+        font-size: 11px;
+    }
+}

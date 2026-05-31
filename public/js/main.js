@@ -13,6 +13,7 @@ window.onload = () => {
     const cardListOverlay = document.getElementById("cardListOverlay");
     const cardListCloseButton = document.getElementById("cardListCloseButton");
     const cardListBody = document.getElementById("cardListBody");
+    const cardListSearchInput = document.getElementById("cardListSearchInput");
     const cardListFilterButtons = document.querySelectorAll(".card-list-filter-button");
     const readyButton = document.getElementById("readyButton");
     const leaveRoomButton = document.getElementById("leaveRoomButton");
@@ -87,7 +88,9 @@ window.onload = () => {
     let selectedMobileFieldCardKey = "";
     let endTurnRequestPending = false;
     let titleCardList = [];
-    let currentCardListFilter = "all";
+    let currentCardListRarityFilter = "all";
+    let currentCardListKindFilter = "all";
+    let currentCardListSearchText = "";
 
     function setScreenMode(mode) {
         document.body.classList.toggle("title-active", mode === "title");
@@ -326,17 +329,81 @@ window.onload = () => {
         return `全${total}枚 / C:${counts.C || 0} UC:${counts.UC || 0} R:${counts.R || 0} SR:${counts.SR || 0} UR:${counts.UR || 0}`;
     }
 
+    function normalizeCardKindFilterValue(card) {
+        if (!card) return "unknown";
+        if (card.kind) return card.kind;
+
+        const type = card.type || "";
+
+        if (type === "攻撃") return "attack";
+        if (type === "防御" || type === "補助") return "support";
+        if (type === "妨害") return "hate";
+        if (type === "罠") return "trap";
+        if (type === "特殊") return "special";
+
+        return "unknown";
+    }
+
+    function matchesCardListKindFilter(card) {
+        if (currentCardListKindFilter === "all") return true;
+
+        if (currentCardListKindFilter === "special") {
+            return card.kind === "special";
+        }
+
+        return normalizeCardKindFilterValue(card) === currentCardListKindFilter;
+    }
+
+    function matchesCardListSearch(card) {
+        if (!currentCardListSearchText) return true;
+
+        const searchSource = [
+            card.name,
+            card.type,
+            card.kind,
+            card.effect,
+            card.hateText,
+            specialEffectLabel(card)
+        ].join(" ").toLowerCase();
+
+        return searchSource.includes(currentCardListSearchText.toLowerCase());
+    }
+
+    function cardListFilterDescription() {
+        const rarityText = currentCardListRarityFilter === "all"
+            ? "全レアリティ"
+            : currentCardListRarityFilter;
+
+        const kindLabels = {
+            all: "全種類",
+            attack: "攻撃",
+            support: "防御/補助",
+            hate: "妨害",
+            trap: "罠",
+            special: "特殊"
+        };
+
+        const kindText = kindLabels[currentCardListKindFilter] || "全種類";
+        const searchText = currentCardListSearchText
+            ? ` / 検索：${currentCardListSearchText}`
+            : "";
+
+        return `${rarityText} / ${kindText}${searchText}`;
+    }
+
     function renderTitleCardList() {
         if (!cardListBody) return;
 
         const filteredCards = titleCardList.filter(card => {
-            if (currentCardListFilter === "all") return true;
-            if (currentCardListFilter === "trap") return card.kind === "trap";
-            if (currentCardListFilter === "special") return card.kind === "special" || card.effectType || card.ignoreTrap || card.pierceTrap;
-            return normalizeRarity(card.rarity) === currentCardListFilter;
+            const rarityMatched = currentCardListRarityFilter === "all" ||
+                normalizeRarity(card.rarity) === currentCardListRarityFilter;
+
+            return rarityMatched &&
+                matchesCardListKindFilter(card) &&
+                matchesCardListSearch(card);
         });
 
-        if (filteredCards.length === 0) {
+        if (titleCardList.length === 0) {
             cardListBody.innerHTML = `
                 <div class="card-list-empty">
                     カード情報を読み込み中です。
@@ -345,8 +412,20 @@ window.onload = () => {
             return;
         }
 
+        if (filteredCards.length === 0) {
+            cardListBody.innerHTML = `
+                <div class="card-list-stats">${cardListStatsText()} / ${cardListFilterDescription()}</div>
+                <div class="card-list-empty">
+                    条件に合うカードがありません。
+                </div>
+            `;
+            return;
+        }
+
         cardListBody.innerHTML = `
-            <div class="card-list-stats">${cardListStatsText()}</div>
+            <div class="card-list-stats">
+                ${cardListStatsText()} / 表示:${filteredCards.length}枚 / ${cardListFilterDescription()}
+            </div>
             <div class="card-list-grid">
                 ${filteredCards.map(card => {
                     const rarity = normalizeRarity(card.rarity);
@@ -977,15 +1056,33 @@ window.onload = () => {
 
     cardListFilterButtons.forEach(button => {
         button.onclick = () => {
-            currentCardListFilter = button.dataset.filter || "all";
+            const group = button.dataset.filterGroup || "rarity";
+            const filter = button.dataset.filter || "all";
+
+            if (group === "kind") {
+                currentCardListKindFilter = filter;
+            } else {
+                currentCardListRarityFilter = filter;
+            }
 
             cardListFilterButtons.forEach(filterButton => {
-                filterButton.classList.toggle("active-card-list-filter", filterButton === button);
+                const sameGroup = (filterButton.dataset.filterGroup || "rarity") === group;
+
+                if (sameGroup) {
+                    filterButton.classList.toggle("active-card-list-filter", filterButton === button);
+                }
             });
 
             renderTitleCardList();
         };
     });
+
+    if (cardListSearchInput) {
+        cardListSearchInput.oninput = () => {
+            currentCardListSearchText = cardListSearchInput.value.trim();
+            renderTitleCardList();
+        };
+    }
 
     const savedName = localStorage.getItem("playerName");
 
