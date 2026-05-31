@@ -62,6 +62,18 @@ window.onload = () => {
     mobileEffectOverlay.className = "mobile-effect-overlay";
     document.body.appendChild(mobileEffectOverlay);
 
+    let mobileHistoryCloseButton = null;
+
+    if (historyPanel) {
+        mobileHistoryCloseButton = document.createElement("button");
+        mobileHistoryCloseButton.id = "mobileHistoryCloseButton";
+        mobileHistoryCloseButton.className = "mobile-history-close-button";
+        mobileHistoryCloseButton.type = "button";
+        mobileHistoryCloseButton.innerText = "×";
+        mobileHistoryCloseButton.setAttribute("aria-label", "使用履歴を閉じる");
+        historyPanel.appendChild(mobileHistoryCloseButton);
+    }
+
     let currentRoomId = "";
     let isHost = false;
     let isReady = false;
@@ -639,6 +651,13 @@ window.onload = () => {
         toggleMobileHistory();
     };
 
+    if (mobileHistoryCloseButton) {
+        mobileHistoryCloseButton.onclick = event => {
+            event.stopPropagation();
+            closeMobileHistory();
+        };
+    }
+
     if (historyPanel) {
         historyPanel.onclick = event => {
             if (!isMobileLayout()) return;
@@ -647,6 +666,17 @@ window.onload = () => {
                 closeMobileHistory();
             }
         };
+
+        const historyTitle = historyPanel.querySelector("h3");
+
+        if (historyTitle) {
+            historyTitle.onclick = event => {
+                if (!isMobileLayout()) return;
+
+                event.stopPropagation();
+                closeMobileHistory();
+            };
+        }
     }
 
     function updateMobileActionPanel() {

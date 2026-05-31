@@ -3670,3 +3670,45 @@ button:disabled {
         display: none !important;
     }
 }
+
+
+/* ===== スマホ使用履歴：閉じるボタン追加 ===== */
+@media (max-width: 768px) {
+    body.battle-active .mobile-history-close-button {
+        position: absolute !important;
+        top: 16px !important;
+        right: 16px !important;
+        z-index: 2 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 34px !important;
+        height: 34px !important;
+        min-height: 34px !important;
+        padding: 0 !important;
+        border-radius: 999px !important;
+        font-size: 22px !important;
+        line-height: 1 !important;
+        color: white !important;
+        background: rgba(255, 48, 48, 0.72) !important;
+        border: 1px solid rgba(255, 255, 255, 0.32) !important;
+        box-shadow: 0 0 14px rgba(255, 48, 48, 0.35) !important;
+    }
+
+    body.battle-active .history-panel:not(.show-mobile-history) .mobile-history-close-button {
+        display: none !important;
+    }
+
+    body.battle-active .history-panel h3 {
+        padding-right: 48px !important;
+        cursor: pointer !important;
+    }
+
+    body.battle-active .history-panel h3::after {
+        content: "  /  タップまたは×で閉じる" !important;
+        display: inline !important;
+        margin-left: 4px !important;
+        font-size: 10px !important;
+        color: rgba(255, 255, 255, 0.68) !important;
+    }
+}
