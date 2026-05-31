@@ -9,6 +9,11 @@ window.onload = () => {
 
     const createRoomButton = document.getElementById("createRoomButton");
     const joinRoomButton = document.getElementById("joinRoomButton");
+    const cardListButton = document.getElementById("cardListButton");
+    const cardListOverlay = document.getElementById("cardListOverlay");
+    const cardListCloseButton = document.getElementById("cardListCloseButton");
+    const cardListBody = document.getElementById("cardListBody");
+    const cardListFilterButtons = document.querySelectorAll(".card-list-filter-button");
     const readyButton = document.getElementById("readyButton");
     const leaveRoomButton = document.getElementById("leaveRoomButton");
     const startGameButton = document.getElementById("startGameButton");
@@ -81,6 +86,8 @@ window.onload = () => {
     let selectedMobileCardInstanceId = "";
     let selectedMobileFieldCardKey = "";
     let endTurnRequestPending = false;
+    let titleCardList = [];
+    let currentCardListFilter = "all";
 
     function setScreenMode(mode) {
         document.body.classList.toggle("title-active", mode === "title");
@@ -268,6 +275,119 @@ window.onload = () => {
             <p>${card.effect}</p>
             <p class="detail-hate">${card.hateText || ""}</p>
         `;
+    }
+
+
+    function cardKindLabel(kind) {
+        const labels = {
+            attack: "攻撃",
+            support: "防御/補助",
+            hate: "妨害",
+            trap: "罠",
+            special: "特殊"
+        };
+
+        return labels[kind] || kind || "不明";
+    }
+
+    function specialEffectLabel(card) {
+        if (!card.effectType && !card.ignoreTrap && !card.trapEffect) return "";
+
+        const labels = {
+            destroyTargetTraps: "伏せカード破壊",
+            destroyAllEnemyTraps: "全体伏せカード破壊",
+            skipTurn: "行動不能",
+            slipDamage: "スリップダメージ",
+            extraTurn: "追加ターン",
+            discardTargetHand: "手札破壊",
+            trapPierceDamage: "罠貫通",
+            pierceDamage: "罠貫通",
+            ignoreTrapDamage: "罠貫通",
+            reflectDamage: "ダメージ反射",
+            cancelHate: "ヘイト無効",
+            cancelTrap: "罠効果無効",
+            cancelTrapAndDestroyEnemyTraps: "罠無効＋伏せ破壊",
+            damageAndHate: "反撃＋ヘイト"
+        };
+
+        if (card.ignoreTrap || card.pierceTrap) return "罠貫通";
+        if (card.trapEffect) return labels[card.trapEffect] || card.trapEffect;
+        return labels[card.effectType] || card.effectType || "";
+    }
+
+    function cardListStatsText() {
+        const total = titleCardList.length;
+        const counts = titleCardList.reduce((result, card) => {
+            const rarity = normalizeRarity(card.rarity);
+            result[rarity] = (result[rarity] || 0) + 1;
+            return result;
+        }, {});
+
+        return `全${total}枚 / C:${counts.C || 0} UC:${counts.UC || 0} R:${counts.R || 0} SR:${counts.SR || 0} UR:${counts.UR || 0}`;
+    }
+
+    function renderTitleCardList() {
+        if (!cardListBody) return;
+
+        const filteredCards = titleCardList.filter(card => {
+            if (currentCardListFilter === "all") return true;
+            if (currentCardListFilter === "trap") return card.kind === "trap";
+            if (currentCardListFilter === "special") return card.kind === "special" || card.effectType || card.ignoreTrap || card.pierceTrap;
+            return normalizeRarity(card.rarity) === currentCardListFilter;
+        });
+
+        if (filteredCards.length === 0) {
+            cardListBody.innerHTML = `
+                <div class="card-list-empty">
+                    カード情報を読み込み中です。
+                </div>
+            `;
+            return;
+        }
+
+        cardListBody.innerHTML = `
+            <div class="card-list-stats">${cardListStatsText()}</div>
+            <div class="card-list-grid">
+                ${filteredCards.map(card => {
+                    const rarity = normalizeRarity(card.rarity);
+                    const specialLabel = specialEffectLabel(card);
+
+                    return `
+                        <div class="card-list-item ${rarityClass(rarity)}">
+                            <div class="card-list-item-head">
+                                <span class="card-list-rarity ${rarityClass(rarity)}">${rarity}</span>
+                                <strong>${card.name}</strong>
+                            </div>
+                            <div class="card-list-meta">
+                                ${card.type || cardKindLabel(card.kind)} / ${cardKindLabel(card.kind)}
+                                ${specialLabel ? ` / ${specialLabel}` : ""}
+                            </div>
+                            <p class="card-list-effect">${card.effect || "効果なし"}</p>
+                            <div class="card-list-footer">
+                                ${card.damage ? `<span>ダメージ：${Number(card.damage).toLocaleString()}</span>` : ""}
+                                ${card.heal ? `<span>回復：${Number(card.heal).toLocaleString()}</span>` : ""}
+                                ${card.hateText ? `<span>${card.hateText}</span>` : ""}
+                            </div>
+                        </div>
+                    `;
+                }).join("")}
+            </div>
+        `;
+    }
+
+    function openTitleCardList() {
+        if (!cardListOverlay) return;
+
+        renderTitleCardList();
+        cardListOverlay.style.display = "flex";
+        cardListOverlay.setAttribute("aria-hidden", "false");
+    }
+
+    function closeTitleCardList() {
+        if (!cardListOverlay) return;
+
+        cardListOverlay.style.display = "none";
+        cardListOverlay.setAttribute("aria-hidden", "true");
     }
 
     function resetCardDetail() {
@@ -829,6 +949,44 @@ window.onload = () => {
         updateMobileActionPanel();
     }
 
+
+    socket.on("cardList", cards => {
+        titleCardList = Array.isArray(cards) ? cards : [];
+        renderTitleCardList();
+    });
+
+    if (cardListButton) {
+        cardListButton.onclick = () => {
+            openTitleCardList();
+        };
+    }
+
+    if (cardListCloseButton) {
+        cardListCloseButton.onclick = () => {
+            closeTitleCardList();
+        };
+    }
+
+    if (cardListOverlay) {
+        cardListOverlay.onclick = event => {
+            if (event.target === cardListOverlay) {
+                closeTitleCardList();
+            }
+        };
+    }
+
+    cardListFilterButtons.forEach(button => {
+        button.onclick = () => {
+            currentCardListFilter = button.dataset.filter || "all";
+
+            cardListFilterButtons.forEach(filterButton => {
+                filterButton.classList.toggle("active-card-list-filter", filterButton === button);
+            });
+
+            renderTitleCardList();
+        };
+    });
+
     const savedName = localStorage.getItem("playerName");
 
     if (savedName) {
@@ -1131,10 +1289,6 @@ window.onload = () => {
 
         if (card.trapDetailText) {
             lines.push(card.trapDetailText);
-        }
-
-        if (card.specialDetailText) {
-            lines.push(card.specialDetailText);
         }
 
         if (typeof card.hateAmount === "number" && card.hateAmount !== 0) {

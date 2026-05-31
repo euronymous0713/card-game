@@ -24,12 +24,40 @@
     <div class="menu-buttons">
       <button id="createRoomButton">ルーム作成</button>
       <button id="joinRoomButton">ルーム参加</button>
+      <button id="cardListButton" type="button">カード一覧</button>
     </div>
 
     <div class="creator-credit">
       Created by Hayato
       <br>
       Ver 0.1.0 Alpha
+    </div>
+  </div>
+
+  <div class="card-list-overlay" id="cardListOverlay" style="display:none;" aria-hidden="true">
+    <div class="card-list-modal">
+      <div class="card-list-header">
+        <div>
+          <h2>カード一覧</h2>
+          <p>現在実装されているカードを確認できます。</p>
+        </div>
+        <button id="cardListCloseButton" class="card-list-close-button" type="button">閉じる</button>
+      </div>
+
+      <div class="card-list-filter-row">
+        <button class="card-list-filter-button active-card-list-filter" type="button" data-filter="all">すべて</button>
+        <button class="card-list-filter-button" type="button" data-filter="C">C</button>
+        <button class="card-list-filter-button" type="button" data-filter="UC">UC</button>
+        <button class="card-list-filter-button" type="button" data-filter="R">R</button>
+        <button class="card-list-filter-button" type="button" data-filter="SR">SR</button>
+        <button class="card-list-filter-button" type="button" data-filter="UR">UR</button>
+        <button class="card-list-filter-button" type="button" data-filter="trap">罠</button>
+        <button class="card-list-filter-button" type="button" data-filter="special">特殊</button>
+      </div>
+
+      <div class="card-list-body" id="cardListBody">
+        <div class="card-list-empty">カード情報を読み込み中です。</div>
+      </div>
     </div>
   </div>
 
