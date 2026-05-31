@@ -13,6 +13,8 @@ window.onload = () => {
     const cardListOverlay = document.getElementById("cardListOverlay");
     const cardListCloseButton = document.getElementById("cardListCloseButton");
     const cardListBody = document.getElementById("cardListBody");
+    const cardListControls = document.getElementById("cardListControls");
+    const cardListControlToggleButton = document.getElementById("cardListControlToggleButton");
     const cardListSearchInput = document.getElementById("cardListSearchInput");
     const cardListFilterButtons = document.querySelectorAll(".card-list-filter-button");
     const readyButton = document.getElementById("readyButton");
@@ -391,7 +393,33 @@ window.onload = () => {
         return `${rarityText} / ${kindText}${searchText}`;
     }
 
+    function updateCardListControlToggleText() {
+        if (!cardListControlToggleButton || !cardListControls) return;
+
+        const isOpen = cardListControls.classList.contains("open-card-list-controls");
+        const hasFilter = currentCardListRarityFilter !== "all" ||
+            currentCardListKindFilter !== "all" ||
+            Boolean(currentCardListSearchText);
+
+        cardListControlToggleButton.innerText = isOpen
+            ? "検索・絞り込みを閉じる"
+            : hasFilter
+                ? `検索・絞り込みを開く（${cardListFilterDescription()}）`
+                : "検索・絞り込みを開く";
+
+        cardListControlToggleButton.setAttribute("aria-expanded", isOpen ? "true" : "false");
+    }
+
+    function setCardListControlsOpen(open) {
+        if (!cardListControls) return;
+
+        cardListControls.classList.toggle("open-card-list-controls", open);
+        updateCardListControlToggleText();
+    }
+
     function renderTitleCardList() {
+        updateCardListControlToggleText();
+
         if (!cardListBody) return;
 
         const filteredCards = titleCardList.filter(card => {
@@ -456,6 +484,12 @@ window.onload = () => {
 
     function openTitleCardList() {
         if (!cardListOverlay) return;
+
+        if (isMobileLayout()) {
+            setCardListControlsOpen(false);
+        } else {
+            setCardListControlsOpen(true);
+        }
 
         renderTitleCardList();
         cardListOverlay.style.display = "flex";
@@ -1051,6 +1085,13 @@ window.onload = () => {
             if (event.target === cardListOverlay) {
                 closeTitleCardList();
             }
+        };
+    }
+
+    if (cardListControlToggleButton) {
+        cardListControlToggleButton.onclick = () => {
+            const isOpen = cardListControls?.classList.contains("open-card-list-controls");
+            setCardListControlsOpen(!isOpen);
         };
     }
 

@@ -47,31 +47,39 @@
         <button id="cardListCloseButton" class="card-list-close-button" type="button">閉じる</button>
       </div>
 
-      <div class="card-list-search-box">
-        <input type="search" id="cardListSearchInput" placeholder="カード名で検索" autocomplete="off">
+      <div class="card-list-control-toggle-row">
+        <button id="cardListControlToggleButton" class="card-list-control-toggle-button" type="button" aria-expanded="false">
+          検索・絞り込みを開く
+        </button>
       </div>
 
-      <div class="card-list-filter-section">
-        <div class="card-list-filter-label">レアリティ</div>
-        <div class="card-list-filter-row">
-          <button class="card-list-filter-button active-card-list-filter" type="button" data-filter-group="rarity" data-filter="all">すべて</button>
-          <button class="card-list-filter-button" type="button" data-filter-group="rarity" data-filter="C">C</button>
-          <button class="card-list-filter-button" type="button" data-filter-group="rarity" data-filter="UC">UC</button>
-          <button class="card-list-filter-button" type="button" data-filter-group="rarity" data-filter="R">R</button>
-          <button class="card-list-filter-button" type="button" data-filter-group="rarity" data-filter="SR">SR</button>
-          <button class="card-list-filter-button" type="button" data-filter-group="rarity" data-filter="UR">UR</button>
+      <div class="card-list-controls" id="cardListControls">
+        <div class="card-list-search-box">
+          <input type="search" id="cardListSearchInput" placeholder="カード名で検索" autocomplete="off">
         </div>
-      </div>
 
-      <div class="card-list-filter-section">
-        <div class="card-list-filter-label">種類</div>
-        <div class="card-list-filter-row">
-          <button class="card-list-filter-button active-card-list-filter" type="button" data-filter-group="kind" data-filter="all">すべて</button>
-          <button class="card-list-filter-button" type="button" data-filter-group="kind" data-filter="attack">攻撃</button>
-          <button class="card-list-filter-button" type="button" data-filter-group="kind" data-filter="support">防御/補助</button>
-          <button class="card-list-filter-button" type="button" data-filter-group="kind" data-filter="hate">妨害</button>
-          <button class="card-list-filter-button" type="button" data-filter-group="kind" data-filter="trap">罠</button>
-          <button class="card-list-filter-button" type="button" data-filter-group="kind" data-filter="special">特殊</button>
+        <div class="card-list-filter-section">
+          <div class="card-list-filter-label">レアリティ</div>
+          <div class="card-list-filter-row">
+            <button class="card-list-filter-button active-card-list-filter" type="button" data-filter-group="rarity" data-filter="all">すべて</button>
+            <button class="card-list-filter-button" type="button" data-filter-group="rarity" data-filter="C">C</button>
+            <button class="card-list-filter-button" type="button" data-filter-group="rarity" data-filter="UC">UC</button>
+            <button class="card-list-filter-button" type="button" data-filter-group="rarity" data-filter="R">R</button>
+            <button class="card-list-filter-button" type="button" data-filter-group="rarity" data-filter="SR">SR</button>
+            <button class="card-list-filter-button" type="button" data-filter-group="rarity" data-filter="UR">UR</button>
+          </div>
+        </div>
+
+        <div class="card-list-filter-section">
+          <div class="card-list-filter-label">種類</div>
+          <div class="card-list-filter-row">
+            <button class="card-list-filter-button active-card-list-filter" type="button" data-filter-group="kind" data-filter="all">すべて</button>
+            <button class="card-list-filter-button" type="button" data-filter-group="kind" data-filter="attack">攻撃</button>
+            <button class="card-list-filter-button" type="button" data-filter-group="kind" data-filter="support">防御/補助</button>
+            <button class="card-list-filter-button" type="button" data-filter-group="kind" data-filter="hate">妨害</button>
+            <button class="card-list-filter-button" type="button" data-filter-group="kind" data-filter="trap">罠</button>
+            <button class="card-list-filter-button" type="button" data-filter-group="kind" data-filter="special">特殊</button>
+          </div>
         </div>
       </div>
 

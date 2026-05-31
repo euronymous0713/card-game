@@ -4244,3 +4244,85 @@ body.battle-active .mobile-trap-waiting-notice.show {
         font-size: 11px;
     }
 }
+
+/* =========================================================
+   カード一覧：スマホ用 検索・絞り込み折りたたみ
+========================================================= */
+.card-list-control-toggle-row {
+    display: none;
+}
+
+.card-list-controls {
+    display: block;
+}
+
+.card-list-control-toggle-button {
+    width: 100%;
+    min-height: 38px;
+    padding: 9px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    background: linear-gradient(135deg, rgba(0, 255, 225, 0.32), rgba(255, 0, 200, 0.26));
+    border: 1px solid rgba(0, 255, 225, 0.42);
+    box-shadow: 0 0 14px rgba(0, 255, 225, 0.18);
+}
+
+@media (max-width: 768px) {
+    .card-list-control-toggle-row {
+        display: block;
+        margin: 8px 0 10px;
+    }
+
+    .card-list-controls {
+        display: none;
+        padding: 10px;
+        margin-bottom: 10px;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.055);
+        border: 1px solid rgba(0, 255, 225, 0.18);
+    }
+
+    .card-list-controls.open-card-list-controls {
+        display: block;
+    }
+
+    .card-list-search-box {
+        margin: 0 0 10px;
+    }
+
+    #cardListSearchInput {
+        padding: 10px 12px;
+        font-size: 14px;
+    }
+
+    .card-list-filter-section {
+        margin-top: 8px;
+    }
+
+    .card-list-filter-label {
+        margin-bottom: 5px;
+        font-size: 11px;
+    }
+
+    .card-list-filter-row {
+        flex-wrap: wrap;
+        overflow-x: visible;
+        padding-bottom: 0;
+        gap: 6px;
+    }
+
+    .card-list-filter-button {
+        flex: 1 1 calc(33.333% - 6px);
+        min-width: 0;
+        min-height: 32px;
+        padding: 6px 7px;
+        font-size: 11px;
+    }
+
+    .card-list-stats {
+        margin-bottom: 9px;
+        padding: 8px 10px;
+        font-size: 11px;
+        line-height: 1.45;
+    }
+}
