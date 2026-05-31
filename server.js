@@ -123,7 +123,9 @@ function createGameState(players) {
         phase: "battle",
         winner: null,
         gameOver: false,
-        waitingTrapChoice: false
+        waitingTrapChoice: false,
+        waitingTrapPlayerId: null,
+        waitingTrapPlayerName: ""
     };
 }
 
@@ -351,6 +353,8 @@ function requestTrapChoice({
     const choiceId = generateChoiceId();
 
     room.game.waitingTrapChoice = true;
+    room.game.waitingTrapPlayerId = targetPlayer.id;
+    room.game.waitingTrapPlayerName = targetPlayer.name;
 
     pendingTrapChoices[choiceId] = {
         roomId,
@@ -369,6 +373,8 @@ function requestTrapChoice({
         context,
         traps: allTraps
     });
+
+    emitGameUpdate(roomId);
 
     return true;
 }
@@ -510,7 +516,10 @@ function resolveTrapEffect(game, roomId, trapOwner, sourcePlayer, trap, context,
             cardType: trap.type,
             cardRarity: normalizeRarity(trap.rarity),
             hateText: `${damage.toLocaleString()}ダメージを跳ね返した`,
-            log: `${trapOwner.name} はダメージを跳ね返した`
+            log: `${trapOwner.name} はダメージを跳ね返した`,
+            damageText: `反射ダメージ：${damage.toLocaleString()}`,
+            damageAmount: damage,
+            trapDetailText: `反射：${sourcePlayer.name} に ${damage.toLocaleString()}ダメージ`
         });
 
         const pending = requestTrapEffectThenDamage({
@@ -551,7 +560,8 @@ function resolveTrapEffect(game, roomId, trapOwner, sourcePlayer, trap, context,
             cardType: trap.type,
             cardRarity: normalizeRarity(trap.rarity),
             hateText: "ヘイト変動を打ち消した",
-            log: `${trapOwner.name} はヘイト変動を打ち消した`
+            log: `${trapOwner.name} はヘイト変動を打ち消した`,
+            trapDetailText: "ヘイト変動を無効化"
         });
 
         return { canceled: true };
@@ -567,7 +577,8 @@ function resolveTrapEffect(game, roomId, trapOwner, sourcePlayer, trap, context,
             cardType: trap.type,
             cardRarity: normalizeRarity(trap.rarity),
             hateText: "罠効果を打ち消した",
-            log: `${trapOwner.name} は罠効果を打ち消した`
+            log: `${trapOwner.name} は罠効果を打ち消した`,
+            trapDetailText: "罠効果を無効化"
         });
 
         return { canceled: true };
@@ -585,7 +596,8 @@ function resolveTrapEffect(game, roomId, trapOwner, sourcePlayer, trap, context,
             cardType: trap.type,
             cardRarity: normalizeRarity(trap.rarity),
             hateText: "罠効果を打ち消し、相手の伏せカードを全破壊",
-            log: `${trapOwner.name} は罠効果を打ち消し、相手の伏せカードをすべて破壊した`
+            log: `${trapOwner.name} は罠効果を打ち消し、相手の伏せカードをすべて破壊した`,
+            trapDetailText: "罠効果を無効化 / 相手の伏せカードを全破壊"
         });
 
         return { canceled: true };
@@ -604,7 +616,11 @@ function resolveTrapEffect(game, roomId, trapOwner, sourcePlayer, trap, context,
             cardType: trap.type,
             cardRarity: normalizeRarity(trap.rarity),
             hateText: `${sourcePlayer.name} に ${damage.toLocaleString()}ダメージ / ヘイト +${hateChange}`,
-            log: `${trapOwner.name} の罠が ${sourcePlayer.name} に反撃した`
+            log: `${trapOwner.name} の罠が ${sourcePlayer.name} に反撃した`,
+            damageText: `罠ダメージ：${damage.toLocaleString()}`,
+            damageAmount: damage,
+            hateAmount: hateChange,
+            trapDetailText: `反撃：${sourcePlayer.name} に ${damage.toLocaleString()}ダメージ / ヘイト +${hateChange}`
         });
 
         changeHate(sourcePlayer, hateChange);
@@ -748,6 +764,8 @@ io.on("connection", socket => {
         if (!trapOwner || !sourcePlayer) {
             delete pendingTrapChoices[choiceId];
             game.waitingTrapChoice = false;
+            game.waitingTrapPlayerId = null;
+            game.waitingTrapPlayerName = "";
             return;
         }
 
@@ -757,6 +775,8 @@ io.on("connection", socket => {
 
         const finishPending = result => {
             game.waitingTrapChoice = false;
+            game.waitingTrapPlayerId = null;
+            game.waitingTrapPlayerName = "";
             callback(result);
         };
 

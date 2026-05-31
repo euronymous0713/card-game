@@ -3813,36 +3813,43 @@ button:disabled {
     }
 }
 
-/* ===== スマホ修正：伏せカード効果トグル・罠選択待ち表示・手札黒つぶれ防止 ===== */
+/* ===== 伏せカード効果トグル・罠選択待ち表示・手札黒つぶれ防止 ===== */
 .mobile-trap-waiting-notice {
     display: none;
 }
 
+body.battle-active .mobile-trap-waiting-notice {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    z-index: 10020;
+    display: none;
+    transform: translate(-50%, -50%);
+    width: min(420px, 84vw);
+    padding: 12px 18px;
+    border-radius: 999px;
+    color: #ffb000;
+    font-size: 17px;
+    font-weight: 900;
+    text-align: center;
+    background: rgba(0, 0, 0, 0.64);
+    border: 1px solid rgba(255, 176, 0, 0.78);
+    box-shadow:
+        0 0 18px rgba(255, 176, 0, 0.42),
+        0 0 32px rgba(0, 255, 225, 0.2);
+    pointer-events: none;
+}
+
+body.battle-active .mobile-trap-waiting-notice.show {
+    display: block;
+}
+
 @media (max-width: 768px) {
     body.battle-active .mobile-trap-waiting-notice {
-        position: fixed;
-        left: 50%;
         top: 52%;
-        z-index: 10020;
-        display: none;
-        transform: translate(-50%, -50%);
         width: min(300px, 82vw);
         padding: 10px 14px;
-        border-radius: 999px;
-        color: #ffb000;
         font-size: 14px;
-        font-weight: 900;
-        text-align: center;
-        background: rgba(0, 0, 0, 0.62);
-        border: 1px solid rgba(255, 176, 0, 0.72);
-        box-shadow:
-            0 0 16px rgba(255, 176, 0, 0.36),
-            0 0 28px rgba(0, 255, 225, 0.18);
-        pointer-events: none;
-    }
-
-    body.battle-active .mobile-trap-waiting-notice.show {
-        display: block;
     }
 
     body.battle-active .trap-choice-overlay {

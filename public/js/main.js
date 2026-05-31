@@ -615,13 +615,17 @@ window.onload = () => {
     }
 
     function updateTrapWaitingNotice() {
-        if (!isMobileLayout() || !latestGame || latestGame.gameOver) {
+        if (!latestGame || latestGame.gameOver) {
             hideTrapWaitingNotice();
             return;
         }
 
         if (latestGame.waitingTrapChoice) {
-            showTrapWaitingNotice("罠カード選択待ち");
+            const waitingName = latestGame.waitingTrapPlayerName || "他プレイヤー";
+            const isMeWaiting = latestGame.waitingTrapPlayerId === socket.id;
+            showTrapWaitingNotice(isMeWaiting
+                ? "あなたが罠を選択中"
+                : `${waitingName} が罠を選択中`);
         } else {
             hideTrapWaitingNotice();
         }
@@ -1117,6 +1121,10 @@ window.onload = () => {
 
         if (typeof card.healAmount === "number" && card.healAmount > 0) {
             lines.push(`回復：${Number(card.healAmount).toLocaleString()}`);
+        }
+
+        if (card.trapDetailText) {
+            lines.push(card.trapDetailText);
         }
 
         if (typeof card.hateAmount === "number" && card.hateAmount !== 0) {
