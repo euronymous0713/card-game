@@ -3804,3 +3804,11 @@ button:disabled {
         bottom: 156px !important;
     }
 }
+
+/* スマホ：カード効果と操作パネルは同じタイミングで開閉するため、個別の閉じるボタンは使わない */
+@media (max-width: 768px) {
+    body.battle-active .mobile-effect-close,
+    .mobile-effect-close {
+        display: none !important;
+    }
+}

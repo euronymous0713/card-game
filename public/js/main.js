@@ -582,7 +582,6 @@ window.onload = () => {
 
         mobileEffectOverlay.innerHTML = `
             <div class="mobile-effect-card">
-                <button class="mobile-effect-close" type="button" aria-label="閉じる">×</button>
                 <div class="mobile-effect-title-row">
                     <span class="mobile-effect-rarity ${rarityClass(rarity)}">${rarity}</span>
                     <strong>${card.name}</strong>
@@ -595,10 +594,6 @@ window.onload = () => {
 
         mobileEffectOverlay.classList.add("show");
 
-        const closeButton = mobileEffectOverlay.querySelector(".mobile-effect-close");
-        if (closeButton) {
-            closeButton.onclick = hideMobileEffect;
-        }
     }
 
     function hideMobileEffect() {
@@ -610,7 +605,7 @@ window.onload = () => {
 
     mobileEffectOverlay.onclick = event => {
         if (event.target === mobileEffectOverlay) {
-            hideMobileEffect();
+            clearMobileCardSelection();
         }
     };
 
@@ -648,7 +643,7 @@ window.onload = () => {
         const willOpen = !historyPanel.classList.contains("show-mobile-history");
 
         if (willOpen) {
-            hideMobileEffect();
+            clearMobileCardSelection();
         }
 
         historyPanel.classList.toggle("show-mobile-history");
@@ -932,6 +927,12 @@ window.onload = () => {
         const oldGame = previousGame;
 
         latestGame = game;
+
+        if (isMobileLayout() && selectedMobileCardInstanceId && !getSelectedMobileCard()) {
+            selectedMobileCardInstanceId = "";
+            hideMobileEffect();
+            updateMobileActionPanel();
+        }
 
         const enemies = latestGame.turnOrder.filter(player => {
             return player.id !== socket.id && !player.defeated;
