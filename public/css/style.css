@@ -2580,3 +2580,279 @@ button:disabled {
         font-size: 9px;
     }
 }
+
+/* スマホ版：ボタンかぶり解消・情報配置再整理 */
+@media (max-width: 768px) {
+    .battle-field {
+        padding: 5px 6px 118px !important;
+        gap: 5px !important;
+    }
+
+    .turn-panel {
+        order: 2 !important;
+        width: 100% !important;
+        min-height: 26px !important;
+        padding: 4px 8px !important;
+        font-size: 10px !important;
+        line-height: 1.15 !important;
+        background: rgba(0, 0, 0, 0.42) !important;
+        border-color: rgba(255, 0, 200, 0.22) !important;
+    }
+
+    .turn-panel span {
+        font-size: 12px !important;
+    }
+
+    .center-zone {
+        order: 3 !important;
+        display: grid !important;
+        grid-template-columns: 1fr auto !important;
+        grid-template-areas:
+            "message field";
+        align-items: stretch !important;
+        gap: 5px !important;
+        width: 100% !important;
+        flex: 0 0 auto !important;
+    }
+
+    .battle-message {
+        grid-area: message !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        min-height: 38px !important;
+        max-height: 38px !important;
+        margin: 0 !important;
+        padding: 5px 8px !important;
+        border-radius: 10px !important;
+        font-size: 10px !important;
+        line-height: 1.25 !important;
+        text-align: center !important;
+    }
+
+    .field-card-area {
+        grid-area: field !important;
+        width: 118px !important;
+        min-height: 38px !important;
+        margin: 0 !important;
+        padding: 4px 5px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+    }
+
+    .field-card-area h3 {
+        font-size: 8px !important;
+        margin-bottom: 3px !important;
+    }
+
+    #myFieldCards {
+        gap: 4px !important;
+    }
+
+    .set-card {
+        width: 42px !important;
+        height: 20px !important;
+        font-size: 8px !important;
+    }
+
+    .my-panel {
+        order: 4 !important;
+    }
+
+    .card-detail {
+        order: 5 !important;
+        width: 100% !important;
+        height: 82px !important;
+        min-height: 82px !important;
+        max-height: 82px !important;
+        padding: 7px 9px !important;
+        border-radius: 12px !important;
+        background: rgba(0, 0, 0, 0.44) !important;
+        border: 1px solid rgba(0, 255, 225, 0.18) !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+
+    .card-detail h3 {
+        margin-bottom: 3px !important;
+        font-size: 12px !important;
+        line-height: 1.15 !important;
+        color: #00ffe1 !important;
+    }
+
+    .card-detail p {
+        font-size: 9px !important;
+        line-height: 1.32 !important;
+    }
+
+    .history-panel {
+        order: 6 !important;
+        width: 100% !important;
+        height: 42px !important;
+        max-height: 42px !important;
+        min-height: 42px !important;
+        padding: 4px 7px !important;
+        display: grid !important;
+        grid-template-columns: 48px 1fr !important;
+        align-items: center !important;
+        gap: 5px !important;
+        overflow: hidden !important;
+        background: rgba(0, 0, 0, 0.32) !important;
+    }
+
+    .history-panel h3 {
+        margin: 0 !important;
+        font-size: 9px !important;
+        line-height: 1.1 !important;
+        white-space: nowrap !important;
+    }
+
+    .played-card-list {
+        max-height: 32px !important;
+        overflow: hidden !important;
+        gap: 2px !important;
+    }
+
+    .played-card {
+        padding: 2px 5px !important;
+        font-size: 8px !important;
+        line-height: 1.2 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+
+    .battle-buttons {
+        left: 6px !important;
+        right: 6px !important;
+        bottom: 94px !important;
+        z-index: 9400 !important;
+    }
+
+    body.mobile-card-action-open .battle-buttons {
+        bottom: 142px !important;
+    }
+
+    #endTurnButton {
+        min-height: 30px !important;
+        padding: 5px 10px !important;
+        font-size: 11px !important;
+        border-radius: 10px !important;
+    }
+
+    .hand-area {
+        height: 88px !important;
+        padding: 5px 6px 6px !important;
+        background: linear-gradient(180deg, rgba(10, 10, 20, 0.1), rgba(10, 10, 20, 0.96) 20%) !important;
+    }
+
+    .hand-card {
+        flex: 0 0 82px !important;
+        width: 82px !important;
+        min-width: 82px !important;
+        height: 76px !important;
+        padding: 5px !important;
+    }
+
+    .mobile-action-panel {
+        left: 6px !important;
+        right: 6px !important;
+        bottom: 88px !important;
+        padding: 5px 6px 6px !important;
+        border-radius: 12px !important;
+        z-index: 9500 !important;
+        background: rgba(0, 0, 0, 0.94) !important;
+        border: 1px solid rgba(255, 176, 0, 0.7) !important;
+        box-shadow: 0 0 18px rgba(255, 176, 0, 0.35) !important;
+    }
+
+    .mobile-selected-card-name {
+        max-width: 100% !important;
+        margin-bottom: 4px !important;
+        font-size: 10px !important;
+        line-height: 1.15 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+
+    .mobile-action-buttons {
+        grid-template-columns: 1.15fr 1fr 0.85fr !important;
+        gap: 5px !important;
+    }
+
+    .mobile-action-buttons button {
+        min-height: 34px !important;
+        padding: 5px 4px !important;
+        font-size: 11px !important;
+        border-radius: 9px !important;
+    }
+
+    .drop-zone,
+    .discard-panel {
+        display: none !important;
+    }
+}
+
+@media (max-width: 380px), (max-height: 720px) {
+    .battle-field {
+        padding-bottom: 106px !important;
+        gap: 3px !important;
+    }
+
+    .center-zone {
+        gap: 4px !important;
+    }
+
+    .battle-message,
+    .field-card-area {
+        min-height: 32px !important;
+        max-height: 32px !important;
+    }
+
+    .field-card-area {
+        width: 106px !important;
+    }
+
+    .set-card {
+        width: 38px !important;
+        height: 18px !important;
+    }
+
+    .card-detail {
+        height: 68px !important;
+        min-height: 68px !important;
+        max-height: 68px !important;
+        padding: 5px 7px !important;
+    }
+
+    .history-panel {
+        height: 34px !important;
+        max-height: 34px !important;
+        min-height: 34px !important;
+    }
+
+    .battle-buttons {
+        bottom: 82px !important;
+    }
+
+    body.mobile-card-action-open .battle-buttons {
+        bottom: 128px !important;
+    }
+
+    .hand-area {
+        height: 78px !important;
+    }
+
+    .hand-card {
+        flex-basis: 74px !important;
+        width: 74px !important;
+        min-width: 74px !important;
+        height: 67px !important;
+    }
+
+    .mobile-action-panel {
+        bottom: 78px !important;
+    }
+}

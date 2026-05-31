@@ -541,6 +541,7 @@ window.onload = () => {
 
     function clearMobileCardSelection() {
         selectedMobileCardInstanceId = "";
+        document.body.classList.remove("mobile-card-action-open");
         updateMobileActionPanel();
         renderHand();
     }
@@ -566,6 +567,7 @@ window.onload = () => {
 
         if (!isMobileLayout() || !card) {
             mobileActionPanel.classList.remove("show");
+            document.body.classList.remove("mobile-card-action-open");
             mobileActionPanel.innerHTML = "";
             return;
         }
@@ -594,6 +596,7 @@ window.onload = () => {
         `;
 
         mobileActionPanel.classList.add("show");
+        document.body.classList.add("mobile-card-action-open");
 
         document.getElementById("mobileUseCardButton").onclick = () => {
             playSelectedMobileCard();
@@ -1125,6 +1128,7 @@ window.onload = () => {
         selectedTargetId = "";
         selectedMobileCardInstanceId = "";
         draggedCard = null;
+        document.body.classList.remove("mobile-card-action-open");
         updateMobileActionPanel();
 
         const trapOverlay = document.getElementById("trapChoiceOverlay");
