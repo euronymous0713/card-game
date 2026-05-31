@@ -52,8 +52,15 @@ window.onload = () => {
     mobileHistoryButton.id = "mobileHistoryButton";
     mobileHistoryButton.className = "mobile-history-button";
     mobileHistoryButton.type = "button";
-    mobileHistoryButton.innerText = "使用履歴";
+    mobileHistoryButton.innerText = "👁";
+    mobileHistoryButton.setAttribute("aria-label", "使用履歴を表示");
+    mobileHistoryButton.title = "使用履歴";
     document.body.appendChild(mobileHistoryButton);
+
+    const mobileEffectOverlay = document.createElement("div");
+    mobileEffectOverlay.id = "mobileEffectOverlay";
+    mobileEffectOverlay.className = "mobile-effect-overlay";
+    document.body.appendChild(mobileEffectOverlay);
 
     let currentRoomId = "";
     let isHost = false;
@@ -556,6 +563,45 @@ window.onload = () => {
         return me.hand.find(card => card.instanceId === selectedMobileCardInstanceId) || null;
     }
 
+    function showMobileEffect(card) {
+        if (!isMobileLayout() || !mobileEffectOverlay || !card) return;
+
+        const rarity = normalizeRarity(card.rarity);
+
+        mobileEffectOverlay.innerHTML = `
+            <div class="mobile-effect-card">
+                <button class="mobile-effect-close" type="button" aria-label="閉じる">×</button>
+                <div class="mobile-effect-title-row">
+                    <span class="mobile-effect-rarity ${rarityClass(rarity)}">${rarity}</span>
+                    <strong>${card.name}</strong>
+                </div>
+                <div class="mobile-effect-type">${card.type || "カード"}</div>
+                <p>${card.effect || "効果なし"}</p>
+                ${card.hateText ? `<div class="mobile-effect-hate">${card.hateText}</div>` : ""}
+            </div>
+        `;
+
+        mobileEffectOverlay.classList.add("show");
+
+        const closeButton = mobileEffectOverlay.querySelector(".mobile-effect-close");
+        if (closeButton) {
+            closeButton.onclick = hideMobileEffect;
+        }
+    }
+
+    function hideMobileEffect() {
+        if (!mobileEffectOverlay) return;
+
+        mobileEffectOverlay.classList.remove("show");
+        mobileEffectOverlay.innerHTML = "";
+    }
+
+    mobileEffectOverlay.onclick = event => {
+        if (event.target === mobileEffectOverlay) {
+            hideMobileEffect();
+        }
+    };
+
     function clearMobileCardSelection() {
         selectedMobileCardInstanceId = "";
         document.body.classList.remove("mobile-card-action-open");
@@ -572,7 +618,7 @@ window.onload = () => {
         }
 
         selectedMobileCardInstanceId = card.instanceId;
-        cardDetail.innerHTML = cardDetailHtml(card);
+        showMobileEffect(card);
         renderHand();
         updateMobileActionPanel();
     }
@@ -625,18 +671,12 @@ window.onload = () => {
                 ${needsEnemyTarget && selectedEnemy ? ` / 対象：${selectedEnemy.name}` : ""}
                 ${needsEnemyTarget && !selectedEnemy ? " / 対象を選択してください" : ""}
             </div>
-            <div class="mobile-selected-card-effect">
-                ${card.effect || "効果なし"}
-            </div>
             <div class="mobile-action-buttons">
                 <button id="mobileUseCardButton" ${isMyTurn ? "" : "disabled"}>
                     使う
                 </button>
                 <button id="mobileDiscardCardButton" ${isMyTurn ? "" : "disabled"}>
                     捨てる
-                </button>
-                <button id="mobileCancelCardButton">
-                    解除
                 </button>
             </div>
         `;
@@ -652,10 +692,6 @@ window.onload = () => {
             discardSelectedMobileCard();
         };
 
-        document.getElementById("mobileCancelCardButton").onclick = () => {
-            clearMobileCardSelection();
-            resetCardDetail();
-        };
     }
 
     function playSelectedMobileCard() {
@@ -688,6 +724,7 @@ window.onload = () => {
         });
 
         selectedMobileCardInstanceId = "";
+        hideMobileEffect();
         updateMobileActionPanel();
     }
 
@@ -709,6 +746,7 @@ window.onload = () => {
         });
 
         selectedMobileCardInstanceId = "";
+        hideMobileEffect();
         updateMobileActionPanel();
     }
 
@@ -1022,7 +1060,11 @@ window.onload = () => {
                 };
 
                 setCard.onclick = () => {
-                    cardDetail.innerHTML = cardDetailHtml(card);
+                    if (isMobileLayout()) {
+                        showMobileEffect(card);
+                    } else {
+                        cardDetail.innerHTML = cardDetailHtml(card);
+                    }
                 };
             }
 
@@ -1192,6 +1234,8 @@ window.onload = () => {
         if (trapOverlay) {
             trapOverlay.remove();
         }
+
+        hideMobileEffect();
 
         setScreenMode("title");
         lobbyScreen.style.display = "none";

@@ -3517,3 +3517,156 @@ button:disabled {
         display: none !important;
     }
 }
+
+
+/* ===== スマホ操作UI調整：履歴ボタン左・効果は中央透過モーダル ===== */
+@media (max-width: 768px) {
+    body.battle-active .card-detail {
+        display: none !important;
+    }
+
+    body.battle-active .mobile-history-button {
+        left: 8px !important;
+        right: auto !important;
+        top: 82px !important;
+        width: 42px !important;
+        height: 42px !important;
+        min-height: 42px !important;
+        padding: 0 !important;
+        border-radius: 999px !important;
+        font-size: 21px !important;
+        line-height: 1 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        background: rgba(0, 0, 0, 0.68) !important;
+        border: 1px solid rgba(0, 255, 225, 0.55) !important;
+        box-shadow: 0 0 14px rgba(0, 255, 225, 0.22) !important;
+    }
+
+    body.battle-active .mobile-action-panel {
+        bottom: 104px !important;
+        left: 8px !important;
+        right: 8px !important;
+        padding: 6px !important;
+        background: rgba(0, 0, 0, 0.78) !important;
+    }
+
+    body.battle-active .mobile-selected-card-name {
+        margin-bottom: 5px !important;
+        text-align: center !important;
+        font-size: 11px !important;
+    }
+
+    body.battle-active .mobile-selected-card-effect {
+        display: none !important;
+    }
+
+    body.battle-active .mobile-action-buttons {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 8px !important;
+    }
+
+    body.battle-active .mobile-action-buttons button {
+        min-height: 36px !important;
+        font-size: 12px !important;
+    }
+
+    .mobile-effect-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 9900;
+        display: none;
+        justify-content: center;
+        align-items: center;
+        padding: 16px;
+        pointer-events: none;
+        background: rgba(0, 0, 0, 0.08);
+    }
+
+    .mobile-effect-overlay.show {
+        display: flex;
+        pointer-events: auto;
+    }
+
+    .mobile-effect-card {
+        position: relative;
+        width: min(330px, 88vw);
+        max-height: 52dvh;
+        overflow-y: auto;
+        padding: 16px 16px 14px;
+        border-radius: 18px;
+        background: rgba(0, 0, 0, 0.68);
+        border: 1px solid rgba(0, 255, 225, 0.48);
+        box-shadow:
+            0 0 20px rgba(0, 255, 225, 0.25),
+            0 0 40px rgba(255, 0, 200, 0.18);
+        color: white;
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+    }
+
+    .mobile-effect-close {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        width: 30px !important;
+        height: 30px !important;
+        min-height: 30px !important;
+        padding: 0 !important;
+        border-radius: 999px !important;
+        font-size: 20px !important;
+        line-height: 1 !important;
+        background: rgba(255, 255, 255, 0.12) !important;
+        border: 1px solid rgba(255, 255, 255, 0.22) !important;
+    }
+
+    .mobile-effect-title-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding-right: 34px;
+        color: #ffb000;
+        font-size: 17px;
+        line-height: 1.25;
+    }
+
+    .mobile-effect-title-row strong {
+        min-width: 0;
+    }
+
+    .mobile-effect-rarity {
+        flex: 0 0 auto;
+        min-width: 32px;
+        padding: 3px 7px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 900;
+        text-align: center;
+    }
+
+    .mobile-effect-type {
+        margin-top: 8px;
+        color: #00ffe1;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .mobile-effect-card p {
+        margin-top: 8px;
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 13px;
+        line-height: 1.55;
+    }
+
+    .mobile-effect-hate {
+        margin-top: 10px;
+        color: #ffb000;
+        font-size: 12px;
+        font-weight: 800;
+    }
+
+    body:not(.battle-active) .mobile-effect-overlay {
+        display: none !important;
+    }
+}
