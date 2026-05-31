@@ -80,6 +80,7 @@ window.onload = () => {
     let selectedTargetId = "";
     let selectedMobileCardInstanceId = "";
     let selectedMobileFieldCardKey = "";
+    let endTurnRequestPending = false;
 
     function setScreenMode(mode) {
         document.body.classList.toggle("title-active", mode === "title");
@@ -623,9 +624,13 @@ window.onload = () => {
         if (latestGame.waitingTrapChoice) {
             const waitingName = latestGame.waitingTrapPlayerName || "他プレイヤー";
             const isMeWaiting = latestGame.waitingTrapPlayerId === socket.id;
-            showTrapWaitingNotice(isMeWaiting
-                ? "あなたが罠を選択中"
-                : `${waitingName} が罠を選択中`);
+
+            if (isMeWaiting) {
+                hideTrapWaitingNotice();
+                return;
+            }
+
+            showTrapWaitingNotice(`${waitingName} が罠を選択中`);
         } else {
             hideTrapWaitingNotice();
         }
@@ -970,6 +975,7 @@ window.onload = () => {
         const oldGame = previousGame;
 
         latestGame = game;
+        endTurnRequestPending = false;
 
         updateTrapWaitingNotice();
 
@@ -1096,7 +1102,7 @@ window.onload = () => {
 
         dropZone.classList.toggle("active-drop-zone", isMyTurn);
         discardZone.classList.toggle("active-discard-zone", isMyTurn);
-        endTurnButton.disabled = !isMyTurn;
+        endTurnButton.disabled = !isMyTurn || endTurnRequestPending || latestGame.waitingTrapChoice;
     }
 
     function playedCardExtraText(card) {
@@ -1317,7 +1323,22 @@ window.onload = () => {
     };
 
     endTurnButton.onclick = () => {
-        socket.emit("endTurn", currentRoomId);
+        if (!latestGame || latestGame.gameOver) return;
+        if (endTurnRequestPending) return;
+
+        const currentPlayer = latestGame.turnOrder[latestGame.currentTurnIndex];
+
+        if (!currentPlayer || currentPlayer.id !== socket.id) return;
+        if (latestGame.waitingTrapChoice) return;
+
+        endTurnRequestPending = true;
+        endTurnButton.disabled = true;
+
+        socket.emit("endTurn", {
+            roomId: currentRoomId,
+            turnIndex: latestGame.currentTurnIndex,
+            playerId: socket.id
+        });
     };
 
     function showGameOver(winner) {

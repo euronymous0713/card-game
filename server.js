@@ -1103,7 +1103,11 @@ io.on("connection", socket => {
         emitGameUpdate(roomId);
     });
 
-    socket.on("endTurn", roomId => {
+    socket.on("endTurn", payload => {
+        const roomId = typeof payload === "string" ? payload : payload?.roomId;
+        const requestedTurnIndex = typeof payload === "object" ? payload.turnIndex : null;
+        const requestedPlayerId = typeof payload === "object" ? payload.playerId : null;
+
         const room = rooms[roomId];
         if (!room || !room.game) return;
 
@@ -1115,9 +1119,22 @@ io.on("connection", socket => {
             return;
         }
 
+        if (
+            typeof requestedTurnIndex === "number" &&
+            requestedTurnIndex !== game.currentTurnIndex
+        ) {
+            emitGameUpdate(roomId);
+            return;
+        }
+
         const currentPlayer = getCurrentPlayer(game);
 
         if (!currentPlayer || currentPlayer.id !== socket.id) {
+            if (requestedPlayerId === socket.id) {
+                emitGameUpdate(roomId);
+                return;
+            }
+
             socket.emit("errorMessage", "今はあなたのターンではありません");
             return;
         }
