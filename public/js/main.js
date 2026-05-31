@@ -1133,6 +1133,10 @@ window.onload = () => {
             lines.push(card.trapDetailText);
         }
 
+        if (card.specialDetailText) {
+            lines.push(card.specialDetailText);
+        }
+
         if (typeof card.hateAmount === "number" && card.hateAmount !== 0) {
             lines.push(`ヘイト：${card.hateAmount > 0 ? "+" : ""}${card.hateAmount}`);
         }
