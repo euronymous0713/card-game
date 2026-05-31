@@ -3712,3 +3712,67 @@ button:disabled {
         color: rgba(255, 255, 255, 0.68) !important;
     }
 }
+
+/* ===== スマホ操作パネル位置・履歴ボタン位置・効果表示タップ抜け調整 ===== */
+@media (max-width: 768px) {
+    body.battle-active .mobile-history-button {
+        top: 128px !important;
+        left: 8px !important;
+        right: auto !important;
+    }
+
+    body.battle-active .mobile-action-panel {
+        bottom: 148px !important;
+        left: 8px !important;
+        right: 8px !important;
+        padding: 7px !important;
+        z-index: 9600 !important;
+    }
+
+    body.battle-active .mobile-action-panel.show {
+        display: block !important;
+    }
+
+    body.battle-active .mobile-action-buttons {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 8px !important;
+    }
+
+    body.battle-active .mobile-action-buttons button {
+        min-height: 36px !important;
+        font-size: 12px !important;
+    }
+
+    body.battle-active .mobile-selected-card-name {
+        max-width: 100% !important;
+        margin-bottom: 6px !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+
+    body.battle-active .mobile-effect-overlay.show {
+        pointer-events: none !important;
+    }
+
+    body.battle-active .mobile-effect-card {
+        pointer-events: auto !important;
+        max-height: 42dvh !important;
+        background: rgba(0, 0, 0, 0.58) !important;
+    }
+}
+
+@media (max-width: 380px), (max-height: 720px) {
+    body.battle-active .mobile-history-button {
+        top: 118px !important;
+    }
+
+    body.battle-active .mobile-action-panel {
+        bottom: 136px !important;
+    }
+
+    body.battle-active .mobile-action-buttons button {
+        min-height: 32px !important;
+        font-size: 11px !important;
+    }
+}
