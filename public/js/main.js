@@ -24,6 +24,7 @@ window.onload = () => {
     const turnPanel = document.getElementById("turnPanel");
     const battleMessage = document.getElementById("battleMessage");
     const playedCardList = document.getElementById("playedCardList");
+    const historyPanel = document.querySelector(".history-panel");
     const endTurnButton = document.getElementById("endTurnButton");
     const myFieldCards = document.getElementById("myFieldCards");
 
@@ -577,11 +578,13 @@ window.onload = () => {
     }
 
     function closeMobileHistory() {
+        if (!historyPanel) return;
+
         historyPanel.classList.remove("show-mobile-history");
     }
 
     function toggleMobileHistory() {
-        if (!isMobileLayout()) return;
+        if (!isMobileLayout() || !historyPanel) return;
 
         historyPanel.classList.toggle("show-mobile-history");
     }
@@ -590,13 +593,15 @@ window.onload = () => {
         toggleMobileHistory();
     };
 
-    historyPanel.onclick = event => {
-        if (!isMobileLayout()) return;
+    if (historyPanel) {
+        historyPanel.onclick = event => {
+            if (!isMobileLayout()) return;
 
-        if (event.target === historyPanel) {
-            closeMobileHistory();
-        }
-    };
+            if (event.target === historyPanel) {
+                closeMobileHistory();
+            }
+        };
+    }
 
     function updateMobileActionPanel() {
         if (!mobileActionPanel) return;
