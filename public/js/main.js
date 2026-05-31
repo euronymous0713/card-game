@@ -63,6 +63,15 @@ window.onload = () => {
     let selectedTargetId = "";
     let selectedMobileCardInstanceId = "";
 
+    function setScreenMode(mode) {
+        document.body.classList.toggle("title-active", mode === "title");
+        document.body.classList.toggle("lobby-active", mode === "lobby");
+        document.body.classList.toggle("battle-active", mode === "battle");
+    }
+
+    setScreenMode("title");
+
+
     createTrapChoiceModalStyle();
 
     function createTrapChoiceModalStyle() {
@@ -741,6 +750,8 @@ window.onload = () => {
         isHost = true;
         isReady = false;
 
+        setScreenMode("lobby");
+        setScreenMode("lobby");
         titleScreen.style.display = "none";
         lobbyScreen.style.display = "flex";
         battleScreen.style.display = "none";
@@ -825,6 +836,7 @@ window.onload = () => {
     };
 
     socket.on("gameStarted", () => {
+        setScreenMode("battle");
         titleScreen.style.display = "none";
         lobbyScreen.style.display = "none";
         battleScreen.style.display = "block";
@@ -1176,6 +1188,7 @@ window.onload = () => {
             trapOverlay.remove();
         }
 
+        setScreenMode("title");
         lobbyScreen.style.display = "none";
         battleScreen.style.display = "none";
         titleScreen.style.display = "flex";

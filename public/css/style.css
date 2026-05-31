@@ -3425,3 +3425,95 @@ button:disabled {
         display: none !important;
     }
 }
+
+
+/* ===== タイトル画面バグ修正 =====
+   スマホ用バトルUIの fixed / overflow 指定がタイトル・ロビーに漏れないようにする。
+   バトル中だけ body.battle-active が付くため、タイトル/ロビーでは通常レイアウトに戻す。
+*/
+@media (max-width: 768px) {
+    body:not(.battle-active) {
+        width: 100% !important;
+        min-height: 100vh !important;
+        height: auto !important;
+        padding: 18px !important;
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+    }
+
+    body.title-active,
+    body.lobby-active {
+        background: linear-gradient(135deg, #0f0f1a, #1a1a2e, #16213e) !important;
+    }
+
+    body:not(.battle-active) #battleScreen {
+        display: none !important;
+    }
+
+    body:not(.battle-active) .title-screen,
+    body:not(.battle-active) #lobbyScreen {
+        position: static !important;
+        inset: auto !important;
+        transform: none !important;
+        width: 100% !important;
+        max-width: 700px !important;
+        height: auto !important;
+        min-height: auto !important;
+        padding: 0 !important;
+        overflow: visible !important;
+        z-index: auto !important;
+    }
+
+    body:not(.battle-active) .game-title {
+        font-size: clamp(30px, 10vw, 52px) !important;
+        line-height: 1.15 !important;
+        margin-bottom: 18px !important;
+        white-space: nowrap !important;
+    }
+
+    body:not(.battle-active) .subtitle {
+        font-size: 14px !important;
+        line-height: 1.75 !important;
+        margin-bottom: 24px !important;
+    }
+
+    body:not(.battle-active) #nameInput {
+        max-width: 320px !important;
+        height: auto !important;
+        padding: 14px !important;
+        margin-bottom: 24px !important;
+        font-size: 16px !important;
+    }
+
+    body:not(.battle-active) .menu-buttons,
+    body:not(.battle-active) .lobby-buttons {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        width: min(320px, 100%) !important;
+        gap: 12px !important;
+    }
+
+    body:not(.battle-active) button {
+        min-height: 48px !important;
+        padding: 12px 18px !important;
+        font-size: 16px !important;
+    }
+
+    body:not(.battle-active) .creator-credit {
+        position: fixed !important;
+        right: 12px !important;
+        bottom: 10px !important;
+        font-size: 11px !important;
+        opacity: 0.8 !important;
+    }
+
+    body:not(.battle-active) .mobile-action-panel,
+    body:not(.battle-active) .mobile-history-button,
+    body:not(.battle-active) .mobile-history-overlay {
+        display: none !important;
+    }
+}
