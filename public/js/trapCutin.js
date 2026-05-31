@@ -14,8 +14,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            background:
-                radial-gradient(circle, rgba(255, 0, 200, 0.18), rgba(0, 0, 0, 0.72));
+            background: radial-gradient(circle, rgba(255, 0, 200, 0.18), rgba(0, 0, 0, 0.72));
             animation: trapCutinFade 1.45s ease-in-out forwards;
         }
 
@@ -24,17 +23,8 @@
             width: 160%;
             height: 180px;
             transform: rotate(-8deg);
-            background:
-                linear-gradient(90deg,
-                    transparent,
-                    rgba(255, 176, 0, 0.08),
-                    rgba(255, 176, 0, 0.88),
-                    rgba(255, 0, 200, 0.92),
-                    rgba(0, 255, 225, 0.85),
-                    transparent);
-            box-shadow:
-                0 0 32px rgba(255, 176, 0, 0.75),
-                0 0 70px rgba(255, 0, 200, 0.45);
+            background: linear-gradient(90deg, transparent, rgba(255, 176, 0, 0.08), rgba(255, 176, 0, 0.88), rgba(255, 0, 200, 0.92), rgba(0, 255, 225, 0.85), transparent);
+            box-shadow: 0 0 32px rgba(255, 176, 0, 0.75), 0 0 70px rgba(255, 0, 200, 0.45);
             animation: trapSlashMove 1.45s ease-in-out forwards;
         }
 
@@ -47,9 +37,7 @@
             color: white;
             background: rgba(0, 0, 0, 0.82);
             border: 2px solid rgba(255, 176, 0, 0.9);
-            box-shadow:
-                0 0 28px rgba(255, 176, 0, 0.7),
-                0 0 70px rgba(255, 0, 200, 0.35);
+            box-shadow: 0 0 28px rgba(255, 176, 0, 0.7), 0 0 70px rgba(255, 0, 200, 0.35);
             animation: trapBoxPop 1.45s ease-in-out forwards;
         }
 
@@ -117,17 +105,17 @@
     function handleUpdateGame(game) {
         if (!game || !Array.isArray(game.playedCards)) return;
 
-        const trapLogs = game.playedCards.filter(log => {
-            return log.actionType === "trap" || log.actionType === "trapEffect";
+        const trapActivateLogs = game.playedCards.filter(log => {
+            return log.actionType === "trap";
         });
 
-        if (trapLogs.length <= latestTrapLogCount) {
-            latestTrapLogCount = trapLogs.length;
+        if (trapActivateLogs.length <= latestTrapLogCount) {
+            latestTrapLogCount = trapActivateLogs.length;
             return;
         }
 
-        const newLogs = trapLogs.slice(latestTrapLogCount);
-        latestTrapLogCount = trapLogs.length;
+        const newLogs = trapActivateLogs.slice(latestTrapLogCount);
+        latestTrapLogCount = trapActivateLogs.length;
 
         newLogs.forEach(log => {
             enqueueCutin(log);
@@ -150,18 +138,13 @@
         const overlay = document.createElement("div");
         overlay.className = "trap-cutin-overlay";
 
-        const label =
-            log.actionType === "trap"
-                ? "TRAP ACTIVATED"
-                : "TRAP EFFECT";
-
         overlay.innerHTML = `
             <div class="trap-cutin-slash"></div>
 
             <div class="trap-cutin-box">
-                <div class="trap-cutin-label">${label}</div>
+                <div class="trap-cutin-label">TRAP ACTIVATED</div>
                 <div class="trap-cutin-player">${log.playerName || "プレイヤー"}</div>
-                <div class="trap-cutin-card">${log.cardName || "伏せカード"}</div>
+                <div class="trap-cutin-card">${log.cardName || "罠カード"}</div>
                 <div class="trap-cutin-effect">${log.hateText || log.log || "罠が発動した"}</div>
             </div>
         `;
