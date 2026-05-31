@@ -576,18 +576,19 @@ window.onload = () => {
 
         mobileActionPanel.innerHTML = `
             <div class="mobile-selected-card-name">
-                選択中：${card.name}
-                ${needsEnemyTarget && selectedEnemy ? ` → ${selectedEnemy.name}` : ""}
+                ${card.name}
+                ${needsEnemyTarget && selectedEnemy ? ` / 対象：${selectedEnemy.name}` : ""}
+                ${needsEnemyTarget && !selectedEnemy ? " / 対象を選択してください" : ""}
             </div>
             <div class="mobile-action-buttons">
                 <button id="mobileUseCardButton" ${isMyTurn ? "" : "disabled"}>
-                    使用する
+                    使う
                 </button>
                 <button id="mobileDiscardCardButton" ${isMyTurn ? "" : "disabled"}>
                     捨てる
                 </button>
                 <button id="mobileCancelCardButton">
-                    キャンセル
+                    解除
                 </button>
             </div>
         `;

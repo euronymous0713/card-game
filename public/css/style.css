@@ -1566,3 +1566,516 @@ button:disabled {
     }
 }
 
+
+/* =========================================================
+   スマホ版 第2版：ゴッドフィールド風 操作優先レイアウト
+   PC版の配置には影響しません。
+========================================================= */
+@media (max-width: 768px) {
+    html,
+    body {
+        width: 100%;
+        min-height: 100%;
+        overflow-x: hidden;
+    }
+
+    body {
+        display: block;
+        padding: 0;
+        align-items: stretch;
+        justify-content: flex-start;
+        background: linear-gradient(180deg, #080814, #15152b 45%, #080814);
+    }
+
+    button {
+        min-height: 44px;
+        touch-action: manipulation;
+    }
+
+    .title-screen,
+    #lobbyScreen {
+        min-height: 100svh;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .game-title {
+        white-space: normal;
+        line-height: 1.08;
+    }
+
+    #battleScreen {
+        width: 100%;
+        height: 100svh;
+        padding: 0;
+        overflow: hidden;
+    }
+
+    .battle-field {
+        width: 100%;
+        max-width: none;
+        height: 100svh;
+        min-height: 100svh;
+        margin: 0;
+        padding: 8px 8px 230px;
+        border: none;
+        border-radius: 0;
+        overflow-y: auto;
+        overflow-x: hidden;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        background:
+            radial-gradient(circle at top, rgba(255, 0, 200, 0.16), transparent 34%),
+            linear-gradient(180deg, rgba(0, 255, 225, 0.08), rgba(0, 0, 0, 0.34));
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .enemy-slots,
+    .turn-panel,
+    .history-panel,
+    .discard-panel,
+    .center-zone,
+    .my-panel,
+    .card-detail,
+    .battle-buttons,
+    .hand-area {
+        position: static;
+        inset: auto;
+        left: auto;
+        right: auto;
+        top: auto;
+        bottom: auto;
+        transform: none;
+    }
+
+    .enemy-slots {
+        order: 1;
+        display: flex;
+        grid-template-columns: none;
+        gap: 8px;
+        width: 100%;
+        padding: 2px 0 4px;
+        overflow-x: auto;
+        align-items: stretch;
+        scrollbar-width: none;
+    }
+
+    .enemy-slots::-webkit-scrollbar {
+        display: none;
+    }
+
+    .enemy-panel {
+        flex: 0 0 76%;
+        width: 76%;
+        max-width: 300px;
+        height: 112px;
+        min-height: 112px;
+        padding: 10px 12px;
+        border-radius: 16px;
+        font-size: 13px;
+        text-align: left;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .enemy-name,
+    .my-name {
+        margin-bottom: 4px;
+        font-size: 14px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .follower-line {
+        margin-top: 4px;
+        font-size: 20px;
+    }
+
+    .owakon-text {
+        font-size: 21px;
+    }
+
+    .panel-hate {
+        margin-top: 6px;
+        font-size: 14px;
+        letter-spacing: 2px;
+    }
+
+    .enemy-field-cards {
+        justify-content: flex-start;
+        margin-top: 6px;
+        gap: 6px;
+    }
+
+    .mini-set-card {
+        width: 30px;
+        height: 20px;
+        font-size: 11px;
+    }
+
+    .turn-panel {
+        order: 2;
+        width: 100%;
+        min-width: 0;
+        padding: 8px 12px;
+        border-radius: 14px;
+        font-size: 12px;
+        position: sticky;
+        top: 6px;
+        z-index: 20;
+        backdrop-filter: blur(8px);
+    }
+
+    .turn-panel span {
+        font-size: 16px;
+    }
+
+    .center-zone {
+        order: 3;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .battle-message {
+        width: 100%;
+        margin: 0;
+        padding: 10px 12px;
+        border-radius: 14px;
+        font-size: 13px;
+        line-height: 1.45;
+    }
+
+    .drop-zone,
+    .discard-panel {
+        display: none !important;
+    }
+
+    .field-card-area {
+        width: 100%;
+        margin: 0;
+        padding: 9px 10px;
+        border-radius: 14px;
+    }
+
+    .field-card-area h3 {
+        text-align: left;
+        font-size: 11px;
+    }
+
+    #myFieldCards {
+        justify-content: flex-start;
+    }
+
+    .set-card {
+        width: 58px;
+        height: 30px;
+    }
+
+    .my-panel {
+        order: 4;
+        width: 100%;
+        height: auto;
+        min-height: 88px;
+        padding: 10px 12px;
+        border-radius: 16px;
+        text-align: left;
+    }
+
+    .card-detail {
+        order: 5;
+        width: 100%;
+        height: auto;
+        min-height: 92px;
+        max-height: 132px;
+        padding: 10px 12px;
+        border-radius: 14px;
+        overflow-y: auto;
+        background: rgba(0, 0, 0, 0.42);
+        border: 1px solid rgba(0, 255, 225, 0.18);
+    }
+
+    .card-detail h3 {
+        margin-bottom: 5px;
+        font-size: 15px;
+    }
+
+    .card-detail p {
+        font-size: 12px;
+    }
+
+    .history-panel {
+        order: 6;
+        width: 100%;
+        max-height: 110px;
+        padding: 10px 12px;
+        border-radius: 14px;
+    }
+
+    .history-panel h3 {
+        margin-bottom: 6px;
+        font-size: 13px;
+    }
+
+    .played-card-list {
+        max-height: 72px;
+    }
+
+    .played-card {
+        padding: 6px 8px;
+        font-size: 11px;
+    }
+
+    .battle-buttons {
+        order: 8;
+        position: fixed;
+        left: 10px;
+        right: 10px;
+        bottom: 174px;
+        z-index: 9400;
+        width: auto;
+    }
+
+    #endTurnButton {
+        width: 100%;
+        min-height: 42px;
+        padding: 8px 12px;
+        font-size: 15px;
+        border-radius: 14px;
+        box-shadow: 0 0 20px rgba(255, 100, 0, 0.28);
+    }
+
+    .hand-area {
+        order: 7;
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 9300;
+        width: 100%;
+        padding: 8px 10px 76px;
+        display: grid;
+        grid-template-columns: repeat(4, minmax(76px, 1fr));
+        gap: 7px;
+        align-items: stretch;
+        justify-content: stretch;
+        background:
+            linear-gradient(180deg, rgba(8, 8, 20, 0), rgba(8, 8, 20, 0.94) 16%, rgba(8, 8, 20, 0.98));
+        border-top: 1px solid rgba(0, 255, 225, 0.18);
+        backdrop-filter: blur(10px);
+    }
+
+    .hand-card {
+        width: 100%;
+        min-width: 0;
+        height: 122px;
+        padding: 8px;
+        border-radius: 13px;
+        touch-action: manipulation;
+        user-select: none;
+    }
+
+    .hand-card:hover {
+        transform: none;
+    }
+
+    .selected-mobile-hand-card {
+        transform: translateY(-10px) scale(1.02) !important;
+        border-color: #ffb000 !important;
+        box-shadow:
+            0 0 20px rgba(255, 176, 0, 0.72),
+            0 0 32px rgba(255, 0, 200, 0.34) !important;
+    }
+
+    .card-name {
+        font-size: 13px;
+        line-height: 1.15;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .card-type {
+        font-size: 11px;
+    }
+
+    .card-hate {
+        font-size: 9px;
+        line-height: 1.25;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .card-rarity-badge {
+        min-width: 25px;
+        padding: 2px 5px;
+        font-size: 9px;
+    }
+
+    .mobile-action-panel {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 9600;
+        display: none;
+        padding: 8px 10px 10px;
+        border-radius: 18px 18px 0 0;
+        background: rgba(0, 0, 0, 0.96);
+        border-top: 2px solid rgba(255, 176, 0, 0.8);
+        box-shadow:
+            0 -10px 28px rgba(0, 0, 0, 0.55),
+            0 0 28px rgba(255, 176, 0, 0.28);
+    }
+
+    .mobile-action-panel.show {
+        display: block;
+    }
+
+    .mobile-selected-card-name {
+        margin-bottom: 7px;
+        font-size: 12px;
+        font-weight: 900;
+        color: #ffb000;
+        text-align: center;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .mobile-action-buttons {
+        display: grid;
+        grid-template-columns: 1.2fr 1fr 0.85fr;
+        gap: 7px;
+    }
+
+    .mobile-action-buttons button {
+        min-height: 46px;
+        padding: 8px 6px;
+        border-radius: 13px;
+        font-size: 13px;
+        line-height: 1.2;
+    }
+
+    #mobileUseCardButton {
+        background: linear-gradient(135deg, #00ffd5, #0099ff);
+    }
+
+    #mobileDiscardCardButton {
+        background: linear-gradient(135deg, #ff9900, #ff3c00);
+    }
+
+    #mobileCancelCardButton {
+        background: linear-gradient(135deg, #555, #222);
+    }
+
+    .turn-announcement,
+    .effect-layer,
+    .game-over-overlay {
+        position: fixed;
+    }
+
+    .turn-announcement-text {
+        max-width: calc(100vw - 28px);
+        padding: 16px 22px;
+        font-size: 26px;
+        text-align: center;
+    }
+
+    .card-use-effect {
+        width: min(92vw, 360px);
+        padding: 14px 18px;
+        font-size: 19px;
+        text-align: center;
+    }
+
+    .draw-effect,
+    .discard-effect {
+        left: 50%;
+        bottom: 225px;
+        transform: translateX(-50%);
+        font-size: 17px;
+    }
+
+    .damage-popup {
+        font-size: 26px;
+    }
+
+    .trap-choice-overlay {
+        align-items: flex-end;
+        padding: 8px;
+    }
+
+    .trap-choice-box {
+        width: 100%;
+        max-height: 88svh;
+        overflow-y: auto;
+        padding: 15px;
+        border-radius: 18px;
+    }
+
+    .trap-choice-box h2 {
+        font-size: 20px;
+    }
+
+    .trap-choice-card {
+        padding: 11px;
+    }
+
+    .trap-choice-card strong {
+        font-size: 15px;
+    }
+
+    .trap-choice-card span {
+        font-size: 12px;
+    }
+
+    .game-over-box {
+        width: min(92vw, 360px);
+        padding: 28px 22px;
+    }
+
+    .game-over-box h2 {
+        font-size: 26px;
+    }
+}
+
+@media (max-width: 430px) {
+    .battle-field {
+        padding-bottom: 238px;
+    }
+
+    .enemy-panel {
+        flex-basis: 82%;
+        width: 82%;
+    }
+
+    .hand-area {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        padding-bottom: 76px;
+    }
+
+    .hand-card {
+        height: 128px;
+    }
+
+    .battle-buttons {
+        bottom: 188px;
+    }
+
+    .mobile-action-buttons {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    #mobileCancelCardButton {
+        grid-column: 1 / -1;
+        min-height: 38px;
+    }
+}
