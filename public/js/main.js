@@ -351,7 +351,7 @@ window.onload = () => {
                 return { label, description, amount, turns };
             };
 
-            icon.onmouseenter = () => {
+            const showPcStatusDetail = () => {
                 if (isMobileLayout()) return;
 
                 const { label, description, amount, turns } = renderStatusDetail();
@@ -365,16 +365,34 @@ window.onload = () => {
                 `;
             };
 
-            icon.onmouseleave = () => {
+            const hidePcStatusDetail = () => {
                 if (isMobileLayout()) return;
-
                 resetCardDetail();
             };
 
+            icon.onmouseenter = showPcStatusDetail;
+            icon.onmouseover = showPcStatusDetail;
+            icon.onfocus = showPcStatusDetail;
+
+            icon.onmouseleave = hidePcStatusDetail;
+            icon.onmouseout = event => {
+                if (icon.contains(event.relatedTarget)) return;
+                hidePcStatusDetail();
+            };
+            icon.onblur = hidePcStatusDetail;
+
+            icon.onmousedown = event => {
+                event.stopPropagation();
+            };
+
             icon.onclick = event => {
+                event.preventDefault();
                 event.stopPropagation();
 
-                if (!isMobileLayout()) return;
+                if (!isMobileLayout()) {
+                    showPcStatusDetail();
+                    return;
+                }
 
                 const { label, description, amount, turns } = renderStatusDetail();
 
@@ -388,6 +406,32 @@ window.onload = () => {
             };
         });
     }
+
+    document.addEventListener("mouseover", event => {
+        const icon = event.target.closest?.(".status-effect-icon");
+        if (!icon || isMobileLayout()) return;
+
+        const label = icon.dataset.statusLabel || "状態異常";
+        const description = icon.dataset.statusDescription || "";
+        const amount = Number(icon.dataset.statusAmount || 0);
+        const turns = Number(icon.dataset.statusTurns || 0);
+
+        cardDetail.innerHTML = `
+            <h3>${label}</h3>
+            <p class="detail-type">状態異常</p>
+            <p>${description}</p>
+            ${amount > 0 ? `<p>効果量：${amount.toLocaleString()}</p>` : ""}
+            <p class="detail-hate">残り${turns}ターン</p>
+        `;
+    });
+
+    document.addEventListener("mouseout", event => {
+        const icon = event.target.closest?.(".status-effect-icon");
+        if (!icon || isMobileLayout()) return;
+        if (icon.contains(event.relatedTarget)) return;
+
+        resetCardDetail();
+    });
 
     function rarityLabel(rarity) {
         const labels = {

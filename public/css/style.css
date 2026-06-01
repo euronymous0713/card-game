@@ -4725,3 +4725,17 @@ body.battle-active .mobile-trap-waiting-notice.show {
         min-height: 16px !important;
     }
 }
+/* 敵プレイヤー側の状態異常アイコンにもホバーが確実に届くようにする */
+.enemy-panel .status-effect-row,
+.my-panel .status-effect-row {
+    position: relative;
+    z-index: 5;
+    pointer-events: auto !important;
+}
+
+.enemy-panel .status-effect-icon,
+.my-panel .status-effect-icon {
+    position: relative;
+    z-index: 6;
+    pointer-events: auto !important;
+}
