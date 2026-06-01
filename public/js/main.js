@@ -619,6 +619,7 @@ window.onload = () => {
                 selectedMobileFieldCardKey = "";
                 selectedMobileStatusKey = statusKey;
                 document.body.classList.remove("mobile-card-action-open");
+        document.body.classList.remove("game-over-active");
                 updateMobileActionPanel();
                 renderHand();
 
@@ -1802,6 +1803,7 @@ window.onload = () => {
     };
 
     socket.on("gameStarted", () => {
+        document.body.classList.remove("game-over-active");
         setScreenMode("battle");
         titleScreen.style.display = "none";
         lobbyScreen.style.display = "none";
@@ -2212,6 +2214,14 @@ window.onload = () => {
 
     function showGameOver(winner) {
         const isWinner = winner.id === socket.id;
+
+        document.body.classList.add("game-over-active");
+        closeMobileHistory();
+        closeMobileSettings();
+        hideMobileEffect();
+        hideTrapWaitingNotice();
+        document.body.classList.remove("mobile-card-action-open");
+        updateMobileActionPanel();
 
         gameOverText.innerText = isWinner
             ? "勝利！最後まで生き残った"

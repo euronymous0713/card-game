@@ -3962,232 +3962,40 @@
     }
 }
 
+
 /* =========================================================
-   スマホ版：タイトル/ルームのクレジット重なり修正 v2
+   スマホ版：ゲーム終了時の操作ブロック
+   - 勝利/敗北表示中は「次へ」以外を押せないようにする
    ========================================================= */
 @media (max-width: 768px) {
-    body:not(.battle-active) {
-        padding-bottom: calc(92px + env(safe-area-inset-bottom)) !important;
-    }
-
-    body:not(.battle-active) .title-screen,
-    body:not(.battle-active) #lobbyScreen {
-        margin-bottom: calc(42px + env(safe-area-inset-bottom)) !important;
-    }
-
-    body:not(.battle-active) .creator-credit {
-        position: fixed !important;
-        left: 0 !important;
-        right: 0 !important;
-        bottom: calc(8px + env(safe-area-inset-bottom)) !important;
-        z-index: 10 !important;
-        width: 100% !important;
-        padding: 0 12px !important;
-        text-align: center !important;
-        font-size: 9px !important;
-        line-height: 1.35 !important;
-        opacity: 0.58 !important;
+    body.battle-active.game-over-active .mobile-history-button,
+    body.battle-active.game-over-active .mobile-settings-button,
+    body.battle-active.game-over-active .mobile-action-panel,
+    body.battle-active.game-over-active .mobile-effect-overlay,
+    body.battle-active.game-over-active .mobile-trap-waiting-notice,
+    body.battle-active.game-over-active .battle-buttons,
+    body.battle-active.game-over-active .hand-area {
         pointer-events: none !important;
     }
 
-    body.battle-active .creator-credit {
-        display: none !important;
-    }
-}
-
-/* =========================================================
-   スマホ版：バトル中設定ボタン / 設定パネル
-   ========================================================= */
-.mobile-settings-button,
-.mobile-settings-overlay {
-    display: none;
-}
-
-@media (max-width: 768px) {
-    body.battle-active .mobile-settings-button {
-        position: fixed !important;
-        left: 8px !important;
-        top: 132px !important;
-        z-index: 9700 !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        width: 42px !important;
-        height: 42px !important;
-        min-height: 42px !important;
-        padding: 0 !important;
-        border-radius: 999px !important;
-        font-size: 20px !important;
-        line-height: 1 !important;
-        color: white !important;
-        background: rgba(0, 0, 0, 0.68) !important;
-        border: 1px solid rgba(255, 176, 0, 0.62) !important;
-        box-shadow: 0 0 14px rgba(255, 176, 0, 0.24) !important;
-    }
-
-    body:not(.battle-active) .mobile-settings-button,
-    body:not(.battle-active) .mobile-settings-overlay {
+    body.battle-active.game-over-active .mobile-history-button,
+    body.battle-active.game-over-active .mobile-settings-button,
+    body.battle-active.game-over-active .mobile-action-panel,
+    body.battle-active.game-over-active .mobile-effect-overlay,
+    body.battle-active.game-over-active .mobile-trap-waiting-notice,
+    body.battle-active.game-over-active .battle-buttons {
         display: none !important;
     }
 
-    body.battle-active .mobile-settings-overlay {
+    body.battle-active.game-over-active .game-over-overlay {
         position: fixed !important;
         inset: 0 !important;
-        z-index: 9900 !important;
-        display: none !important;
-        align-items: center !important;
-        justify-content: center !important;
-        padding: 16px !important;
-        background: rgba(0, 0, 0, 0.48) !important;
-        backdrop-filter: blur(3px) !important;
-        -webkit-backdrop-filter: blur(3px) !important;
+        z-index: 30000 !important;
+        pointer-events: auto !important;
     }
 
-    body.battle-active .mobile-settings-overlay.show-mobile-settings {
-        display: flex !important;
-    }
-
-    .mobile-settings-box {
-        width: min(320px, 90vw) !important;
-        padding: 16px !important;
-        border-radius: 18px !important;
-        color: white !important;
-        background: rgba(0, 0, 0, 0.88) !important;
-        border: 1px solid rgba(0, 255, 225, 0.42) !important;
-        box-shadow:
-            0 0 22px rgba(0, 255, 225, 0.22),
-            0 0 34px rgba(255, 0, 200, 0.12) !important;
-    }
-
-    .mobile-settings-header {
-        display: flex !important;
-        align-items: center !important;
-        justify-content: space-between !important;
-        gap: 12px !important;
-        margin-bottom: 14px !important;
-    }
-
-    .mobile-settings-header strong {
-        color: #00ffe1 !important;
-        font-size: 18px !important;
-    }
-
-    #mobileSettingsCloseButton {
-        width: 32px !important;
-        height: 32px !important;
-        min-height: 32px !important;
-        padding: 0 !important;
-        border-radius: 999px !important;
-        font-size: 20px !important;
-        line-height: 1 !important;
-        background: rgba(255, 255, 255, 0.12) !important;
-        border: 1px solid rgba(255, 255, 255, 0.22) !important;
-    }
-
-    .mobile-settings-room-id {
-        display: flex !important;
-        align-items: center !important;
-        justify-content: space-between !important;
-        gap: 10px !important;
-        margin-bottom: 14px !important;
-        padding: 11px 12px !important;
-        border-radius: 12px !important;
-        background: rgba(255, 255, 255, 0.07) !important;
-        border: 1px solid rgba(255, 255, 255, 0.12) !important;
-    }
-
-    .mobile-settings-room-id span {
-        color: rgba(255, 255, 255, 0.68) !important;
-        font-size: 12px !important;
-        font-weight: 800 !important;
-    }
-
-    .mobile-settings-room-id strong {
-        color: #ffb000 !important;
-        font-size: 20px !important;
-        letter-spacing: 1px !important;
-    }
-
-    .mobile-battle-leave-button {
-        width: 100% !important;
-        min-height: 42px !important;
-        padding: 10px 12px !important;
-        border-radius: 12px !important;
-        font-size: 13px !important;
-        background: linear-gradient(135deg, #ff4d4d, #8a0000) !important;
-        box-shadow: 0 0 16px rgba(255, 48, 48, 0.26) !important;
-    }
-}
-
-@media (max-width: 380px), (max-height: 720px) {
-    body.battle-active .mobile-settings-button {
-        left: 6px !important;
-        top: 120px !important;
-        width: 38px !important;
-        height: 38px !important;
-        min-height: 38px !important;
-        font-size: 18px !important;
-    }
-}
-
-
-
-/* =========================================================
-   スマホ版：設定ボタンを使用履歴の下へ移動
-   ========================================================= */
-@media (max-width: 768px) {
-    body.battle-active .mobile-settings-button {
-        left: 8px !important;
-        top: 214px !important;
-        width: 42px !important;
-        height: 42px !important;
-        min-height: 42px !important;
-        z-index: 9700 !important;
-    }
-}
-
-@media (max-width: 380px), (max-height: 720px) {
-    body.battle-active .mobile-settings-button {
-        left: 6px !important;
-        top: 196px !important;
-        width: 38px !important;
-        height: 38px !important;
-        min-height: 38px !important;
-    }
-}
-
-/* =========================================================
-   スマホ版：設定ボタン最終位置調整
-   - 使用履歴ボタンと同じサイズに統一
-   - 使用履歴ボタンの下へ少し余裕を持って配置
-   ========================================================= */
-@media (max-width: 768px) {
-    body.battle-active .mobile-settings-button {
-        left: 8px !important;
-        top: 224px !important;
-        width: 42px !important;
-        height: 42px !important;
-        min-width: 42px !important;
-        min-height: 42px !important;
-        max-width: 42px !important;
-        max-height: 42px !important;
-        padding: 0 !important;
-        font-size: 20px !important;
-        line-height: 1 !important;
-        border-radius: 999px !important;
-    }
-}
-
-@media (max-width: 380px), (max-height: 720px) {
-    body.battle-active .mobile-settings-button {
-        left: 6px !important;
-        top: 206px !important;
-        width: 38px !important;
-        height: 38px !important;
-        min-width: 38px !important;
-        min-height: 38px !important;
-        max-width: 38px !important;
-        max-height: 38px !important;
-        font-size: 18px !important;
+    body.battle-active.game-over-active .game-over-box,
+    body.battle-active.game-over-active #nextButton {
+        pointer-events: auto !important;
     }
 }
