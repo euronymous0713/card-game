@@ -58,11 +58,6 @@
 }
 
 @media (min-width: 769px) {
-    .my-panel {
-        height: 165px !important;
-        bottom: 190px !important;
-        padding-bottom: 12px !important;
-    }
 
     .my-panel .status-effect-row,
     .enemy-panel .status-effect-row {
@@ -76,9 +71,10 @@
 }
 
 /* =========================================================
-   PC版：他プレイヤー情報の見切れ対策
-   - 伏せカード + 状態異常が同時にある時も収まるように高さを拡張
-   - 上部敵枠が広がる分、中央/左右の情報枠を少し下へ調整
+   PC版：他プレイヤー情報の見切れ対策＋微調整
+   - 他プレイヤー枠は前回よりほんの少しだけ縦幅を減らす
+   - 自分プレイヤー情報はほんの少しだけ下方向へ広げる
+   - 伏せカード + 状態異常が同時にある時も収まりやすくする
    - スマホ版には影響させない
    ========================================================= */
 
@@ -89,9 +85,9 @@
     }
 
     .enemy-panel {
-        height: 192px !important;
-        min-height: 192px !important;
-        padding: 14px 18px !important;
+        height: 184px !important;
+        min-height: 184px !important;
+        padding: 13px 18px !important;
         overflow: visible !important;
     }
 
@@ -119,14 +115,14 @@
     }
 
     .enemy-panel .status-effect-row {
-        margin-top: 7px !important;
-        min-height: 26px !important;
+        margin-top: 6px !important;
+        min-height: 24px !important;
         gap: 5px !important;
     }
 
     .enemy-panel .enemy-field-cards {
-        margin-top: 7px !important;
-        min-height: 24px !important;
+        margin-top: 6px !important;
+        min-height: 22px !important;
         gap: 7px !important;
     }
 
@@ -137,16 +133,16 @@
     }
 
     .turn-panel {
-        top: 240px !important;
+        top: 232px !important;
     }
 
     .history-panel {
-        top: 352px !important;
-        max-height: 178px !important;
+        top: 344px !important;
+        max-height: 184px !important;
     }
 
     .played-card-list {
-        max-height: 114px !important;
+        max-height: 120px !important;
     }
 
     .center-zone {
@@ -164,15 +160,22 @@
     }
 
     .card-detail {
-        top: 282px !important;
-        height: 205px !important;
-        max-height: 205px !important;
+        top: 278px !important;
+        height: 208px !important;
+        max-height: 208px !important;
     }
 
     .my-panel {
-        bottom: 184px !important;
-        height: 154px !important;
-        min-height: 154px !important;
+        bottom: 178px !important;
+        height: 166px !important;
+        min-height: 166px !important;
+        padding-bottom: 14px !important;
+        overflow: visible !important;
+    }
+
+    .my-panel .status-effect-row {
+        margin-top: 8px !important;
+        min-height: 26px !important;
     }
 
     .discard-panel {
