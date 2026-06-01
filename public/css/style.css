@@ -211,7 +211,7 @@ button:disabled {
 .enemy-panel {
     width: 100%;
     min-width: 0;
-    height: 160px;
+    height: 165px;
     padding: 16px 20px;
     border-radius: 18px;
     font-size: 16px;
@@ -309,7 +309,7 @@ button:disabled {
 }
 
 .enemy-field-cards {
-    margin-top: 6px;
+    margin-top: 10px;
     display: flex;
     justify-content: center;
     gap: 8px;
@@ -1792,3 +1792,33 @@ body.battle-active .mobile-trap-waiting-notice.show {
    - 自分プレイヤー情報の状態異常がはみ出ないようにする
    - 自分プレイヤー情報と自分伏せカードの高さを揃える
    ========================================================= */
+
+/* =========================================================
+   PC版：カード一覧モーダルの高さ固定
+   - 絞り込み後にカード枚数が少なくても画面位置がズレないようにする
+   - 検索・絞り込み条件は上部に固定し、カード一覧だけをスクロールする
+   - スマホ版の折りたたみ表示には影響させない
+   ========================================================= */
+
+@media (min-width: 769px) {
+    .card-list-modal {
+        height: min(760px, 90vh) !important;
+        min-height: min(760px, 90vh) !important;
+    }
+
+    .card-list-header,
+    .card-list-controls {
+        flex: 0 0 auto !important;
+    }
+
+    .card-list-body {
+        flex: 1 1 auto !important;
+        min-height: 0 !important;
+        overflow-y: auto !important;
+        padding-right: 8px !important;
+    }
+
+    .card-list-grid {
+        align-content: start !important;
+    }
+}
