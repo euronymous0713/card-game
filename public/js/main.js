@@ -252,6 +252,126 @@ window.onload = () => {
             : `${player.followers.toLocaleString()} フォロワー`;
     }
 
+    function statusInfo(type) {
+        const infos = {
+            slipDamage: {
+                label: "炎上",
+                icon: "🔥",
+                description: "ターン開始時にスリップダメージを受けます。"
+            },
+            burn: {
+                label: "炎上",
+                icon: "🔥",
+                description: "ターン開始時にスリップダメージを受けます。"
+            },
+            freeze: {
+                label: "凍結",
+                icon: "🧊",
+                description: "ターン開始時に行動できず、ターンを失います。"
+            },
+            mute: {
+                label: "ミュート",
+                icon: "🔇",
+                description: "ヘイト上昇を受けません。"
+            },
+            shadowban: {
+                label: "シャドウバン",
+                icon: "👻",
+                description: "自分の攻撃ダメージが500下がります。"
+            },
+            expose: {
+                label: "晒し中",
+                icon: "👁",
+                description: "受ける攻撃ダメージが300増えます。"
+            }
+        };
+
+        return infos[type] || {
+            label: "状態異常",
+            icon: "⚠️",
+            description: "特殊な状態異常です。"
+        };
+    }
+
+    function statusEffectTitle(effect) {
+        const info = statusInfo(effect.type);
+        const amountText = effect.amount ? ` / ${Number(effect.amount).toLocaleString()}ダメージ` : "";
+        const turnText = `残り${Number(effect.remainingTurns || 0)}ターン`;
+
+        return `${effect.label || info.label}：${turnText}${amountText}\n${effect.description || info.description}`;
+    }
+
+    function statusEffectsHtml(player) {
+        const effects = Array.isArray(player?.statusEffects)
+            ? player.statusEffects.filter(effect => effect && Number(effect.remainingTurns || 0) > 0)
+            : [];
+
+        if (effects.length === 0) {
+            return `<div class="status-effect-row empty-status-effect-row">状態異常なし</div>`;
+        }
+
+        return `
+            <div class="status-effect-row">
+                ${effects.map((effect, index) => {
+                    const info = statusInfo(effect.type);
+                    const label = effect.label || info.label;
+                    const description = effect.description || info.description;
+                    const amount = Number(effect.amount || 0);
+                    const turns = Number(effect.remainingTurns || 0);
+
+                    return `
+                        <button
+                            type="button"
+                            class="status-effect-icon status-${effect.type || "unknown"}"
+                            data-status-label="${label}"
+                            data-status-description="${description}"
+                            data-status-amount="${amount}"
+                            data-status-turns="${turns}"
+                            title="${statusEffectTitle(effect)}"
+                            aria-label="${label}"
+                        >
+                            ${effect.icon || info.icon}<span>${turns}</span>
+                        </button>
+                    `;
+                }).join("")}
+            </div>
+        `;
+    }
+
+    function bindStatusEffectEvents(container) {
+        if (!container) return;
+
+        container.querySelectorAll(".status-effect-icon").forEach(icon => {
+            icon.onclick = event => {
+                event.stopPropagation();
+
+                const label = icon.dataset.statusLabel || "状態異常";
+                const description = icon.dataset.statusDescription || "";
+                const amount = Number(icon.dataset.statusAmount || 0);
+                const turns = Number(icon.dataset.statusTurns || 0);
+
+                if (isMobileLayout()) {
+                    showMobileEffect({
+                        name: label,
+                        rarity: "C",
+                        type: "状態異常",
+                        effect: `${description}${amount > 0 ? `\n効果量：${amount.toLocaleString()}` : ""}`,
+                        hateText: `残り${turns}ターン`
+                    });
+                    return;
+                }
+
+                cardDetail.innerHTML = `
+                    <h3>${label}</h3>
+                    <p class="detail-type">状態異常</p>
+                    <p>${description}</p>
+                    ${amount > 0 ? `<p>効果量：${amount.toLocaleString()}</p>` : ""}
+                    <p class="detail-hate">残り${turns}ターン</p>
+                `;
+            };
+        });
+    }
+
     function rarityLabel(rarity) {
         const labels = {
             C: "C / コモン",
@@ -1358,7 +1478,10 @@ window.onload = () => {
                 <div class="panel-hate ${me.hate >= 3 ? "max-hate-text" : ""}">
                     ${hateIcons(me.hate)}
                 </div>
+                ${statusEffectsHtml(me)}
             `;
+
+            bindStatusEffectEvents(myPanel);
         }
 
         enemySlots.forEach((slot, index) => {
@@ -1378,10 +1501,13 @@ window.onload = () => {
                     <div class="panel-hate ${enemy.hate >= 3 ? "max-hate-text" : ""}">
                         ${hateIcons(enemy.hate)}
                     </div>
+                    ${statusEffectsHtml(enemy)}
                     <div class="enemy-field-cards">
                         ${enemy.fieldCards.map(() => `<span class="mini-set-card">伏</span>`).join("")}
                     </div>
                 `;
+
+                bindStatusEffectEvents(slot);
 
                 slot.onclick = () => {
                     if (enemy.defeated) return;

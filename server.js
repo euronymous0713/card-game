@@ -140,19 +140,147 @@ function getAlivePlayers(game) {
     return game.turnOrder.filter(player => !player.defeated);
 }
 
+const STATUS_INFO = {
+    slipDamage: {
+        label: "炎上",
+        icon: "🔥",
+        description: "ターン開始時にスリップダメージを受ける"
+    },
+    burn: {
+        label: "炎上",
+        icon: "🔥",
+        description: "ターン開始時にスリップダメージを受ける"
+    },
+    freeze: {
+        label: "凍結",
+        icon: "🧊",
+        description: "ターン開始時に行動できず、ターンを失う"
+    },
+    mute: {
+        label: "ミュート",
+        icon: "🔇",
+        description: "ヘイト上昇を受けない"
+    },
+    shadowban: {
+        label: "シャドウバン",
+        icon: "👻",
+        description: "攻撃ダメージが500下がる"
+    },
+    expose: {
+        label: "晒し中",
+        icon: "👁",
+        description: "受ける攻撃ダメージが300増える"
+    }
+};
+
+function statusInfo(type) {
+    return STATUS_INFO[type] || {
+        label: "状態異常",
+        icon: "⚠️",
+        description: "特殊な状態異常"
+    };
+}
+
+function hasStatusEffect(player, type) {
+    if (!player || !Array.isArray(player.statusEffects)) return false;
+
+    return player.statusEffects.some(effect => {
+        return effect &&
+            effect.type === type &&
+            Number(effect.remainingTurns || 0) > 0;
+    });
+}
+
+function addStatusEffect(player, effect) {
+    if (!player || !effect || !effect.type) return;
+
+    if (!Array.isArray(player.statusEffects)) {
+        player.statusEffects = [];
+    }
+
+    const info = statusInfo(effect.type);
+    const remainingTurns = Math.max(1, Number(effect.remainingTurns || effect.durationTurns || 1));
+
+    player.statusEffects.push({
+        type: effect.type,
+        label: effect.label || info.label,
+        icon: effect.icon || info.icon,
+        description: effect.description || info.description,
+        amount: Number(effect.amount || 0),
+        remainingTurns,
+        sourcePlayerId: effect.sourcePlayerId || "",
+        sourcePlayerName: effect.sourcePlayerName || "状態異常",
+        cardName: effect.cardName || info.label,
+        cardRarity: normalizeRarity(effect.cardRarity)
+    });
+}
+
+function decreaseStatusEffect(player, type, amount = 1) {
+    if (!player || !Array.isArray(player.statusEffects)) return;
+
+    player.statusEffects = player.statusEffects
+        .map(effect => {
+            if (!effect || effect.type !== type) return effect;
+
+            return {
+                ...effect,
+                remainingTurns: Number(effect.remainingTurns || 0) - amount
+            };
+        })
+        .filter(effect => {
+            return effect && Number(effect.remainingTurns || 0) > 0;
+        });
+}
+
+function getHighestFollowerPlayers(game) {
+    const alivePlayers = getAlivePlayers(game);
+    const highest = Math.max(...alivePlayers.map(player => player.followers));
+
+    return alivePlayers.filter(player => player.followers === highest);
+}
+
+function getLowestFollowerPlayers(game) {
+    const alivePlayers = getAlivePlayers(game);
+    const lowest = Math.min(...alivePlayers.map(player => player.followers));
+
+    return alivePlayers.filter(player => player.followers === lowest);
+}
+
+function isRankTarget(game, player, condition) {
+    if (!game || !player || !condition) return false;
+
+    if (condition === "leader" || condition === "highestFollowers" || condition === "top") {
+        return getHighestFollowerPlayers(game).some(candidate => candidate.id === player.id);
+    }
+
+    if (condition === "lowestFollowers" || condition === "last" || condition === "underdog") {
+        return getLowestFollowerPlayers(game).some(candidate => candidate.id === player.id);
+    }
+
+    return false;
+}
+
 function applyTurnStartEffects(game, player) {
     if (!player || player.defeated) return;
 
-    if (Array.isArray(player.statusEffects) && player.statusEffects.length > 0) {
-        const remainingEffects = [];
+    if (!Array.isArray(player.statusEffects) || player.statusEffects.length === 0) {
+        return;
+    }
 
-        player.statusEffects.forEach(effect => {
-            if (!effect || effect.type !== "slipDamage") return;
+    const remainingEffects = [];
 
+    player.statusEffects.forEach(effect => {
+        if (!effect) return;
+
+        const type = effect.type || "unknown";
+        const remainingTurns = Number(effect.remainingTurns || 0);
+
+        if (remainingTurns <= 0) return;
+
+        if (type === "slipDamage" || type === "burn") {
             const damage = Number(effect.amount || 0);
-            const remainingTurns = Number(effect.remainingTurns || 0);
 
-            if (damage > 0 && remainingTurns > 0) {
+            if (damage > 0) {
                 applyDamage(game, player, damage);
 
                 addLog(game, {
@@ -160,13 +288,14 @@ function applyTurnStartEffects(game, player) {
                     playerId: effect.sourcePlayerId || "",
                     playerName: effect.sourcePlayerName || "状態異常",
                     targetName: player.name,
-                    cardName: effect.cardName || "スリップダメージ",
+                    cardName: effect.cardName || "炎上",
                     cardType: "状態異常",
                     cardRarity: effect.cardRarity || "C",
                     hateText: `${player.name} に ${formatNumber(damage)} スリップダメージ`,
-                    log: `${player.name} はスリップダメージを受けた`,
-                    damageText: `スリップダメージ：${formatNumber(damage)}`,
-                    damageAmount: damage
+                    log: `${player.name} は炎上ダメージを受けた`,
+                    damageText: `炎上ダメージ：${formatNumber(damage)}`,
+                    damageAmount: damage,
+                    specialText: `状態異常：${effect.label || "炎上"}`
                 });
             }
 
@@ -178,10 +307,15 @@ function applyTurnStartEffects(game, player) {
                     remainingTurns: nextRemainingTurns
                 });
             }
-        });
 
-        player.statusEffects = remainingEffects;
-    }
+            return;
+        }
+
+        // 凍結はターンスキップ処理側で残りターンを減らすため、ここでは減らしません。
+        remainingEffects.push(effect);
+    });
+
+    player.statusEffects = remainingEffects;
 }
 
 function moveToNextAliveTurn(game) {
@@ -235,17 +369,19 @@ function moveToNextAliveTurn(game) {
 
         if (Number(nextPlayer.skipTurns || 0) > 0) {
             nextPlayer.skipTurns -= 1;
+            decreaseStatusEffect(nextPlayer, "freeze");
 
             addLog(game, {
                 actionType: "skipTurn",
                 playerId: nextPlayer.id,
                 playerName: nextPlayer.name,
                 targetName: nextPlayer.name,
-                cardName: "行動不能",
+                cardName: "凍結",
                 cardType: "状態異常",
                 cardRarity: "C",
                 hateText: "ターンをスキップ",
-                log: `${nextPlayer.name} は行動不能でターンを失った`
+                log: `${nextPlayer.name} は凍結でターンを失った`,
+                specialText: "状態異常：凍結"
             });
 
             continue;
@@ -294,7 +430,16 @@ function applyDamage(game, target, amount) {
 }
 
 function changeHate(player, amount) {
-    player.hate = clamp(player.hate + amount, 0, 3);
+    const value = Number(amount || 0);
+
+    if (!player || value === 0) return false;
+
+    if (value > 0 && hasStatusEffect(player, "mute")) {
+        return false;
+    }
+
+    player.hate = clamp(player.hate + value, 0, 3);
+    return true;
 }
 
 function applyHateBonus(card, sourcePlayer, targetPlayer, baseDamage) {
@@ -347,6 +492,52 @@ function applyHateBonus(card, sourcePlayer, targetPlayer, baseDamage) {
     return { damage, details };
 }
 
+function applyRankBonus(game, card, sourcePlayer, targetPlayer, baseDamage) {
+    let damage = Number(baseDamage || 0);
+    const details = [];
+
+    if (!Array.isArray(card.rankBonus)) {
+        return { damage, details };
+    }
+
+    card.rankBonus.forEach(bonus => {
+        const condition = bonus.condition || bonus.target || bonus.rank;
+
+        if (!isRankTarget(game, targetPlayer, condition)) return;
+
+        const label = condition === "leader" || condition === "highestFollowers" || condition === "top"
+            ? "トップ対象"
+            : "最下位対象";
+
+        const bonusDamage = Number(bonus.extraDamage ?? bonus.damage ?? bonus.bonusDamage ?? 0);
+
+        if (bonusDamage > 0) {
+            damage += bonusDamage;
+            details.push(`${label}：+${formatNumber(bonusDamage)}ダメージ`);
+        }
+
+        const targetHateChange = Number(bonus.targetHateChange ?? 0);
+
+        if (targetHateChange !== 0 && targetPlayer) {
+            const changed = changeHate(targetPlayer, targetHateChange);
+            details.push(changed
+                ? `${label}：対象ヘイト ${targetHateChange > 0 ? "+" : ""}${targetHateChange}`
+                : `${label}：対象ヘイト変動なし`);
+        }
+
+        const selfHateChange = Number(bonus.selfHateChange ?? 0);
+
+        if (selfHateChange !== 0 && sourcePlayer) {
+            const changed = changeHate(sourcePlayer, selfHateChange);
+            details.push(changed
+                ? `${label}：自分ヘイト ${selfHateChange > 0 ? "+" : ""}${selfHateChange}`
+                : `${label}：自分ヘイト変動なし`);
+        }
+    });
+
+    return { damage, details };
+}
+
 function applySpecialEffect(game, card, caster, target) {
     const effectType = card.effectType;
     const details = [];
@@ -379,7 +570,15 @@ function applySpecialEffect(game, card, caster, target) {
 
         const skipTurns = Math.max(1, Number(card.skipTurns || 1));
         target.skipTurns = Number(target.skipTurns || 0) + skipTurns;
-        details.push(`行動不能：${skipTurns}ターン`);
+        addStatusEffect(target, {
+            type: "freeze",
+            remainingTurns: skipTurns,
+            sourcePlayerId: caster.id,
+            sourcePlayerName: caster.name,
+            cardName: card.name,
+            cardRarity: card.rarity
+        });
+        details.push(`凍結：${skipTurns}ターン`);
         return details;
     }
 
@@ -389,18 +588,14 @@ function applySpecialEffect(game, card, caster, target) {
         const slipDamage = Math.max(0, Number(card.slipDamage || 0));
         const durationTurns = Math.max(1, Number(card.durationTurns || 1));
 
-        if (!Array.isArray(target.statusEffects)) {
-            target.statusEffects = [];
-        }
-
-        target.statusEffects.push({
+        addStatusEffect(target, {
             type: "slipDamage",
             amount: slipDamage,
             remainingTurns: durationTurns,
             sourcePlayerId: caster.id,
             sourcePlayerName: caster.name,
             cardName: card.name,
-            cardRarity: normalizeRarity(card.rarity)
+            cardRarity: card.rarity
         });
 
         details.push(`スリップダメージ：${formatNumber(slipDamage)} × ${durationTurns}ターン`);
@@ -424,6 +619,40 @@ function applySpecialEffect(game, card, caster, target) {
 
         target.hand.splice(0, discardCount);
         details.push(`手札破壊：${discardCount}枚`);
+        return details;
+    }
+
+    if (effectType === "applyStatus") {
+        if (!target) return details;
+
+        const statusType = card.statusType || "burn";
+        const durationTurns = Math.max(1, Number(card.durationTurns || 1));
+        const amount = Number(card.statusAmount || card.slipDamage || 0);
+        const info = statusInfo(statusType);
+
+        addStatusEffect(target, {
+            type: statusType,
+            amount,
+            remainingTurns: durationTurns,
+            sourcePlayerId: caster.id,
+            sourcePlayerName: caster.name,
+            cardName: card.name,
+            cardRarity: card.rarity
+        });
+
+        if (statusType === "freeze") {
+            target.skipTurns = Number(target.skipTurns || 0) + durationTurns;
+        }
+
+        details.push(`${info.label}：${durationTurns}ターン${amount > 0 ? ` / ${formatNumber(amount)}ダメージ` : ""}`);
+        return details;
+    }
+
+    if (effectType === "clearSelfStatus") {
+        const before = Array.isArray(caster.statusEffects) ? caster.statusEffects.length : 0;
+        caster.statusEffects = [];
+        caster.skipTurns = 0;
+        details.push(`状態異常解除：${before}個`);
         return details;
     }
 
@@ -1197,12 +1426,20 @@ io.on("connection", socket => {
                 let totalDamage = 0;
 
                 targets.forEach(enemy => {
-                    const bonusResult = applyHateBonus(usedCard, caster, enemy, usedCard.damage);
-                    let damage = bonusResult.damage;
+                    const hateBonusResult = applyHateBonus(usedCard, caster, enemy, usedCard.damage);
+                    const rankBonusResult = applyRankBonus(game, usedCard, caster, enemy, hateBonusResult.damage);
+                    let damage = rankBonusResult.damage;
+
+                    if (hasStatusEffect(caster, "shadowban")) {
+                        damage = Math.max(0, damage - 500);
+                    }
+
+                    if (hasStatusEffect(enemy, "expose")) {
+                        damage += 300;
+                    }
 
                     if (enemy.hate >= 3) {
                         damage *= 2;
-                        bonusResult.details.push("ヘイト3：ダメージ2倍");
                     }
 
                     applyDamage(game, enemy, damage);
@@ -1224,12 +1461,24 @@ io.on("connection", socket => {
                 return;
             }
 
-            const bonusResult = applyHateBonus(usedCard, caster, finalTarget, usedCard.damage);
-            let damage = bonusResult.damage;
+            const hateBonusResult = applyHateBonus(usedCard, caster, finalTarget, usedCard.damage);
+            const rankBonusResult = applyRankBonus(game, usedCard, caster, finalTarget, hateBonusResult.damage);
+            let damage = rankBonusResult.damage;
+            const bonusDetails = [...hateBonusResult.details, ...rankBonusResult.details];
+
+            if (hasStatusEffect(caster, "shadowban")) {
+                damage = Math.max(0, damage - 500);
+                bonusDetails.push("シャドウバン：-500ダメージ");
+            }
+
+            if (hasStatusEffect(finalTarget, "expose")) {
+                damage += 300;
+                bonusDetails.push("晒し中：+300ダメージ");
+            }
 
             if (finalTarget.hate >= 3) {
                 damage *= 2;
-                bonusResult.details.push("ヘイト3：ダメージ2倍");
+                bonusDetails.push("ヘイト3：ダメージ2倍");
             }
 
             const afterDamage = result => {
@@ -1253,7 +1502,7 @@ io.on("connection", socket => {
                     damageAmount: result.canceled ? 0 : damage,
                     originalDamageAmount: damage,
                     damageCanceled: Boolean(result.canceled),
-                    bonusText: bonusResult.details.join(" / ")
+                    bonusText: bonusDetails.join(" / ")
                 });
             };
 

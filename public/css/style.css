@@ -4560,3 +4560,99 @@ body.battle-active .mobile-trap-waiting-notice.show {
         max-height: 62dvh !important;
     }
 }
+/* =========================================================
+   状態異常アイコン表示
+   ========================================================= */
+
+.status-effect-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    min-height: 22px;
+    margin-top: 6px;
+    flex-wrap: wrap;
+}
+
+.empty-status-effect-row {
+    display: none;
+}
+
+.status-effect-icon {
+    width: 26px !important;
+    height: 24px !important;
+    min-height: 24px !important;
+    padding: 0 !important;
+    border-radius: 999px !important;
+    border: 1px solid rgba(255, 255, 255, 0.24) !important;
+    background: rgba(0, 0, 0, 0.42) !important;
+    color: white !important;
+    font-size: 13px !important;
+    line-height: 1 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 1px !important;
+    box-shadow: 0 0 8px rgba(0, 255, 225, 0.12) !important;
+    cursor: help !important;
+    transform: none !important;
+}
+
+.status-effect-icon:hover {
+    transform: translateY(-1px) scale(1.08) !important;
+    border-color: rgba(0, 255, 225, 0.7) !important;
+}
+
+.status-effect-icon span {
+    margin-left: -2px;
+    padding: 0 2px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.6);
+    color: #ffb000;
+    font-size: 9px;
+    font-weight: 900;
+}
+
+.status-slipDamage,
+.status-burn {
+    border-color: rgba(255, 120, 0, 0.7) !important;
+    box-shadow: 0 0 8px rgba(255, 120, 0, 0.24) !important;
+}
+
+.status-freeze {
+    border-color: rgba(100, 210, 255, 0.75) !important;
+    box-shadow: 0 0 8px rgba(100, 210, 255, 0.24) !important;
+}
+
+.status-mute {
+    border-color: rgba(170, 170, 170, 0.65) !important;
+}
+
+.status-shadowban {
+    border-color: rgba(180, 120, 255, 0.7) !important;
+    box-shadow: 0 0 8px rgba(180, 120, 255, 0.22) !important;
+}
+
+.status-expose {
+    border-color: rgba(255, 80, 180, 0.75) !important;
+    box-shadow: 0 0 8px rgba(255, 80, 180, 0.22) !important;
+}
+
+@media (max-width: 768px) {
+    .status-effect-row {
+        gap: 3px;
+        min-height: 16px;
+        margin-top: 3px;
+    }
+
+    .status-effect-icon {
+        width: 20px !important;
+        height: 18px !important;
+        min-height: 18px !important;
+        font-size: 10px !important;
+    }
+
+    .status-effect-icon span {
+        font-size: 7px;
+    }
+}
