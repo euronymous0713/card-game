@@ -96,6 +96,7 @@ window.onload = () => {
     let currentCardListSearchText = "";
     let cardListVisibleCount = 24;
     let cardListSearchTimer = null;
+    let gameOverSoundPlayed = false;
 
     function setScreenMode(mode) {
         document.body.classList.toggle("title-active", mode === "title");
@@ -104,6 +105,90 @@ window.onload = () => {
     }
 
     setScreenMode("title");
+
+
+    const soundManager = window.SoundManager || null;
+
+    if (soundManager && typeof soundManager.init === "function") {
+        soundManager.init();
+    }
+
+    function playSound(soundName) {
+        if (!soundManager || typeof soundManager.play !== "function") return;
+
+        soundManager.play(soundName);
+    }
+
+    function unlockSoundOnce() {
+        if (!soundManager || typeof soundManager.unlock !== "function") return;
+
+        soundManager.unlock();
+    }
+
+    document.addEventListener("pointerdown", unlockSoundOnce, { once: true });
+    document.addEventListener("keydown", unlockSoundOnce, { once: true });
+
+    function soundNameFromPlayedCardLog(log) {
+        if (!log) return "";
+
+        const actionType = log.actionType || "";
+        const cardType = log.cardType || "";
+        const specialText = log.specialText || "";
+        const hateAmount = Number(log.hateAmount || 0);
+        const damageAmount = Number(log.damageAmount || 0);
+        const healAmount = Number(log.healAmount || 0);
+
+        if (actionType === "setTrap") return "setTrap";
+        if (actionType === "trap") return "trap";
+
+        if (actionType === "discard" || actionType === "trapEffect") return "";
+
+        if (
+            actionType === "statusEffect" ||
+            actionType === "extraTurn" ||
+            actionType === "special" ||
+            cardType === "特殊" ||
+            specialText
+        ) {
+            return "special";
+        }
+
+        if (
+            actionType === "hate" ||
+            cardType === "妨害" ||
+            hateAmount !== 0
+        ) {
+            return "hate";
+        }
+
+        if (
+            actionType === "heal" ||
+            cardType === "防御" ||
+            cardType === "補助" ||
+            cardType === "防御/補助" ||
+            healAmount > 0
+        ) {
+            return "heal";
+        }
+
+        if (
+            actionType === "attack" ||
+            cardType === "攻撃" ||
+            damageAmount > 0
+        ) {
+            return "attack";
+        }
+
+        return "special";
+    }
+
+    function playSoundForPlayedCardLog(log) {
+        const soundName = soundNameFromPlayedCardLog(log);
+
+        if (!soundName) return;
+
+        playSound(soundName);
+    }
 
 
     createTrapChoiceModalStyle();
@@ -925,6 +1010,7 @@ window.onload = () => {
 
         if (!oldGame && currentPlayer) {
             showTurnAnnouncement(currentPlayer.name, currentPlayer.id === socket.id);
+            playSound("turnStart");
         }
 
         if (!oldGame) return;
@@ -934,12 +1020,17 @@ window.onload = () => {
 
         if (oldTurnPlayer && newTurnPlayer && oldTurnPlayer.id !== newTurnPlayer.id) {
             showTurnAnnouncement(newTurnPlayer.name, newTurnPlayer.id === socket.id);
+            playSound("turnStart");
         }
 
         newGame.turnOrder.forEach(newPlayer => {
             const oldPlayer = getPlayerFromGame(oldGame, newPlayer.id);
 
             if (!oldPlayer) return;
+
+            if (newPlayer.defeated && !oldPlayer.defeated) {
+                playSound("defeated");
+            }
 
             if (newPlayer.followers < oldPlayer.followers) {
                 const damage = oldPlayer.followers - newPlayer.followers;
@@ -976,6 +1067,8 @@ window.onload = () => {
             if (!latestLog) return;
 
             const isMyAction = latestLog.playerId === socket.id;
+
+            playSoundForPlayedCardLog(latestLog);
 
             if (latestLog.actionType === "discard") {
                 if (isMyAction) {
@@ -1497,6 +1590,8 @@ window.onload = () => {
         battleScreen.style.display = "block";
         gameOverOverlay.style.display = "none";
         previousGame = null;
+        gameOverSoundPlayed = false;
+        playSound("gameStart");
     });
 
     socket.on("chooseTrap", data => {
@@ -1884,6 +1979,7 @@ window.onload = () => {
 
         endTurnRequestPending = true;
         endTurnButton.disabled = true;
+        playSound("turnEnd");
 
         socket.emit("endTurn", {
             roomId: currentRoomId,
@@ -1900,6 +1996,11 @@ window.onload = () => {
             : `${winner.name} の勝利`;
 
         gameOverOverlay.style.display = "flex";
+
+        if (!gameOverSoundPlayed) {
+            gameOverSoundPlayed = true;
+            playSound(isWinner ? "victory" : "defeat");
+        }
     }
 
     nextButton.onclick = () => {
@@ -1913,6 +2014,7 @@ window.onload = () => {
         isReady = false;
         latestGame = null;
         previousGame = null;
+        gameOverSoundPlayed = false;
         selectedTargetId = "";
         selectedMobileCardInstanceId = "";
         selectedMobileStatusKey = "";
