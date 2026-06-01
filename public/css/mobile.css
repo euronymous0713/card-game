@@ -4130,3 +4130,28 @@
     }
 }
 
+
+
+/* =========================================================
+   スマホ版：設定ボタンを使用履歴の下へ移動
+   ========================================================= */
+@media (max-width: 768px) {
+    body.battle-active .mobile-settings-button {
+        left: 8px !important;
+        top: 214px !important;
+        width: 42px !important;
+        height: 42px !important;
+        min-height: 42px !important;
+        z-index: 9700 !important;
+    }
+}
+
+@media (max-width: 380px), (max-height: 720px) {
+    body.battle-active .mobile-settings-button {
+        left: 6px !important;
+        top: 196px !important;
+        width: 38px !important;
+        height: 38px !important;
+        min-height: 38px !important;
+    }
+}

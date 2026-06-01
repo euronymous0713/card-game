@@ -1389,7 +1389,7 @@ window.onload = () => {
     }
 
     function openMobileSettings() {
-        if (!isMobileLayout() || !mobileSettingsOverlay) return;
+        if (!mobileSettingsOverlay) return;
 
         clearMobileCardSelection();
         closeMobileHistory();
@@ -1440,7 +1440,7 @@ window.onload = () => {
     }
 
     function toggleMobileSettings() {
-        if (!isMobileLayout() || !mobileSettingsOverlay) return;
+        if (!mobileSettingsOverlay) return;
 
         if (mobileSettingsOverlay.classList.contains("show-mobile-settings")) {
             closeMobileSettings();

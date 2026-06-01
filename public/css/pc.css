@@ -10,53 +10,50 @@
 }
 
 @media (min-width: 769px) {
-
     .card-detail {
         position: absolute !important;
         right: 28px !important;
         top: 270px !important;
-
-        width: 320px !important;
-        height: 235px !important;
-        max-height: 235px !important;
-
-        padding: 14px !important;
-
-        overflow: hidden !important;
-        overflow-y: hidden !important;
+        width: 300px !important;
+        height: 215px !important;
+        max-height: 215px !important;
+        padding: 15px !important;
+        border-radius: 16px !important;
+        background: rgba(0, 0, 0, 0.48) !important;
+        border: 1px solid rgba(0, 255, 225, 0.22) !important;
+        box-shadow:
+            0 0 18px rgba(0, 255, 225, 0.12),
+            inset 0 0 16px rgba(255, 255, 255, 0.03) !important;
+        overflow-y: auto !important;
         overflow-x: hidden !important;
+        z-index: 8 !important;
     }
 
     .card-detail h3 {
-        margin-bottom: 6px !important;
-        font-size: 15px !important;
-        line-height: 1.2 !important;
+        margin-bottom: 8px !important;
+        font-size: 17px !important;
+        line-height: 1.25 !important;
     }
 
     .card-detail p {
-        font-size: 11px !important;
-        line-height: 1.35 !important;
+        font-size: 13px !important;
+        line-height: 1.55 !important;
         opacity: 0.94 !important;
     }
 
     .card-detail .detail-rarity {
-        margin-bottom: 4px !important;
-        font-size: 10px !important;
+        margin-bottom: 6px !important;
     }
 
     .card-detail .detail-type {
-        margin-bottom: 4px !important;
-        font-size: 11px !important;
+        margin-bottom: 6px !important;
+        font-size: 13px !important;
     }
 
     .card-detail .detail-hate {
-        margin-top: 6px !important;
-        font-size: 11px !important;
-        line-height: 1.3 !important;
-    }
-
-    .card-detail::-webkit-scrollbar {
-        display: none !important;
+        margin-top: 8px !important;
+        font-size: 13px !important;
+        line-height: 1.45 !important;
     }
 }
 
@@ -185,5 +182,126 @@
 
     .battle-buttons {
         bottom: 66px !important;
+    }
+}
+
+
+/* =========================================================
+   PC版：バトル中設定ボタン / 設定パネル
+   使用履歴の下あたりに配置
+   ========================================================= */
+@media (min-width: 769px) {
+    body.battle-active .mobile-settings-button {
+        position: absolute !important;
+        left: 28px !important;
+        top: 542px !important;
+        z-index: 40 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 230px !important;
+        height: 42px !important;
+        min-height: 42px !important;
+        padding: 0 14px !important;
+        border-radius: 999px !important;
+        font-size: 20px !important;
+        line-height: 1 !important;
+        color: white !important;
+        background: rgba(0, 0, 0, 0.64) !important;
+        border: 1px solid rgba(255, 176, 0, 0.62) !important;
+        box-shadow: 0 0 14px rgba(255, 176, 0, 0.24) !important;
+    }
+
+    body:not(.battle-active) .mobile-settings-button,
+    body:not(.battle-active) .mobile-settings-overlay {
+        display: none !important;
+    }
+
+    body.battle-active .mobile-settings-overlay {
+        position: fixed !important;
+        inset: 0 !important;
+        z-index: 9900 !important;
+        display: none !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 24px !important;
+        background: rgba(0, 0, 0, 0.48) !important;
+        backdrop-filter: blur(3px) !important;
+        -webkit-backdrop-filter: blur(3px) !important;
+    }
+
+    body.battle-active .mobile-settings-overlay.show-mobile-settings {
+        display: flex !important;
+    }
+
+    .mobile-settings-box {
+        width: 340px !important;
+        padding: 18px !important;
+        border-radius: 18px !important;
+        color: white !important;
+        background: rgba(0, 0, 0, 0.9) !important;
+        border: 1px solid rgba(0, 255, 225, 0.42) !important;
+        box-shadow:
+            0 0 22px rgba(0, 255, 225, 0.22),
+            0 0 34px rgba(255, 0, 200, 0.12) !important;
+    }
+
+    .mobile-settings-header {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 12px !important;
+        margin-bottom: 14px !important;
+    }
+
+    .mobile-settings-header strong {
+        color: #00ffe1 !important;
+        font-size: 18px !important;
+    }
+
+    #mobileSettingsCloseButton {
+        width: 32px !important;
+        height: 32px !important;
+        min-height: 32px !important;
+        padding: 0 !important;
+        border-radius: 999px !important;
+        font-size: 20px !important;
+        line-height: 1 !important;
+        background: rgba(255, 255, 255, 0.12) !important;
+        border: 1px solid rgba(255, 255, 255, 0.22) !important;
+    }
+
+    .mobile-settings-room-id {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 10px !important;
+        margin-bottom: 14px !important;
+        padding: 11px 12px !important;
+        border-radius: 12px !important;
+        background: rgba(255, 255, 255, 0.07) !important;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    }
+
+    .mobile-settings-room-id span {
+        color: rgba(255, 255, 255, 0.68) !important;
+        font-size: 12px !important;
+        font-weight: 800 !important;
+    }
+
+    .mobile-settings-room-id strong {
+        color: #ffb000 !important;
+        font-size: 20px !important;
+        letter-spacing: 1px !important;
+    }
+
+    .mobile-battle-leave-button {
+        width: 100% !important;
+        min-height: 42px !important;
+        padding: 10px 12px !important;
+        border-radius: 12px !important;
+        font-size: 13px !important;
+        background: linear-gradient(135deg, #ff4d4d, #8a0000) !important;
+        box-shadow: 0 0 16px rgba(255, 48, 48, 0.26) !important;
     }
 }
