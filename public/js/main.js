@@ -342,24 +342,19 @@ window.onload = () => {
         if (!container) return;
 
         container.querySelectorAll(".status-effect-icon").forEach(icon => {
-            icon.onclick = event => {
-                event.stopPropagation();
-
+            const renderStatusDetail = () => {
                 const label = icon.dataset.statusLabel || "状態異常";
                 const description = icon.dataset.statusDescription || "";
                 const amount = Number(icon.dataset.statusAmount || 0);
                 const turns = Number(icon.dataset.statusTurns || 0);
 
-                if (isMobileLayout()) {
-                    showMobileEffect({
-                        name: label,
-                        rarity: "C",
-                        type: "状態異常",
-                        effect: `${description}${amount > 0 ? `\n効果量：${amount.toLocaleString()}` : ""}`,
-                        hateText: `残り${turns}ターン`
-                    });
-                    return;
-                }
+                return { label, description, amount, turns };
+            };
+
+            icon.onmouseenter = () => {
+                if (isMobileLayout()) return;
+
+                const { label, description, amount, turns } = renderStatusDetail();
 
                 cardDetail.innerHTML = `
                     <h3>${label}</h3>
@@ -368,6 +363,28 @@ window.onload = () => {
                     ${amount > 0 ? `<p>効果量：${amount.toLocaleString()}</p>` : ""}
                     <p class="detail-hate">残り${turns}ターン</p>
                 `;
+            };
+
+            icon.onmouseleave = () => {
+                if (isMobileLayout()) return;
+
+                resetCardDetail();
+            };
+
+            icon.onclick = event => {
+                event.stopPropagation();
+
+                if (!isMobileLayout()) return;
+
+                const { label, description, amount, turns } = renderStatusDetail();
+
+                showMobileEffect({
+                    name: label,
+                    rarity: "C",
+                    type: "状態異常",
+                    effect: `${description}${amount > 0 ? `\n効果量：${amount.toLocaleString()}` : ""}`,
+                    hateText: `残り${turns}ターン`
+                });
             };
         });
     }

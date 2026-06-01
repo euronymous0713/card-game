@@ -4656,3 +4656,72 @@ body.battle-active .mobile-trap-waiting-notice.show {
         font-size: 7px;
     }
 }
+/* =========================================================
+   状態異常表示 修正
+   - 自分プレイヤー情報で見切れないように調整
+   - PCはホバー、スマホはタップで効果確認
+   ========================================================= */
+
+.my-panel,
+.enemy-panel {
+    overflow: visible !important;
+}
+
+@media (min-width: 769px) {
+    .my-panel {
+        height: 160px !important;
+        bottom: 190px !important;
+        padding-bottom: 12px !important;
+    }
+
+    .my-panel .status-effect-row,
+    .enemy-panel .status-effect-row {
+        margin-top: 7px !important;
+        min-height: 24px !important;
+    }
+
+    .status-effect-icon {
+        cursor: help !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .my-panel {
+        min-height: 64px !important;
+        height: auto !important;
+        overflow: visible !important;
+        padding-bottom: 7px !important;
+    }
+
+    .my-panel .status-effect-row {
+        margin-top: 3px !important;
+        min-height: 18px !important;
+        max-height: 38px !important;
+        overflow: visible !important;
+        justify-content: center !important;
+    }
+
+    .enemy-panel {
+        overflow: visible !important;
+    }
+
+    .enemy-panel .status-effect-row {
+        margin-top: 2px !important;
+        min-height: 14px !important;
+    }
+
+    .status-effect-icon {
+        cursor: pointer !important;
+    }
+}
+
+@media (max-width: 380px), (max-height: 720px) {
+    .my-panel {
+        min-height: 54px !important;
+        height: auto !important;
+    }
+
+    .my-panel .status-effect-row {
+        min-height: 16px !important;
+    }
+}

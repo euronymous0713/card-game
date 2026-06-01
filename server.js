@@ -311,8 +311,20 @@ function applyTurnStartEffects(game, player) {
             return;
         }
 
-        // 凍結はターンスキップ処理側で残りターンを減らすため、ここでは減らしません。
-        remainingEffects.push(effect);
+        if (type === "freeze") {
+            // 凍結はターンスキップ処理側で残りターンを減らします。
+            remainingEffects.push(effect);
+            return;
+        }
+
+        const nextRemainingTurns = remainingTurns - 1;
+
+        if (nextRemainingTurns > 0 && !player.defeated) {
+            remainingEffects.push({
+                ...effect,
+                remainingTurns: nextRemainingTurns
+            });
+        }
     });
 
     player.statusEffects = remainingEffects;
