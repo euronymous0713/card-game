@@ -4403,3 +4403,160 @@ body.battle-active .mobile-trap-waiting-notice.show {
         line-height: 1.45;
     }
 }
+/* =========================================================
+   カード効果表示枠 拡大調整
+   PC：右側のカード効果枠を大きくする
+   スマホ：中央の効果表示を大きくして読みやすくする
+   ========================================================= */
+
+/* PC版：右側カード効果枠 */
+@media (min-width: 769px) {
+    .card-detail {
+        position: absolute !important;
+        right: 20px !important;
+        top: 230px !important;
+        width: 380px !important;
+        height: 360px !important;
+        max-height: calc(100vh - 330px) !important;
+        padding: 18px !important;
+        border-radius: 16px !important;
+        background: rgba(0, 0, 0, 0.50) !important;
+        border: 1px solid rgba(0, 255, 225, 0.24) !important;
+        box-shadow:
+            0 0 20px rgba(0, 255, 225, 0.14),
+            inset 0 0 18px rgba(255, 255, 255, 0.035) !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        z-index: 8 !important;
+    }
+
+    .card-detail h3 {
+        margin-bottom: 10px !important;
+        font-size: 19px !important;
+        line-height: 1.25 !important;
+    }
+
+    .card-detail p {
+        font-size: 14px !important;
+        line-height: 1.65 !important;
+        opacity: 0.94 !important;
+    }
+
+    .card-detail .detail-rarity {
+        margin-bottom: 8px !important;
+    }
+
+    .card-detail .detail-type {
+        margin-bottom: 8px !important;
+        font-size: 14px !important;
+    }
+
+    .card-detail .detail-hate {
+        margin-top: 10px !important;
+        font-size: 14px !important;
+        line-height: 1.5 !important;
+    }
+}
+
+/* スマホ版：盤面内のカード効果枠 */
+@media (max-width: 768px) {
+    .card-detail {
+        min-height: 130px !important;
+        height: 130px !important;
+        max-height: 130px !important;
+        padding: 9px 11px !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        border-radius: 13px !important;
+        background: rgba(0, 0, 0, 0.58) !important;
+        border: 1px solid rgba(0, 255, 225, 0.24) !important;
+    }
+
+    .card-detail h3 {
+        margin-bottom: 5px !important;
+        font-size: 14px !important;
+        line-height: 1.25 !important;
+    }
+
+    .card-detail p {
+        font-size: 11px !important;
+        line-height: 1.55 !important;
+    }
+
+    .card-detail .detail-rarity,
+    .card-detail .trap-choice-rarity,
+    .card-detail .trap-source-rarity {
+        margin-bottom: 4px !important;
+        padding: 2px 7px !important;
+        font-size: 9px !important;
+    }
+
+    .card-detail .detail-type,
+    .card-detail .detail-hate {
+        margin-top: 4px !important;
+        margin-bottom: 4px !important;
+        line-height: 1.4 !important;
+    }
+
+    /* スマホ版：カードタップ時に中央に出る効果表示 */
+    .mobile-effect-overlay {
+        padding: 12px !important;
+        align-items: center !important;
+        background: rgba(0, 0, 0, 0.14) !important;
+    }
+
+    .mobile-effect-card {
+        width: min(430px, 92vw) !important;
+        max-height: 68dvh !important;
+        padding: 18px 18px 16px !important;
+        border-radius: 20px !important;
+        background: rgba(0, 0, 0, 0.76) !important;
+        border: 2px solid rgba(0, 255, 225, 0.42) !important;
+        box-shadow:
+            0 0 24px rgba(0, 255, 225, 0.26),
+            0 0 44px rgba(255, 0, 200, 0.16) !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        backdrop-filter: blur(5px) !important;
+        -webkit-backdrop-filter: blur(5px) !important;
+    }
+
+    .mobile-effect-card p {
+        font-size: 13px !important;
+        line-height: 1.65 !important;
+    }
+
+    .mobile-effect-title-row {
+        gap: 8px !important;
+        margin-bottom: 8px !important;
+    }
+
+    .mobile-effect-title-row strong {
+        font-size: 18px !important;
+        line-height: 1.25 !important;
+    }
+
+    .mobile-effect-type {
+        margin-bottom: 10px !important;
+        font-size: 12px !important;
+    }
+
+    .mobile-effect-hate {
+        margin-top: 12px !important;
+        font-size: 12px !important;
+        line-height: 1.45 !important;
+    }
+}
+
+/* かなり低いスマホ画面だけ少し抑える */
+@media (max-width: 380px), (max-height: 720px) {
+    .card-detail {
+        min-height: 105px !important;
+        height: 105px !important;
+        max-height: 105px !important;
+    }
+
+    .mobile-effect-card {
+        max-height: 62dvh !important;
+    }
+}
