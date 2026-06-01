@@ -307,21 +307,53 @@
 }
 
 /* =========================================================
-   PC版：設定ボタン位置調整
-   - 捨て札エリアの上あたりへ配置
+   PC版：設定ボタン最終位置調整
+   - 使用履歴の下
+   - 捨て札の上
+   - 左側の情報列に一直線で配置
    ========================================================= */
 @media (min-width: 769px) {
+    .history-panel {
+        top: 352px !important;
+        max-height: 148px !important;
+    }
+
+    .played-card-list {
+        max-height: 86px !important;
+    }
+
     body.battle-active .mobile-settings-button {
         position: absolute !important;
         left: 28px !important;
-        top: auto !important;
-        bottom: 218px !important;
+        top: 512px !important;
+        bottom: auto !important;
+        z-index: 45 !important;
+
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+
         width: 220px !important;
         height: 40px !important;
         min-height: 40px !important;
         padding: 0 14px !important;
-        font-size: 18px !important;
+
         border-radius: 999px !important;
-        z-index: 45 !important;
+        font-size: 18px !important;
+        line-height: 1 !important;
+        color: white !important;
+
+        background: rgba(0, 0, 0, 0.64) !important;
+        border: 1px solid rgba(255, 176, 0, 0.62) !important;
+        box-shadow: 0 0 14px rgba(255, 176, 0, 0.24) !important;
+    }
+
+    .discard-panel {
+        bottom: 58px !important;
+        height: 108px !important;
+    }
+
+    .battle-buttons {
+        bottom: 38px !important;
     }
 }
