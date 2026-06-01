@@ -3999,3 +3999,142 @@
         pointer-events: auto !important;
     }
 }
+
+/* =========================================================
+   スマホ版：設定ボタン位置復旧
+   - 使用履歴ボタンの真下に戻す
+   - 使用履歴ボタンと同じサイズに揃える
+   - ゲーム終了中は「次へ」以外を押せないため非表示維持
+   ========================================================= */
+.mobile-settings-button,
+.mobile-settings-overlay {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    body.battle-active:not(.game-over-active) .mobile-settings-button {
+        position: fixed !important;
+        left: 8px !important;
+        top: 214px !important;
+        z-index: 9700 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 42px !important;
+        height: 42px !important;
+        min-height: 42px !important;
+        padding: 0 !important;
+        border-radius: 999px !important;
+        font-size: 20px !important;
+        line-height: 1 !important;
+        color: white !important;
+        background: rgba(0, 0, 0, 0.68) !important;
+        border: 1px solid rgba(255, 176, 0, 0.62) !important;
+        box-shadow: 0 0 14px rgba(255, 176, 0, 0.24) !important;
+    }
+
+    body.battle-active .mobile-settings-overlay {
+        position: fixed !important;
+        inset: 0 !important;
+        z-index: 9900 !important;
+        display: none !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 16px !important;
+        background: rgba(0, 0, 0, 0.48) !important;
+        backdrop-filter: blur(3px) !important;
+        -webkit-backdrop-filter: blur(3px) !important;
+    }
+
+    body.battle-active .mobile-settings-overlay.show-mobile-settings {
+        display: flex !important;
+    }
+
+    body.battle-active.game-over-active .mobile-settings-button,
+    body.battle-active.game-over-active .mobile-settings-overlay {
+        display: none !important;
+        pointer-events: none !important;
+    }
+
+    .mobile-settings-box {
+        width: min(320px, 90vw) !important;
+        padding: 16px !important;
+        border-radius: 18px !important;
+        color: white !important;
+        background: rgba(0, 0, 0, 0.88) !important;
+        border: 1px solid rgba(0, 255, 225, 0.42) !important;
+        box-shadow:
+            0 0 22px rgba(0, 255, 225, 0.22),
+            0 0 34px rgba(255, 0, 200, 0.12) !important;
+    }
+
+    .mobile-settings-header {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 12px !important;
+        margin-bottom: 14px !important;
+    }
+
+    .mobile-settings-header strong {
+        color: #00ffe1 !important;
+        font-size: 18px !important;
+    }
+
+    #mobileSettingsCloseButton {
+        width: 32px !important;
+        height: 32px !important;
+        min-height: 32px !important;
+        padding: 0 !important;
+        border-radius: 999px !important;
+        font-size: 20px !important;
+        line-height: 1 !important;
+        background: rgba(255, 255, 255, 0.12) !important;
+        border: 1px solid rgba(255, 255, 255, 0.22) !important;
+    }
+
+    .mobile-settings-room-id {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 10px !important;
+        margin-bottom: 14px !important;
+        padding: 11px 12px !important;
+        border-radius: 12px !important;
+        background: rgba(255, 255, 255, 0.07) !important;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    }
+
+    .mobile-settings-room-id span {
+        color: rgba(255, 255, 255, 0.68) !important;
+        font-size: 12px !important;
+        font-weight: 800 !important;
+    }
+
+    .mobile-settings-room-id strong {
+        color: #ffb000 !important;
+        font-size: 20px !important;
+        letter-spacing: 1px !important;
+    }
+
+    .mobile-battle-leave-button {
+        width: 100% !important;
+        min-height: 42px !important;
+        padding: 10px 12px !important;
+        border-radius: 12px !important;
+        font-size: 13px !important;
+        background: linear-gradient(135deg, #ff4d4d, #8a0000) !important;
+        box-shadow: 0 0 16px rgba(255, 48, 48, 0.26) !important;
+    }
+}
+
+@media (max-width: 380px), (max-height: 720px) {
+    body.battle-active:not(.game-over-active) .mobile-settings-button {
+        left: 6px !important;
+        top: 196px !important;
+        width: 38px !important;
+        height: 38px !important;
+        min-height: 38px !important;
+        font-size: 18px !important;
+    }
+}
