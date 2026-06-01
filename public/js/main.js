@@ -308,19 +308,19 @@ window.onload = () => {
             : [];
 
         if (effects.length === 0) {
-            return `<div class="status-effect-row empty-status-effect-row">状態異常なし</div>`;
+            return "";
         }
 
         return `
             <div class="status-effect-row">
                 ${effects.map((effect, index) => {
-                    const info = statusInfo(effect.type);
-                    const label = effect.label || info.label;
-                    const description = effect.description || info.description;
-                    const amount = Number(effect.amount || 0);
-                    const turns = Number(effect.remainingTurns || 0);
+            const info = statusInfo(effect.type);
+            const label = effect.label || info.label;
+            const description = effect.description || info.description;
+            const amount = Number(effect.amount || 0);
+            const turns = Number(effect.remainingTurns || 0);
 
-                    return `
+            return `
                         <button
                             type="button"
                             class="status-effect-icon status-${effect.type || "unknown"}"
@@ -334,7 +334,7 @@ window.onload = () => {
                             ${effect.icon || info.icon}<span>${turns}</span>
                         </button>
                     `;
-                }).join("")}
+        }).join("")}
             </div>
         `;
     }
@@ -658,10 +658,10 @@ window.onload = () => {
             </div>
             <div class="card-list-grid">
                 ${visibleCards.map(card => {
-                    const rarity = normalizeRarity(card.rarity);
-                    const specialLabel = specialEffectLabel(card);
+            const rarity = normalizeRarity(card.rarity);
+            const specialLabel = specialEffectLabel(card);
 
-                    return `
+            return `
                         <div class="card-list-item ${rarityClass(rarity)}">
                             <div class="card-list-item-head">
                                 <span class="card-list-rarity ${rarityClass(rarity)}">${rarity}</span>
@@ -679,7 +679,7 @@ window.onload = () => {
                             </div>
                         </div>
                     `;
-                }).join("")}
+        }).join("")}
             </div>
             ${hasMoreCards ? `
                 <button type="button" class="card-list-more-button" id="cardListMoreButton">
