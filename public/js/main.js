@@ -1451,6 +1451,18 @@ window.onload = () => {
             lines.push(`回復：${Number(card.healAmount).toLocaleString()}`);
         }
 
+        if (card.damageDetailText) {
+            lines.push(card.damageDetailText);
+        }
+
+        if (card.bonusText) {
+            lines.push(card.bonusText);
+        }
+
+        if (card.specialText) {
+            lines.push(card.specialText);
+        }
+
         if (card.trapDetailText) {
             lines.push(card.trapDetailText);
         }

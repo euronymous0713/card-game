@@ -109,7 +109,10 @@ function createGameState(players) {
             host: player.host,
             hand: [],
             fieldCards: [],
-            defeated: false
+            defeated: false,
+            skipTurns: 0,
+            extraTurns: 0,
+            statusEffects: []
         };
 
         drawCards(gamePlayer);
@@ -137,17 +140,120 @@ function getAlivePlayers(game) {
     return game.turnOrder.filter(player => !player.defeated);
 }
 
+function applyTurnStartEffects(game, player) {
+    if (!player || player.defeated) return;
+
+    if (Array.isArray(player.statusEffects) && player.statusEffects.length > 0) {
+        const remainingEffects = [];
+
+        player.statusEffects.forEach(effect => {
+            if (!effect || effect.type !== "slipDamage") return;
+
+            const damage = Number(effect.amount || 0);
+            const remainingTurns = Number(effect.remainingTurns || 0);
+
+            if (damage > 0 && remainingTurns > 0) {
+                applyDamage(game, player, damage);
+
+                addLog(game, {
+                    actionType: "statusEffect",
+                    playerId: effect.sourcePlayerId || "",
+                    playerName: effect.sourcePlayerName || "状態異常",
+                    targetName: player.name,
+                    cardName: effect.cardName || "スリップダメージ",
+                    cardType: "状態異常",
+                    cardRarity: effect.cardRarity || "C",
+                    hateText: `${player.name} に ${formatNumber(damage)} スリップダメージ`,
+                    log: `${player.name} はスリップダメージを受けた`,
+                    damageText: `スリップダメージ：${formatNumber(damage)}`,
+                    damageAmount: damage
+                });
+            }
+
+            const nextRemainingTurns = remainingTurns - 1;
+
+            if (nextRemainingTurns > 0 && !player.defeated) {
+                remainingEffects.push({
+                    ...effect,
+                    remainingTurns: nextRemainingTurns
+                });
+            }
+        });
+
+        player.statusEffects = remainingEffects;
+    }
+}
+
 function moveToNextAliveTurn(game) {
     const alivePlayers = getAlivePlayers(game);
     if (alivePlayers.length <= 1) return;
 
+    const currentPlayer = getCurrentPlayer(game);
+
+    if (
+        currentPlayer &&
+        !currentPlayer.defeated &&
+        Number(currentPlayer.extraTurns || 0) > 0
+    ) {
+        currentPlayer.extraTurns -= 1;
+        drawCards(currentPlayer);
+
+        addLog(game, {
+            actionType: "extraTurn",
+            playerId: currentPlayer.id,
+            playerName: currentPlayer.name,
+            targetName: currentPlayer.name,
+            cardName: "追加ターン",
+            cardType: "特殊",
+            cardRarity: "C",
+            hateText: "もう一度ターンを行う",
+            log: `${currentPlayer.name} は追加ターンを得た`
+        });
+
+        return;
+    }
+
+    let guard = 0;
+
     do {
         game.currentTurnIndex =
             (game.currentTurnIndex + 1) % game.turnOrder.length;
-    } while (game.turnOrder[game.currentTurnIndex].defeated);
 
-    const nextPlayer = getCurrentPlayer(game);
-    if (nextPlayer) drawCards(nextPlayer);
+        const nextPlayer = getCurrentPlayer(game);
+        guard += 1;
+
+        if (!nextPlayer || nextPlayer.defeated) {
+            continue;
+        }
+
+        applyTurnStartEffects(game, nextPlayer);
+        checkGameOver(game);
+
+        if (game.gameOver || nextPlayer.defeated) {
+            continue;
+        }
+
+        if (Number(nextPlayer.skipTurns || 0) > 0) {
+            nextPlayer.skipTurns -= 1;
+
+            addLog(game, {
+                actionType: "skipTurn",
+                playerId: nextPlayer.id,
+                playerName: nextPlayer.name,
+                targetName: nextPlayer.name,
+                cardName: "行動不能",
+                cardType: "状態異常",
+                cardRarity: "C",
+                hateText: "ターンをスキップ",
+                log: `${nextPlayer.name} は行動不能でターンを失った`
+            });
+
+            continue;
+        }
+
+        drawCards(nextPlayer);
+        return;
+    } while (guard < game.turnOrder.length * 3);
 }
 
 function checkGameOver(game) {
@@ -173,6 +279,10 @@ function addLog(game, log) {
     game.playedCards.push(log);
 }
 
+function formatNumber(value) {
+    return Number(value || 0).toLocaleString();
+}
+
 function applyDamage(game, target, amount) {
     target.followers = Math.max(0, target.followers - amount);
 
@@ -185,6 +295,140 @@ function applyDamage(game, target, amount) {
 
 function changeHate(player, amount) {
     player.hate = clamp(player.hate + amount, 0, 3);
+}
+
+function applyHateBonus(card, sourcePlayer, targetPlayer, baseDamage) {
+    let damage = Number(baseDamage || 0);
+    const details = [];
+
+    if (!Array.isArray(card.hateBonus)) {
+        return { damage, details };
+    }
+
+    card.hateBonus.forEach(bonus => {
+        const requiredHate = Number(
+            bonus.targetHateAtLeast ??
+            bonus.hate ??
+            bonus.targetHate ??
+            0
+        );
+
+        if (!targetPlayer || targetPlayer.hate < requiredHate) return;
+
+        const bonusDamage = Number(bonus.extraDamage ?? bonus.damage ?? bonus.bonusDamage ?? 0);
+
+        if (bonusDamage > 0) {
+            damage += bonusDamage;
+            details.push(`ヘイト${requiredHate}以上：+${formatNumber(bonusDamage)}ダメージ`);
+        }
+
+        const targetHateChange = Number(bonus.targetHateChange ?? 0);
+
+        if (targetHateChange !== 0) {
+            changeHate(targetPlayer, targetHateChange);
+            details.push(`ヘイト${requiredHate}以上：対象ヘイト ${targetHateChange > 0 ? "+" : ""}${targetHateChange}`);
+        }
+
+        const selfHateChange = Number(bonus.selfHateChange ?? 0);
+
+        if (selfHateChange !== 0 && sourcePlayer) {
+            changeHate(sourcePlayer, selfHateChange);
+            details.push(`ヘイト${requiredHate}以上：自分ヘイト ${selfHateChange > 0 ? "+" : ""}${selfHateChange}`);
+        }
+
+        const destroyTrapCount = Number(bonus.destroyTrapCount ?? 0);
+
+        if (destroyTrapCount > 0 && targetPlayer) {
+            const destroyed = targetPlayer.fieldCards.splice(0, destroyTrapCount).length;
+            details.push(`ヘイト${requiredHate}以上：伏せカード${destroyed}枚破壊`);
+        }
+    });
+
+    return { damage, details };
+}
+
+function applySpecialEffect(game, card, caster, target) {
+    const effectType = card.effectType;
+    const details = [];
+
+    if (effectType === "destroyTargetTraps") {
+        if (!target) return details;
+
+        const destroyCount = Number(card.destroyTrapCount || 1);
+        const destroyed = target.fieldCards.splice(0, destroyCount).length;
+        details.push(`伏せカード破壊：${destroyed}枚`);
+        return details;
+    }
+
+    if (effectType === "destroyAllEnemyTraps") {
+        let totalDestroyed = 0;
+
+        game.turnOrder.forEach(player => {
+            if (player.id === caster.id || player.defeated) return;
+
+            totalDestroyed += player.fieldCards.length;
+            player.fieldCards = [];
+        });
+
+        details.push(`敵全体の伏せカード破壊：${totalDestroyed}枚`);
+        return details;
+    }
+
+    if (effectType === "skipTurn") {
+        if (!target) return details;
+
+        const skipTurns = Math.max(1, Number(card.skipTurns || 1));
+        target.skipTurns = Number(target.skipTurns || 0) + skipTurns;
+        details.push(`行動不能：${skipTurns}ターン`);
+        return details;
+    }
+
+    if (effectType === "slipDamage") {
+        if (!target) return details;
+
+        const slipDamage = Math.max(0, Number(card.slipDamage || 0));
+        const durationTurns = Math.max(1, Number(card.durationTurns || 1));
+
+        if (!Array.isArray(target.statusEffects)) {
+            target.statusEffects = [];
+        }
+
+        target.statusEffects.push({
+            type: "slipDamage",
+            amount: slipDamage,
+            remainingTurns: durationTurns,
+            sourcePlayerId: caster.id,
+            sourcePlayerName: caster.name,
+            cardName: card.name,
+            cardRarity: normalizeRarity(card.rarity)
+        });
+
+        details.push(`スリップダメージ：${formatNumber(slipDamage)} × ${durationTurns}ターン`);
+        return details;
+    }
+
+    if (effectType === "extraTurn") {
+        const extraTurns = Math.max(1, Number(card.extraTurns || 1));
+        caster.extraTurns = Number(caster.extraTurns || 0) + extraTurns;
+        details.push(`追加ターン：${extraTurns}回`);
+        return details;
+    }
+
+    if (effectType === "discardTargetHand") {
+        if (!target) return details;
+
+        const discardAllHand = Boolean(card.discardAllHand);
+        const discardCount = discardAllHand
+            ? target.hand.length
+            : Math.min(target.hand.length, Math.max(1, Number(card.discardCount || 1)));
+
+        target.hand.splice(0, discardCount);
+        details.push(`手札破壊：${discardCount}枚`);
+        return details;
+    }
+
+    details.push("特殊効果：未対応");
+    return details;
 }
 
 function findRoomBySocketId(socketId) {
@@ -913,24 +1157,30 @@ io.on("connection", socket => {
         const finalTarget =
             usedCard.targetType === "self"
                 ? caster
-                : target;
+                : usedCard.targetType === "allEnemies"
+                    ? null
+                    : target;
 
-        if (!finalTarget) {
+        if (usedCard.targetType !== "allEnemies" && !finalTarget) {
             caster.hand.push(usedCard);
             return;
         }
+
+        const targetLabel = usedCard.targetType === "allEnemies"
+            ? "敵全体"
+            : finalTarget.name;
 
         const finishCardPlay = (extraLog = {}) => {
             addLog(game, {
                 actionType: "play",
                 playerId: caster.id,
                 playerName: caster.name,
-                targetName: finalTarget.name,
+                targetName: targetLabel,
                 cardName: usedCard.name,
                 cardType: usedCard.type,
                 cardRarity: normalizeRarity(usedCard.rarity),
                 hateText: usedCard.hateText,
-                log: `${caster.name} → ${finalTarget.name}：${usedCard.name}`,
+                log: `${caster.name} → ${targetLabel}：${usedCard.name}`,
                 ...extraLog
             });
 
@@ -938,10 +1188,80 @@ io.on("connection", socket => {
         };
 
         if (usedCard.kind === "attack") {
-            let damage = usedCard.damage;
+            if (usedCard.targetType === "allEnemies") {
+                const targets = game.turnOrder.filter(player => {
+                    return player.id !== caster.id && !player.defeated;
+                });
+
+                const damageDetails = [];
+                let totalDamage = 0;
+
+                targets.forEach(enemy => {
+                    const bonusResult = applyHateBonus(usedCard, caster, enemy, usedCard.damage);
+                    let damage = bonusResult.damage;
+
+                    if (enemy.hate >= 3) {
+                        damage *= 2;
+                        bonusResult.details.push("ヘイト3：ダメージ2倍");
+                    }
+
+                    applyDamage(game, enemy, damage);
+                    totalDamage += damage;
+                    damageDetails.push(`${enemy.name}:${formatNumber(damage)}`);
+                });
+
+                if (usedCard.hateTarget === "self") {
+                    changeHate(caster, usedCard.hateChange);
+                }
+
+                finishCardPlay({
+                    log: `${caster.name} → 敵全体：${usedCard.name}`,
+                    damageText: `全体ダメージ：${damageDetails.join(" / ")}`,
+                    damageAmount: totalDamage,
+                    damageDetailText: damageDetails.join(" / ")
+                });
+
+                return;
+            }
+
+            const bonusResult = applyHateBonus(usedCard, caster, finalTarget, usedCard.damage);
+            let damage = bonusResult.damage;
 
             if (finalTarget.hate >= 3) {
                 damage *= 2;
+                bonusResult.details.push("ヘイト3：ダメージ2倍");
+            }
+
+            const afterDamage = result => {
+                if (!result.canceled) {
+                    applyDamage(game, finalTarget, damage);
+                }
+
+                if (usedCard.hateTarget === "self") {
+                    changeHate(caster, usedCard.hateChange);
+                }
+
+                if (usedCard.hateTarget === "target") {
+                    changeHate(finalTarget, usedCard.hateChange);
+                }
+
+                finishCardPlay({
+                    log: `${caster.name} → ${finalTarget.name}：${usedCard.name}`,
+                    damageText: result.canceled
+                        ? `ダメージ：0（無効 / 元ダメージ ${formatNumber(damage)}）`
+                        : `ダメージ：${formatNumber(damage)}`,
+                    damageAmount: result.canceled ? 0 : damage,
+                    originalDamageAmount: damage,
+                    damageCanceled: Boolean(result.canceled),
+                    bonusText: bonusResult.details.join(" / ")
+                });
+            };
+
+            const shouldIgnoreTrap = Boolean(usedCard.ignoreTrap || usedCard.pierceTrap);
+
+            if (shouldIgnoreTrap) {
+                afterDamage({ canceled: false });
+                return;
             }
 
             const requested = requestTrapChoice({
@@ -957,47 +1277,16 @@ io.on("connection", socket => {
                     effect: usedCard.effect,
                     hateText: usedCard.hateText,
                     sourceActionText: `${caster.name} が ${usedCard.name} を使用`,
-                    resultText: `${damage.toLocaleString()}ダメージを受ける可能性があります`
+                    resultText: `${formatNumber(damage)}ダメージを受ける可能性があります`
                 },
                 onResolved: result => {
                     if (result.pending) return;
-
-                    if (!result.canceled) {
-                        applyDamage(game, finalTarget, damage);
-                    }
-
-                    if (usedCard.hateTarget === "self") {
-                        changeHate(caster, usedCard.hateChange);
-                    }
-
-                    finishCardPlay({
-                        log: result.canceled
-                            ? `${caster.name} → ${finalTarget.name}：${usedCard.name}`
-                            : `${caster.name} → ${finalTarget.name}：${usedCard.name}`,
-                        damageText: result.canceled
-                            ? `ダメージ：0（無効 / 元ダメージ ${damage.toLocaleString()}）`
-                            : `ダメージ：${damage.toLocaleString()}`,
-                        damageAmount: result.canceled ? 0 : damage,
-                        originalDamageAmount: damage,
-                        damageCanceled: Boolean(result.canceled)
-                    });
+                    afterDamage(result);
                 }
             });
 
             if (!requested) {
-                applyDamage(game, finalTarget, damage);
-
-                if (usedCard.hateTarget === "self") {
-                    changeHate(caster, usedCard.hateChange);
-                }
-
-                finishCardPlay({
-                    log: `${caster.name} → ${finalTarget.name}：${usedCard.name}`,
-                    damageText: `ダメージ：${damage.toLocaleString()}`,
-                    damageAmount: damage,
-                    originalDamageAmount: damage,
-                    damageCanceled: false
-                });
+                afterDamage({ canceled: false });
             }
 
             return;
@@ -1051,6 +1340,25 @@ io.on("connection", socket => {
                 changeHate(finalTarget, usedCard.hateChange);
                 finishCardPlay();
             }
+
+            return;
+        }
+
+        if (usedCard.kind === "special") {
+            const specialDetails = applySpecialEffect(game, usedCard, caster, finalTarget);
+
+            if (usedCard.hateTarget === "self") {
+                changeHate(caster, usedCard.hateChange);
+            }
+
+            if (usedCard.hateTarget === "target" && finalTarget) {
+                changeHate(finalTarget, usedCard.hateChange);
+            }
+
+            finishCardPlay({
+                specialText: specialDetails.join(" / "),
+                log: `${caster.name} → ${targetLabel}：${usedCard.name}`
+            });
 
             return;
         }

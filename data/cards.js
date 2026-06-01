@@ -20,12 +20,12 @@ module.exports = [
         type: "攻撃",
         kind: "attack",
         targetType: "enemy",
-        damage: 1400,
+        damage: 1300,
         heal: 0,
         hateTarget: "self",
         hateChange: 0,
         hateText: "ヘイト変動なし",
-        effect: "対象に1,400フォロワーダメージ。対象のヘイトが3ならダメージ2倍。"
+        effect: "対象に1,300フォロワーダメージ。対象のヘイトが3ならダメージ2倍。"
     },
     {
         id: "card-3",
@@ -34,12 +34,13 @@ module.exports = [
         type: "攻撃",
         kind: "attack",
         targetType: "enemy",
-        damage: 1500,
+        damage: 1400,
         heal: 0,
         hateTarget: "self",
         hateChange: 0,
         hateText: "ヘイト変動なし",
-        effect: "対象に1,500フォロワーダメージ。対象のヘイトが3ならダメージ2倍。"
+        effect: "対象に1,400フォロワーダメージ。対象のヘイトが3ならダメージ2倍。 対象ヘイト1以上なら+400ダメージ。",
+        hateBonus: [{ targetHateAtLeast: 1, extraDamage: 400 }]
     },
     {
         id: "card-4",
@@ -48,26 +49,27 @@ module.exports = [
         type: "攻撃",
         kind: "attack",
         targetType: "enemy",
-        damage: 1600,
+        damage: 1500,
         heal: 0,
         hateTarget: "self",
         hateChange: 1,
         hateText: "自分のヘイト +1",
-        effect: "対象に1,600フォロワーダメージ。対象のヘイトが3ならダメージ2倍。自分のヘイトが1上がる。"
+        effect: "対象に1,500フォロワーダメージ。対象のヘイトが3ならダメージ2倍。自分のヘイトが1上がる。"
     },
     {
         id: "card-5",
-        name: "誹謗中傷",
+        name: "晒し",
         rarity: "C",
         type: "攻撃",
         kind: "attack",
         targetType: "enemy",
-        damage: 1800,
+        damage: 1200,
         heal: 0,
-        hateTarget: "self",
+        hateTarget: "target",
         hateChange: 1,
-        hateText: "自分のヘイト +1",
-        effect: "対象に1,800フォロワーダメージ。対象のヘイトが3ならダメージ2倍。自分のヘイトが1上がる。"
+        hateText: "対象のヘイト +1",
+        effect: "対象に1,200フォロワーダメージ。対象のヘイトが3ならダメージ2倍。対象のヘイトが1上がる。 対象ヘイト1以上なら+500ダメージ。",
+        hateBonus: [{ targetHateAtLeast: 1, extraDamage: 500 }]
     },
     {
         id: "card-6",
@@ -169,20 +171,6 @@ module.exports = [
     },
     {
         id: "card-13",
-        name: "顔真っ赤",
-        rarity: "C",
-        type: "妨害",
-        kind: "hate",
-        targetType: "enemy",
-        damage: 0,
-        heal: 0,
-        hateTarget: "target",
-        hateChange: 1,
-        hateText: "対象のヘイト +1",
-        effect: "対象プレイヤーのヘイトを1上げる。ヘイト3のプレイヤーは攻撃ダメージが2倍になる。"
-    },
-    {
-        id: "card-14",
         name: "通報準備",
         rarity: "C",
         type: "特殊",
@@ -194,11 +182,11 @@ module.exports = [
         hateTarget: "self",
         hateChange: 0,
         hateText: "ヘイト変動なし",
-        effect: "対象プレイヤーの手札を1枚捨てさせる。相手の選択肢を減らす。",
+        effect: "対象プレイヤーの手札を1枚捨てさせる。",
         discardCount: 1
     },
     {
-        id: "card-15",
+        id: "card-14",
         name: "伏せカード確認班",
         rarity: "C",
         type: "特殊",
@@ -214,7 +202,7 @@ module.exports = [
         destroyTrapCount: 1
     },
     {
-        id: "card-16",
+        id: "card-15",
         name: "粘着DM",
         rarity: "C",
         type: "特殊",
@@ -226,12 +214,12 @@ module.exports = [
         hateTarget: "self",
         hateChange: 0,
         hateText: "ヘイト変動なし",
-        effect: "対象に700スリップダメージを2ターン与える。",
+        effect: "対象に600スリップダメージを2ターン与える。",
         durationTurns: 2,
-        slipDamage: 700
+        slipDamage: 600
     },
     {
-        id: "card-17",
+        id: "card-16",
         name: "火消し",
         rarity: "C",
         type: "罠",
@@ -242,12 +230,12 @@ module.exports = [
         hateTarget: "self",
         hateChange: 0,
         hateText: "ヘイト変動を無効化",
-        effect: "伏せカード。自分が他プレイヤーからヘイトを変動させられた時、その変動を打ち消す。",
+        effect: "伏せカード。ヘイト変動を打ち消す。",
         trapCondition: "onHateChange",
         trapEffect: "cancelHate"
     },
     {
-        id: "card-18",
+        id: "card-17",
         name: "釣り針スルー",
         rarity: "C",
         type: "罠",
@@ -257,12 +245,27 @@ module.exports = [
         heal: 0,
         hateTarget: "self",
         hateChange: 0,
-        hateText: "相手に1,000ダメージ / 相手のヘイト +1",
-        effect: "伏せカード。自分が他プレイヤーからダメージを受けた時、相手に1,000ダメージを与え、相手のヘイトを1上げる。",
+        hateText: "相手に800ダメージ / 相手のヘイト +1",
+        effect: "伏せカード。ダメージを受けた時、相手に800ダメージを与え、相手のヘイトを1上げる。",
         trapCondition: "onDamage",
         trapEffect: "damageAndHate",
-        trapDamage: 1000,
+        trapDamage: 800,
         trapHateChange: 1
+    },
+    {
+        id: "card-18",
+        name: "誤字指摘",
+        rarity: "C",
+        type: "攻撃",
+        kind: "attack",
+        targetType: "enemy",
+        damage: 900,
+        heal: 0,
+        hateTarget: "self",
+        hateChange: 0,
+        hateText: "ヘイト変動なし",
+        effect: "対象に900フォロワーダメージ。対象のヘイトが3ならダメージ2倍。 対象ヘイト2以上なら+800ダメージ。",
+        hateBonus: [{ targetHateAtLeast: 2, extraDamage: 800 }]
     },
     {
         id: "card-19",
@@ -271,12 +274,13 @@ module.exports = [
         type: "攻撃",
         kind: "attack",
         targetType: "enemy",
-        damage: 2400,
+        damage: 2100,
         heal: 0,
         hateTarget: "self",
         hateChange: 1,
         hateText: "自分のヘイト +1",
-        effect: "対象に2,400フォロワーダメージ。対象のヘイトが3ならダメージ2倍。自分のヘイトが1上がる。"
+        effect: "対象に2,100フォロワーダメージ。対象のヘイトが3ならダメージ2倍。自分のヘイトが1上がる。 対象ヘイト1以上なら+700ダメージ、対象ヘイト2以上なら+700ダメージ。",
+        hateBonus: [{ targetHateAtLeast: 1, extraDamage: 700 }, { targetHateAtLeast: 2, extraDamage: 700 }]
     },
     {
         id: "card-20",
@@ -285,12 +289,12 @@ module.exports = [
         type: "攻撃",
         kind: "attack",
         targetType: "enemy",
-        damage: 1800,
+        damage: 1700,
         heal: 0,
         hateTarget: "self",
         hateChange: 1,
         hateText: "自分のヘイト +1",
-        effect: "対象に1,800フォロワーダメージ。対象のヘイトが3ならダメージ2倍。罠カードを無視してダメージを与える。自分のヘイトが1上がる。",
+        effect: "対象に1,700フォロワーダメージ。対象のヘイトが3ならダメージ2倍。罠カードを無視してダメージを与える。自分のヘイトが1上がる。",
         ignoreTrap: true
     },
     {
@@ -300,13 +304,14 @@ module.exports = [
         type: "攻撃",
         kind: "attack",
         targetType: "enemy",
-        damage: 2200,
+        damage: 2000,
         heal: 0,
         hateTarget: "self",
         hateChange: 1,
         hateText: "自分のヘイト +1",
-        effect: "対象に2,200フォロワーダメージ。対象のヘイトが3ならダメージ2倍。罠カードを無視してダメージを与える。自分のヘイトが1上がる。",
-        ignoreTrap: true
+        effect: "対象に2,000フォロワーダメージ。対象のヘイトが3ならダメージ2倍。罠カードを無視してダメージを与える。自分のヘイトが1上がる。 対象ヘイト2以上なら+1,000ダメージ。",
+        ignoreTrap: true,
+        hateBonus: [{ targetHateAtLeast: 2, extraDamage: 1000 }]
     },
     {
         id: "card-22",
@@ -315,12 +320,12 @@ module.exports = [
         type: "攻撃",
         kind: "attack",
         targetType: "allEnemies",
-        damage: 1000,
+        damage: 900,
         heal: 0,
         hateTarget: "self",
         hateChange: 1,
         hateText: "自分のヘイト +1",
-        effect: "敵全体に1,000フォロワーダメージ。対象のヘイトが3なら、その対象へのダメージは2倍。自分のヘイトが1上がる。"
+        effect: "敵全体に900フォロワーダメージ。対象のヘイトが3なら、その対象へのダメージは2倍。自分のヘイトが1上がる。"
     },
     {
         id: "card-23",
@@ -329,12 +334,12 @@ module.exports = [
         type: "攻撃",
         kind: "attack",
         targetType: "allEnemies",
-        damage: 1300,
+        damage: 1200,
         heal: 0,
         hateTarget: "self",
         hateChange: 2,
         hateText: "自分のヘイト +2",
-        effect: "敵全体に1,300フォロワーダメージ。対象のヘイトが3なら、その対象へのダメージは2倍。自分のヘイトが2上がる。"
+        effect: "敵全体に1,200フォロワーダメージ。対象のヘイトが3なら、その対象へのダメージは2倍。自分のヘイトが2上がる。"
     },
     {
         id: "card-24",
@@ -380,20 +385,6 @@ module.exports = [
     },
     {
         id: "card-27",
-        name: "まとめサイト誘導",
-        rarity: "UC",
-        type: "妨害",
-        kind: "hate",
-        targetType: "enemy",
-        damage: 0,
-        heal: 0,
-        hateTarget: "target",
-        hateChange: 2,
-        hateText: "対象のヘイト +2",
-        effect: "対象プレイヤーのヘイトを2上げる。ヘイト3のプレイヤーは攻撃ダメージが2倍になる。"
-    },
-    {
-        id: "card-28",
         name: "一時凍結申請",
         rarity: "UC",
         type: "特殊",
@@ -409,7 +400,7 @@ module.exports = [
         skipTurns: 1
     },
     {
-        id: "card-29",
+        id: "card-28",
         name: "炎上継続",
         rarity: "UC",
         type: "特殊",
@@ -421,12 +412,12 @@ module.exports = [
         hateTarget: "self",
         hateChange: 0,
         hateText: "ヘイト変動なし",
-        effect: "対象に1,000スリップダメージを3ターン与える。",
+        effect: "対象に900スリップダメージを3ターン与える。",
         durationTurns: 3,
-        slipDamage: 1000
+        slipDamage: 900
     },
     {
-        id: "card-30",
+        id: "card-29",
         name: "連続投稿",
         rarity: "UC",
         type: "特殊",
@@ -442,7 +433,7 @@ module.exports = [
         extraTurns: 1
     },
     {
-        id: "card-31",
+        id: "card-30",
         name: "晒し返し",
         rarity: "UC",
         type: "罠",
@@ -452,12 +443,27 @@ module.exports = [
         heal: 0,
         hateTarget: "self",
         hateChange: 0,
-        hateText: "相手に1,500ダメージ / 相手のヘイト +1",
-        effect: "伏せカード。自分が他プレイヤーからダメージを受けた時、相手に1,500ダメージを与え、相手のヘイトを1上げる。",
+        hateText: "相手に1,300ダメージ / 相手のヘイト +1",
+        effect: "伏せカード。ダメージを受けた時、相手に1,300ダメージを与え、相手のヘイトを1上げる。",
         trapCondition: "onDamage",
         trapEffect: "damageAndHate",
-        trapDamage: 1500,
+        trapDamage: 1300,
         trapHateChange: 1
+    },
+    {
+        id: "card-31",
+        name: "炎上便乗",
+        rarity: "UC",
+        type: "攻撃",
+        kind: "attack",
+        targetType: "enemy",
+        damage: 1600,
+        heal: 0,
+        hateTarget: "self",
+        hateChange: 0,
+        hateText: "ヘイト変動なし",
+        effect: "対象に1,600フォロワーダメージ。対象のヘイトが3ならダメージ2倍。 対象ヘイト1以上なら+800ダメージ、対象ヘイト2以上なら対象ヘイト+1。",
+        hateBonus: [{ targetHateAtLeast: 1, extraDamage: 800 }, { targetHateAtLeast: 2, targetHateChange: 1 }]
     },
     {
         id: "card-32",
@@ -466,12 +472,13 @@ module.exports = [
         type: "攻撃",
         kind: "attack",
         targetType: "enemy",
-        damage: 3000,
+        damage: 2600,
         heal: 0,
         hateTarget: "self",
         hateChange: 2,
         hateText: "自分のヘイト +2",
-        effect: "対象に3,000フォロワーダメージ。対象のヘイトが3ならダメージ2倍。自分のヘイトが2上がる。"
+        effect: "対象に2,600フォロワーダメージ。対象のヘイトが3ならダメージ2倍。自分のヘイトが2上がる。 対象ヘイト1以上なら+800ダメージ、対象ヘイト2以上なら+1,000ダメージ。",
+        hateBonus: [{ targetHateAtLeast: 1, extraDamage: 800 }, { targetHateAtLeast: 2, extraDamage: 1000 }]
     },
     {
         id: "card-33",
@@ -480,13 +487,14 @@ module.exports = [
         type: "攻撃",
         kind: "attack",
         targetType: "enemy",
-        damage: 2600,
+        damage: 2400,
         heal: 0,
         hateTarget: "self",
         hateChange: 1,
         hateText: "自分のヘイト +1",
-        effect: "対象に2,600フォロワーダメージ。対象のヘイトが3ならダメージ2倍。罠カードを無視してダメージを与える。自分のヘイトが1上がる。",
-        ignoreTrap: true
+        effect: "対象に2,400フォロワーダメージ。対象のヘイトが3ならダメージ2倍。罠カードを無視してダメージを与える。自分のヘイトが1上がる。 対象ヘイト2以上なら+1,200ダメージ。",
+        ignoreTrap: true,
+        hateBonus: [{ targetHateAtLeast: 2, extraDamage: 1200 }]
     },
     {
         id: "card-34",
@@ -495,12 +503,13 @@ module.exports = [
         type: "攻撃",
         kind: "attack",
         targetType: "enemy",
-        damage: 3200,
+        damage: 2800,
         heal: 0,
         hateTarget: "target",
         hateChange: 2,
         hateText: "対象のヘイト +2",
-        effect: "対象に3,200フォロワーダメージ。対象のヘイトが3ならダメージ2倍。対象のヘイトが2上がる。"
+        effect: "対象に2,800フォロワーダメージ。対象のヘイトが3ならダメージ2倍。対象のヘイトが2上がる。 対象ヘイト2以上なら+1,000ダメージ。",
+        hateBonus: [{ targetHateAtLeast: 2, extraDamage: 1000 }]
     },
     {
         id: "card-35",
@@ -509,12 +518,12 @@ module.exports = [
         type: "攻撃",
         kind: "attack",
         targetType: "allEnemies",
-        damage: 2000,
+        damage: 1800,
         heal: 0,
         hateTarget: "self",
         hateChange: 2,
         hateText: "自分のヘイト +2",
-        effect: "敵全体に2,000フォロワーダメージ。対象のヘイトが3なら、その対象へのダメージは2倍。自分のヘイトが2上がる。"
+        effect: "敵全体に1,800フォロワーダメージ。対象のヘイトが3なら、その対象へのダメージは2倍。自分のヘイトが2上がる。"
     },
     {
         id: "card-36",
@@ -524,11 +533,11 @@ module.exports = [
         kind: "support",
         targetType: "self",
         damage: 0,
-        heal: 2800,
+        heal: 2600,
         hateTarget: "self",
         hateChange: -2,
         hateText: "自分のヘイト -2",
-        effect: "自分のフォロワーを2,800回復。自分のヘイトが2下がる。"
+        effect: "自分のフォロワーを2,600回復。自分のヘイトが2下がる。"
     },
     {
         id: "card-37",
@@ -588,7 +597,7 @@ module.exports = [
         hateTarget: "self",
         hateChange: 0,
         hateText: "ダメージを跳ね返す",
-        effect: "伏せカード。自分が他プレイヤーからダメージを受けた時、そのダメージを打ち消して相手に跳ね返す。",
+        effect: "伏せカード。ダメージを受けた時、そのダメージを打ち消して相手に跳ね返す。",
         trapCondition: "onDamage",
         trapEffect: "reflectDamage"
     },
@@ -604,7 +613,7 @@ module.exports = [
         hateTarget: "self",
         hateChange: 0,
         hateText: "罠効果を無効化",
-        effect: "伏せカード。自分が罠カードの効果を受けた時、その罠効果を打ち消す。",
+        effect: "伏せカード。罠カードの効果を受けた時、その罠効果を打ち消す。",
         trapCondition: "onTrapEffect",
         trapEffect: "cancelTrap"
     },
@@ -615,12 +624,13 @@ module.exports = [
         type: "攻撃",
         kind: "attack",
         targetType: "enemy",
-        damage: 4000,
+        damage: 3600,
         heal: 0,
         hateTarget: "self",
         hateChange: 3,
         hateText: "自分のヘイト +3",
-        effect: "対象に4,000フォロワーダメージ。対象のヘイトが3ならダメージ2倍。自分のヘイトが3上がる。"
+        effect: "対象に3,600フォロワーダメージ。対象のヘイトが3ならダメージ2倍。自分のヘイトが3上がる。 対象ヘイト2以上なら+1,400ダメージ。",
+        hateBonus: [{ targetHateAtLeast: 2, extraDamage: 1400 }]
     },
     {
         id: "card-43",
@@ -629,13 +639,14 @@ module.exports = [
         type: "攻撃",
         kind: "attack",
         targetType: "enemy",
-        damage: 3500,
+        damage: 3200,
         heal: 0,
         hateTarget: "self",
         hateChange: 3,
         hateText: "自分のヘイト +3",
-        effect: "対象に3,500フォロワーダメージ。対象のヘイトが3ならダメージ2倍。罠カードを無視してダメージを与える。自分のヘイトが3上がる。",
-        ignoreTrap: true
+        effect: "対象に3,200フォロワーダメージ。対象のヘイトが3ならダメージ2倍。罠カードを無視してダメージを与える。自分のヘイトが3上がる。 対象ヘイト2以上なら+1,200ダメージ。",
+        ignoreTrap: true,
+        hateBonus: [{ targetHateAtLeast: 2, extraDamage: 1200 }]
     },
     {
         id: "card-44",
@@ -644,12 +655,12 @@ module.exports = [
         type: "攻撃",
         kind: "attack",
         targetType: "allEnemies",
-        damage: 3000,
+        damage: 2600,
         heal: 0,
         hateTarget: "self",
         hateChange: 3,
         hateText: "自分のヘイト +3",
-        effect: "敵全体に3,000フォロワーダメージ。対象のヘイトが3なら、その対象へのダメージは2倍。自分のヘイトが3上がる。"
+        effect: "敵全体に2,600フォロワーダメージ。対象のヘイトが3なら、その対象へのダメージは2倍。自分のヘイトが3上がる。"
     },
     {
         id: "card-45",
@@ -659,11 +670,11 @@ module.exports = [
         kind: "support",
         targetType: "self",
         damage: 0,
-        heal: 4500,
+        heal: 4200,
         hateTarget: "self",
         hateChange: -3,
         hateText: "自分のヘイト -3",
-        effect: "自分のフォロワーを4,500回復。自分のヘイトが3下がる。"
+        effect: "自分のフォロワーを4,200回復。自分のヘイトが3下がる。"
     },
     {
         id: "card-46",
@@ -707,11 +718,11 @@ module.exports = [
         heal: 0,
         hateTarget: "self",
         hateChange: 0,
-        hateText: "相手に2,500ダメージ / 相手のヘイト +2",
-        effect: "伏せカード。自分が他プレイヤーからダメージを受けた時、相手に2,500ダメージを与え、相手のヘイトを2上げる。",
+        hateText: "相手に2,200ダメージ / 相手のヘイト +2",
+        effect: "伏せカード。ダメージを受けた時、相手に2,200ダメージを与え、相手のヘイトを2上げる。",
         trapCondition: "onDamage",
         trapEffect: "damageAndHate",
-        trapDamage: 2500,
+        trapDamage: 2200,
         trapHateChange: 2
     },
     {
@@ -721,12 +732,13 @@ module.exports = [
         type: "攻撃",
         kind: "attack",
         targetType: "enemy",
-        damage: 5500,
+        damage: 5000,
         heal: 0,
         hateTarget: "target",
         hateChange: 3,
         hateText: "対象のヘイト +3",
-        effect: "対象に5,500フォロワーダメージ。対象のヘイトが3ならダメージ2倍。対象のヘイトが3上がる。"
+        effect: "対象に5,000フォロワーダメージ。対象のヘイトが3ならダメージ2倍。対象のヘイトが3上がる。 対象ヘイト2以上なら+1,000ダメージ。",
+        hateBonus: [{ targetHateAtLeast: 2, extraDamage: 1000 }]
     },
     {
         id: "card-50",
@@ -735,11 +747,11 @@ module.exports = [
         type: "攻撃",
         kind: "attack",
         targetType: "allEnemies",
-        damage: 4000,
+        damage: 3600,
         heal: 0,
         hateTarget: "self",
         hateChange: 3,
         hateText: "自分のヘイト +3",
-        effect: "敵全体に4,000フォロワーダメージ。対象のヘイトが3なら、その対象へのダメージは2倍。自分のヘイトが3上がる。"
+        effect: "敵全体に3,600フォロワーダメージ。対象のヘイトが3なら、その対象へのダメージは2倍。自分のヘイトが3上がる。"
     }
 ];
