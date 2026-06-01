@@ -13,10 +13,10 @@
     .card-detail {
         position: absolute !important;
         right: 28px !important;
-        top: 250px !important;
+        top: 270px !important;
         width: 300px !important;
-        height: 230px !important;
-        max-height: 230px !important;
+        height: 215px !important;
+        max-height: 215px !important;
         padding: 15px !important;
         border-radius: 16px !important;
         background: rgba(0, 0, 0, 0.48) !important;
@@ -72,5 +72,115 @@
 
     .status-effect-icon {
         cursor: help !important;
+    }
+}
+
+/* =========================================================
+   PC版：他プレイヤー情報の見切れ対策
+   - 伏せカード + 状態異常が同時にある時も収まるように高さを拡張
+   - 上部敵枠が広がる分、中央/左右の情報枠を少し下へ調整
+   - スマホ版には影響させない
+   ========================================================= */
+
+@media (min-width: 769px) {
+    .enemy-slots {
+        top: 18px !important;
+        gap: 10px !important;
+    }
+
+    .enemy-panel {
+        height: 192px !important;
+        min-height: 192px !important;
+        padding: 14px 18px !important;
+        overflow: visible !important;
+    }
+
+    .enemy-panel .enemy-name {
+        margin-bottom: 5px !important;
+        font-size: 15px !important;
+        line-height: 1.2 !important;
+    }
+
+    .enemy-panel .follower-line {
+        margin-top: 5px !important;
+        font-size: 23px !important;
+        line-height: 1.15 !important;
+    }
+
+    .enemy-panel .owakon-text {
+        font-size: 24px !important;
+        line-height: 1.15 !important;
+    }
+
+    .enemy-panel .panel-hate {
+        margin-top: 7px !important;
+        font-size: 15px !important;
+        line-height: 1.1 !important;
+    }
+
+    .enemy-panel .status-effect-row {
+        margin-top: 7px !important;
+        min-height: 26px !important;
+        gap: 5px !important;
+    }
+
+    .enemy-panel .enemy-field-cards {
+        margin-top: 7px !important;
+        min-height: 24px !important;
+        gap: 7px !important;
+    }
+
+    .enemy-panel .mini-set-card {
+        width: 32px !important;
+        height: 22px !important;
+        font-size: 11px !important;
+    }
+
+    .turn-panel {
+        top: 240px !important;
+    }
+
+    .history-panel {
+        top: 352px !important;
+        max-height: 178px !important;
+    }
+
+    .played-card-list {
+        max-height: 114px !important;
+    }
+
+    .center-zone {
+        top: 50% !important;
+        width: 500px !important;
+    }
+
+    .drop-zone {
+        width: 480px !important;
+        height: 135px !important;
+    }
+
+    .field-card-area {
+        margin-top: 14px !important;
+    }
+
+    .card-detail {
+        top: 282px !important;
+        height: 205px !important;
+        max-height: 205px !important;
+    }
+
+    .my-panel {
+        bottom: 184px !important;
+        height: 154px !important;
+        min-height: 154px !important;
+    }
+
+    .discard-panel {
+        bottom: 92px !important;
+        height: 112px !important;
+    }
+
+    .battle-buttons {
+        bottom: 66px !important;
     }
 }
