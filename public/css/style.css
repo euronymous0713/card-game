@@ -1105,7 +1105,9 @@ button:disabled {
 }
 
 @keyframes urCardGlow {
-    0%, 100% {
+
+    0%,
+    100% {
         box-shadow:
             0 0 0 2px rgba(255, 216, 92, 0.3),
             0 0 18px rgba(255, 176, 0, 0.45),
@@ -1139,7 +1141,9 @@ button:disabled {
 }
 
 @keyframes urStarTwinkle {
-    0%, 100% {
+
+    0%,
+    100% {
         transform: scale(1);
         opacity: 0.72;
     }
@@ -1730,6 +1734,7 @@ body.battle-active .mobile-trap-waiting-notice.show {
     z-index: 6;
     pointer-events: auto !important;
 }
+
 /* =========================================================
    スマホ版：状態異常表示とターン終了ボタン位置の調整
    ========================================================= */
