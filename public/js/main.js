@@ -88,6 +88,7 @@ window.onload = () => {
     let selectedTargetId = "";
     let selectedMobileCardInstanceId = "";
     let selectedMobileFieldCardKey = "";
+    let selectedMobileStatusKey = "";
     let endTurnRequestPending = false;
     let titleCardList = [];
     let currentCardListRarityFilter = "all";
@@ -394,7 +395,22 @@ window.onload = () => {
                     return;
                 }
 
+                const statusKey = makeStatusEffectKey(icon);
+
+                if (selectedMobileStatusKey === statusKey && mobileEffectOverlay.classList.contains("show")) {
+                    selectedMobileStatusKey = "";
+                    hideMobileEffect();
+                    return;
+                }
+
                 const { label, description, amount, turns } = renderStatusDetail();
+
+                selectedMobileCardInstanceId = "";
+                selectedMobileFieldCardKey = "";
+                selectedMobileStatusKey = statusKey;
+                document.body.classList.remove("mobile-card-action-open");
+                updateMobileActionPanel();
+                renderHand();
 
                 showMobileEffect({
                     name: label,
@@ -1036,6 +1052,15 @@ window.onload = () => {
         mobileEffectOverlay.innerHTML = "";
     }
 
+    function makeStatusEffectKey(icon) {
+        return [
+            icon.dataset.statusLabel || "",
+            icon.dataset.statusDescription || "",
+            icon.dataset.statusAmount || "0",
+            icon.dataset.statusTurns || "0"
+        ].join("|");
+    }
+
     function showTrapWaitingNotice(message = "罠カード選択待ち") {
         if (!mobileTrapWaitingNotice) return;
 
@@ -1079,6 +1104,7 @@ window.onload = () => {
     function clearMobileCardSelection() {
         selectedMobileCardInstanceId = "";
         selectedMobileFieldCardKey = "";
+        selectedMobileStatusKey = "";
         hideMobileEffect();
         document.body.classList.remove("mobile-card-action-open");
         updateMobileActionPanel();
@@ -1094,6 +1120,7 @@ window.onload = () => {
         }
 
         selectedMobileFieldCardKey = "";
+        selectedMobileStatusKey = "";
         selectedMobileCardInstanceId = card.instanceId;
         showMobileEffect(card);
         renderHand();
@@ -1110,6 +1137,7 @@ window.onload = () => {
         }
 
         selectedMobileCardInstanceId = "";
+        selectedMobileStatusKey = "";
         selectedMobileFieldCardKey = fieldKey;
         document.body.classList.remove("mobile-card-action-open");
         updateMobileActionPanel();
@@ -1236,6 +1264,7 @@ window.onload = () => {
 
         selectedMobileCardInstanceId = "";
         selectedMobileFieldCardKey = "";
+        selectedMobileStatusKey = "";
         hideMobileEffect();
         updateMobileActionPanel();
     }
@@ -1259,6 +1288,7 @@ window.onload = () => {
 
         selectedMobileCardInstanceId = "";
         selectedMobileFieldCardKey = "";
+        selectedMobileStatusKey = "";
         hideMobileEffect();
         updateMobileActionPanel();
     }
@@ -1885,6 +1915,7 @@ window.onload = () => {
         previousGame = null;
         selectedTargetId = "";
         selectedMobileCardInstanceId = "";
+        selectedMobileStatusKey = "";
         draggedCard = null;
         document.body.classList.remove("mobile-card-action-open");
         closeMobileHistory();
