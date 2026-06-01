@@ -10,50 +10,53 @@
 }
 
 @media (min-width: 769px) {
+
     .card-detail {
         position: absolute !important;
         right: 28px !important;
         top: 270px !important;
-        width: 300px !important;
-        height: 215px !important;
-        max-height: 215px !important;
-        padding: 15px !important;
-        border-radius: 16px !important;
-        background: rgba(0, 0, 0, 0.48) !important;
-        border: 1px solid rgba(0, 255, 225, 0.22) !important;
-        box-shadow:
-            0 0 18px rgba(0, 255, 225, 0.12),
-            inset 0 0 16px rgba(255, 255, 255, 0.03) !important;
-        overflow-y: auto !important;
+
+        width: 320px !important;
+        height: 235px !important;
+        max-height: 235px !important;
+
+        padding: 14px !important;
+
+        overflow: hidden !important;
+        overflow-y: hidden !important;
         overflow-x: hidden !important;
-        z-index: 8 !important;
     }
 
     .card-detail h3 {
-        margin-bottom: 8px !important;
-        font-size: 17px !important;
-        line-height: 1.25 !important;
+        margin-bottom: 6px !important;
+        font-size: 15px !important;
+        line-height: 1.2 !important;
     }
 
     .card-detail p {
-        font-size: 13px !important;
-        line-height: 1.55 !important;
+        font-size: 11px !important;
+        line-height: 1.35 !important;
         opacity: 0.94 !important;
     }
 
     .card-detail .detail-rarity {
-        margin-bottom: 6px !important;
+        margin-bottom: 4px !important;
+        font-size: 10px !important;
     }
 
     .card-detail .detail-type {
-        margin-bottom: 6px !important;
-        font-size: 13px !important;
+        margin-bottom: 4px !important;
+        font-size: 11px !important;
     }
 
     .card-detail .detail-hate {
-        margin-top: 8px !important;
-        font-size: 13px !important;
-        line-height: 1.45 !important;
+        margin-top: 6px !important;
+        font-size: 11px !important;
+        line-height: 1.3 !important;
+    }
+
+    .card-detail::-webkit-scrollbar {
+        display: none !important;
     }
 }
 
