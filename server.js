@@ -708,7 +708,7 @@ function emitRoomUpdate(roomId) {
     const room = rooms[roomId];
     if (!room) return;
 
-    emitRoomUpdate(roomId);
+    io.to(roomId).emit("updateRoom", room.players);
 }
 
 function updateIdInLogs(logs, oldId, newId) {
