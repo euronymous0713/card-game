@@ -93,6 +93,8 @@ window.onload = () => {
     let currentCardListRarityFilter = "all";
     let currentCardListKindFilter = "all";
     let currentCardListSearchText = "";
+    let cardListVisibleCount = 24;
+    let cardListSearchTimer = null;
 
     function setScreenMode(mode) {
         document.body.classList.toggle("title-active", mode === "title");
@@ -450,12 +452,15 @@ window.onload = () => {
             return;
         }
 
+        const visibleCards = filteredCards.slice(0, cardListVisibleCount);
+        const hasMoreCards = visibleCards.length < filteredCards.length;
+
         cardListBody.innerHTML = `
             <div class="card-list-stats">
-                ${cardListStatsText()} / 表示:${filteredCards.length}枚 / ${cardListFilterDescription()}
+                ${cardListStatsText()} / 表示:${visibleCards.length}/${filteredCards.length}枚 / ${cardListFilterDescription()}
             </div>
             <div class="card-list-grid">
-                ${filteredCards.map(card => {
+                ${visibleCards.map(card => {
                     const rarity = normalizeRarity(card.rarity);
                     const specialLabel = specialEffectLabel(card);
 
@@ -479,7 +484,21 @@ window.onload = () => {
                     `;
                 }).join("")}
             </div>
+            ${hasMoreCards ? `
+                <button type="button" class="card-list-more-button" id="cardListMoreButton">
+                    さらに表示する（残り${filteredCards.length - visibleCards.length}枚）
+                </button>
+            ` : ""}
         `;
+
+        const cardListMoreButton = document.getElementById("cardListMoreButton");
+
+        if (cardListMoreButton) {
+            cardListMoreButton.onclick = () => {
+                cardListVisibleCount += 24;
+                renderTitleCardList();
+            };
+        }
     }
 
     function openTitleCardList() {
@@ -491,6 +510,7 @@ window.onload = () => {
             setCardListControlsOpen(true);
         }
 
+        cardListVisibleCount = 24;
         renderTitleCardList();
         cardListOverlay.style.display = "flex";
         cardListOverlay.setAttribute("aria-hidden", "false");
@@ -1114,6 +1134,7 @@ window.onload = () => {
                 }
             });
 
+            cardListVisibleCount = 24;
             renderTitleCardList();
         };
     });
@@ -1121,7 +1142,12 @@ window.onload = () => {
     if (cardListSearchInput) {
         cardListSearchInput.oninput = () => {
             currentCardListSearchText = cardListSearchInput.value.trim();
-            renderTitleCardList();
+            cardListVisibleCount = 24;
+
+            clearTimeout(cardListSearchTimer);
+            cardListSearchTimer = setTimeout(() => {
+                renderTitleCardList();
+            }, 120);
         };
     }
 

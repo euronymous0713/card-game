@@ -1011,47 +1011,84 @@ button:disabled {
 }
 
 .rarity-ur {
-    background: linear-gradient(135deg, #fff2a6, #ffb000 28%, #ff00c8 62%, #00ffe1) !important;
-    border-color: rgba(255, 245, 170, 1) !important;
-    color: #1a1028 !important;
-    text-shadow: 0 0 8px rgba(255, 255, 255, 0.75);
+    background: linear-gradient(135deg, #fff6c7, #ffcf4a 42%, #f2a900) !important;
+    border-color: rgba(255, 232, 128, 0.95) !important;
+    color: #2a1b00 !important;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55);
     box-shadow:
-        0 0 18px rgba(255, 176, 0, 0.85),
-        0 0 34px rgba(255, 0, 200, 0.55),
-        0 0 54px rgba(0, 255, 225, 0.35) !important;
+        0 0 14px rgba(255, 176, 0, 0.62),
+        0 0 24px rgba(255, 226, 120, 0.26) !important;
 }
 
 .hand-card.rarity-ur {
     position: relative;
-    overflow: hidden;
+    overflow: visible;
     border-width: 3px;
+    background:
+        linear-gradient(160deg, rgba(52, 28, 8, 0.98), rgba(29, 16, 45, 0.98)) !important;
+    color: #ffffff !important;
+    border-color: rgba(255, 216, 92, 0.95) !important;
     box-shadow:
-        0 0 22px rgba(255, 176, 0, 0.85),
-        0 0 42px rgba(255, 0, 200, 0.5),
-        inset 0 0 22px rgba(255, 255, 255, 0.16);
+        0 0 0 2px rgba(255, 216, 92, 0.35),
+        0 0 22px rgba(255, 176, 0, 0.55),
+        0 0 34px rgba(255, 0, 200, 0.22),
+        inset 0 0 18px rgba(255, 216, 92, 0.08) !important;
+    animation: urCardGlow 2.6s ease-in-out infinite;
 }
 
 .hand-card.rarity-ur::before {
     content: "";
     position: absolute;
-    inset: -40%;
-    background: linear-gradient(120deg, transparent 35%, rgba(255, 255, 255, 0.65) 50%, transparent 65%);
-    transform: rotate(18deg) translateX(-80%);
-    animation: urShine 2.4s ease-in-out infinite;
+    inset: -7px;
+    border-radius: 21px;
+    border: 1px solid rgba(255, 235, 140, 0.85);
+    background:
+        linear-gradient(90deg, rgba(255, 216, 92, 0.95), rgba(255, 0, 200, 0.42), rgba(0, 255, 225, 0.42), rgba(255, 216, 92, 0.95));
+    background-size: 240% 100%;
+    z-index: -1;
+    filter: drop-shadow(0 0 10px rgba(255, 176, 0, 0.55));
+    animation: urBorderFlow 3.2s linear infinite;
     pointer-events: none;
 }
 
 .hand-card.rarity-ur::after {
-    content: "✦";
+    content: "✦ ✧";
     position: absolute;
     right: 10px;
-    top: 8px;
-    font-size: 18px;
-    color: #fff2a6;
+    top: 7px;
+    font-size: 16px;
+    letter-spacing: 1px;
+    color: #ffe88a;
     text-shadow:
-        0 0 8px rgba(255, 176, 0, 1),
-        0 0 16px rgba(255, 0, 200, 0.8);
+        0 0 6px rgba(255, 216, 92, 0.95),
+        0 0 12px rgba(255, 176, 0, 0.55);
+    opacity: 0.9;
+    animation: urStarTwinkle 1.9s ease-in-out infinite;
     pointer-events: none;
+}
+
+.hand-card.rarity-ur .card-name {
+    color: #ffffff;
+    text-shadow:
+        0 2px 3px rgba(0, 0, 0, 0.85),
+        0 0 8px rgba(255, 216, 92, 0.28);
+}
+
+.hand-card.rarity-ur .card-type {
+    color: #ffe88a;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.hand-card.rarity-ur .card-hate {
+    color: #ffd36a;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85);
+}
+
+.hand-card.rarity-ur .card-rarity-badge {
+    color: #2a1b00 !important;
+    text-shadow: none;
+    background: linear-gradient(135deg, #fff6c7, #ffcf4a 46%, #f2a900) !important;
+    border-color: rgba(255, 245, 170, 0.95) !important;
 }
 
 .hand-card.rarity-ur .card-name,
@@ -1062,24 +1099,49 @@ button:disabled {
     z-index: 1;
 }
 
-@keyframes urShine {
-    0% {
-        transform: rotate(18deg) translateX(-90%);
-        opacity: 0;
+@keyframes urCardGlow {
+    0%, 100% {
+        box-shadow:
+            0 0 0 2px rgba(255, 216, 92, 0.3),
+            0 0 18px rgba(255, 176, 0, 0.45),
+            0 0 28px rgba(255, 0, 200, 0.16),
+            inset 0 0 18px rgba(255, 216, 92, 0.08) !important;
     }
 
-    30% {
+    50% {
+        box-shadow:
+            0 0 0 2px rgba(255, 216, 92, 0.58),
+            0 0 26px rgba(255, 176, 0, 0.72),
+            0 0 40px rgba(0, 255, 225, 0.2),
+            inset 0 0 22px rgba(255, 216, 92, 0.13) !important;
+    }
+}
+
+@keyframes urBorderFlow {
+    0% {
+        background-position: 0% 50%;
+        opacity: 0.86;
+    }
+
+    50% {
         opacity: 1;
     }
 
-    58% {
-        transform: rotate(18deg) translateX(90%);
-        opacity: 0;
+    100% {
+        background-position: 240% 50%;
+        opacity: 0.86;
+    }
+}
+
+@keyframes urStarTwinkle {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 0.72;
     }
 
-    100% {
-        transform: rotate(18deg) translateX(90%);
-        opacity: 0;
+    50% {
+        transform: scale(1.12);
+        opacity: 1;
     }
 }
 
@@ -4024,6 +4086,8 @@ body.battle-active .mobile-trap-waiting-notice.show {
     background: rgba(255, 255, 255, 0.055);
     border: 1px solid rgba(255, 255, 255, 0.12);
     box-shadow: none !important;
+    content-visibility: auto;
+    contain-intrinsic-size: 180px;
 }
 
 .card-list-item-head {
@@ -4084,6 +4148,19 @@ body.battle-active .mobile-trap-waiting-notice.show {
     text-align: center;
     color: rgba(255, 255, 255, 0.62);
 }
+
+.card-list-more-button {
+    display: block;
+    width: min(320px, 100%);
+    margin: 16px auto 4px;
+    padding: 11px 18px;
+    border-radius: 999px;
+    font-size: 14px;
+    background: linear-gradient(135deg, rgba(0, 255, 225, 0.92), rgba(255, 176, 0, 0.92));
+    color: #10131f;
+    box-shadow: 0 0 18px rgba(0, 255, 225, 0.24);
+}
+
 
 @media (max-width: 900px) {
     .card-list-grid {
