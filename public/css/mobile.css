@@ -4282,3 +4282,122 @@
         line-height: 1.25 !important;
     }
 }
+
+/* =========================================================
+   スマホ版：カード効果と操作パネルの重なり再調整 v11
+   - カード効果表示を少し小さくして中央付近に余白を作る
+   - 「使う / 捨てる」パネルを自分情報の上に逃がす
+   - 自分プレイヤー情報には被せない
+   - バトル画面だけに限定
+   ========================================================= */
+@media (max-width: 768px) {
+    body.battle-active .mobile-effect-card {
+        width: min(300px, 84vw) !important;
+        max-height: 34dvh !important;
+        padding: 12px 13px 11px !important;
+        border-radius: 16px !important;
+        transform: translateY(-38px) !important;
+    }
+
+    body.battle-active .mobile-effect-title-row {
+        gap: 6px !important;
+        padding-right: 0 !important;
+        font-size: 14px !important;
+        line-height: 1.2 !important;
+    }
+
+    body.battle-active .mobile-effect-rarity {
+        min-width: 28px !important;
+        padding: 2px 6px !important;
+        font-size: 9px !important;
+    }
+
+    body.battle-active .mobile-effect-type {
+        margin-top: 5px !important;
+        font-size: 10px !important;
+        line-height: 1.2 !important;
+    }
+
+    body.battle-active .mobile-effect-card p {
+        margin-top: 5px !important;
+        font-size: 11px !important;
+        line-height: 1.38 !important;
+    }
+
+    body.battle-active .mobile-effect-hate {
+        margin-top: 6px !important;
+        font-size: 10px !important;
+        line-height: 1.25 !important;
+    }
+
+    body.battle-active .mobile-action-panel {
+        left: 10px !important;
+        right: 10px !important;
+        bottom: 206px !important;
+        padding: 5px 6px !important;
+        border-radius: 13px !important;
+        z-index: 9600 !important;
+        background: rgba(0, 0, 0, 0.86) !important;
+    }
+
+    body.battle-active .mobile-selected-card-name {
+        margin-bottom: 4px !important;
+        font-size: 10px !important;
+        line-height: 1.15 !important;
+    }
+
+    body.battle-active .mobile-action-buttons {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 6px !important;
+    }
+
+    body.battle-active .mobile-action-buttons button {
+        min-height: 32px !important;
+        padding: 5px 6px !important;
+        border-radius: 10px !important;
+        font-size: 11px !important;
+        line-height: 1.1 !important;
+    }
+
+    body.battle-active.mobile-card-action-open .battle-field {
+        padding-bottom: 214px !important;
+    }
+}
+
+@media (max-width: 380px), (max-height: 720px) {
+    body.battle-active .mobile-effect-card {
+        width: min(286px, 84vw) !important;
+        max-height: 30dvh !important;
+        padding: 10px 11px !important;
+        transform: translateY(-44px) !important;
+    }
+
+    body.battle-active .mobile-effect-title-row {
+        font-size: 13px !important;
+    }
+
+    body.battle-active .mobile-effect-card p {
+        font-size: 10px !important;
+        line-height: 1.32 !important;
+    }
+
+    body.battle-active .mobile-action-panel {
+        left: 8px !important;
+        right: 8px !important;
+        bottom: 184px !important;
+        padding: 5px !important;
+    }
+
+    body.battle-active .mobile-selected-card-name {
+        font-size: 9px !important;
+    }
+
+    body.battle-active .mobile-action-buttons button {
+        min-height: 29px !important;
+        font-size: 10px !important;
+    }
+
+    body.battle-active.mobile-card-action-open .battle-field {
+        padding-bottom: 196px !important;
+    }
+}
