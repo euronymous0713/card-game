@@ -266,7 +266,7 @@ module.exports = [
         hateTarget: "self",
         hateChange: 0,
         hateText: "ヘイト変動なし",
-        effect: "対象に800フォロワーダメージ。対象のヘイトが3ならダメージ2倍。順位条件で追加効果。",
+        effect: "対象に800フォロワーダメージ。対象のヘイトが3ならダメージ2倍。対象が現在フォロワー最下位（同率含む）なら、追加で500ダメージ。",
         rankBonus: [{ condition: "lowestFollowers", extraDamage: 500 }]
     },
     {
@@ -310,7 +310,7 @@ module.exports = [
         hateTarget: "self",
         hateChange: 0,
         hateText: "ヘイト変動なし",
-        effect: "対象に1,200フォロワーダメージ。対象のヘイトが3ならダメージ2倍。順位条件で追加効果。",
+        effect: "対象に1,200フォロワーダメージ。対象のヘイトが3ならダメージ2倍。対象が現在フォロワー1位（同率含む）なら、追加で600ダメージし、自分のヘイトが1上がる。",
         rankBonus: [{ condition: "leader", extraDamage: 600, selfHateChange: 1 }]
     },
     {
@@ -325,7 +325,7 @@ module.exports = [
         hateTarget: "self",
         hateChange: 0,
         hateText: "ヘイト変動なし",
-        effect: "対象に1,000フォロワーダメージ。対象のヘイトが3ならダメージ2倍。順位条件で追加効果。",
+        effect: "対象に1,000フォロワーダメージ。対象のヘイトが3ならダメージ2倍。対象が現在フォロワー最下位（同率含む）なら、追加で700ダメージし、自分のヘイトが1上がる。",
         rankBonus: [{ condition: "lowestFollowers", extraDamage: 700, selfHateChange: 1 }]
     },
     {
@@ -525,7 +525,7 @@ module.exports = [
         hateTarget: "self",
         hateChange: 0,
         hateText: "ヘイト変動なし",
-        effect: "対象に1,500フォロワーダメージ。対象のヘイトが3ならダメージ2倍。順位条件で追加効果。",
+        effect: "対象に1,500フォロワーダメージ。対象のヘイトが3ならダメージ2倍。対象が現在フォロワー1位（同率含む）なら、追加で900ダメージし、対象のヘイトを1上げる。",
         rankBonus: [{ condition: "leader", extraDamage: 900, targetHateChange: 1 }]
     },
     {
@@ -540,7 +540,7 @@ module.exports = [
         hateTarget: "self",
         hateChange: 0,
         hateText: "ヘイト変動なし",
-        effect: "対象に1,200フォロワーダメージ。対象のヘイトが3ならダメージ2倍。順位条件で追加効果。",
+        effect: "対象に1,200フォロワーダメージ。対象のヘイトが3ならダメージ2倍。対象が現在フォロワー最下位（同率含む）なら、追加で1,000ダメージ。",
         rankBonus: [{ condition: "lowestFollowers", extraDamage: 1000 }]
     },
     {
@@ -658,7 +658,7 @@ module.exports = [
         hateTarget: "self",
         hateChange: 0,
         hateText: "ヘイト変動なし",
-        effect: "対象に1,800フォロワーダメージ。対象のヘイトが3ならダメージ2倍。順位条件で追加効果。",
+        effect: "対象に1,800フォロワーダメージ。対象のヘイトが3ならダメージ2倍。対象が現在フォロワー1位（同率含む）なら、追加で1,200ダメージし、対象のヘイトを1上げる。",
         rankBonus: [{ condition: "leader", extraDamage: 1200, targetHateChange: 1 }]
     },
     {
