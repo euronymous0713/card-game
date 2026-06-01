@@ -4222,3 +4222,63 @@
         font-size: 12px !important;
     }
 }
+
+/* =========================================================
+   スマホ版：Created by 表示の重なり修正 v10
+   - タイトル/ルーム画面だけ下部余白を確保
+   - クレジットを画面下に固定しつつ、中央UIと被らないようにする
+   - バトル画面には影響させない
+   ========================================================= */
+@media (max-width: 768px) {
+    body.title-active,
+    body.lobby-active {
+        padding-bottom: 54px !important;
+        align-items: center !important;
+    }
+
+    body.title-active .title-screen,
+    body.lobby-active #lobbyScreen {
+        transform-origin: center center !important;
+        margin-bottom: 18px !important;
+    }
+
+    body.title-active .creator-credit,
+    body.lobby-active .creator-credit {
+        position: fixed !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 8px !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 12px !important;
+        text-align: center !important;
+        font-size: 9px !important;
+        line-height: 1.35 !important;
+        color: rgba(255, 255, 255, 0.34) !important;
+        pointer-events: none !important;
+        z-index: 2 !important;
+    }
+
+    body.battle-active .creator-credit {
+        display: none !important;
+    }
+}
+
+@media (max-width: 380px), (max-height: 720px) {
+    body.title-active,
+    body.lobby-active {
+        padding-bottom: 44px !important;
+    }
+
+    body.title-active .title-screen,
+    body.lobby-active #lobbyScreen {
+        margin-bottom: 10px !important;
+    }
+
+    body.title-active .creator-credit,
+    body.lobby-active .creator-credit {
+        bottom: 6px !important;
+        font-size: 8px !important;
+        line-height: 1.25 !important;
+    }
+}
