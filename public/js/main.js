@@ -72,7 +72,7 @@ window.onload = () => {
     mobileSettingsButton.innerText = "⚙";
     mobileSettingsButton.setAttribute("aria-label", "設定を表示");
     mobileSettingsButton.title = "設定";
-    document.body.appendChild(mobileSettingsButton);
+    battleField.appendChild(mobileSettingsButton);
 
     const mobileSettingsOverlay = document.createElement("div");
     mobileSettingsOverlay.id = "mobileSettingsOverlay";
