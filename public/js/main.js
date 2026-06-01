@@ -1030,7 +1030,7 @@ window.onload = () => {
         const rarity = normalizeRarity(card.rarity);
 
         mobileEffectOverlay.innerHTML = `
-            <div class="mobile-effect-card ${rarityClass(rarity)}">
+            <div class="mobile-effect-card">
                 <div class="mobile-effect-title-row">
                     <span class="mobile-effect-rarity ${rarityClass(rarity)}">${rarity}</span>
                     <strong>${card.name}</strong>
