@@ -4909,3 +4909,93 @@ body.battle-active .mobile-trap-waiting-notice.show {
         font-size: 11px !important;
     }
 }
+/* =========================================================
+   スマホ版：小幅レイアウト調整 v3
+   大きな構造変更はせず、重なりだけを避ける
+   ========================================================= */
+
+@media (max-width: 768px) {
+    /* 他プレイヤー情報と被らないよう、現在ターン表示を少し下げる */
+    .turn-panel {
+        margin-top: 8px !important;
+    }
+
+    /* 自分プレイヤー情報の高さに合わせて、自分の伏せカード枠も少し高くする */
+    .field-card-area {
+        min-height: 64px !important;
+        height: 64px !important;
+        max-height: 64px !important;
+        padding: 7px 10px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+    }
+
+    .field-card-area h3 {
+        margin-bottom: 6px !important;
+        line-height: 1 !important;
+    }
+
+    #myFieldCards {
+        min-height: 34px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    .set-card {
+        height: 30px !important;
+    }
+
+    .my-panel {
+        min-height: 64px !important;
+        height: 64px !important;
+        max-height: 64px !important;
+        padding: 7px 10px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+    }
+
+    /* カード使用/捨てるパネルを少し上げ、効果表示や自分情報とのかぶりを避ける */
+    .mobile-action-panel {
+        bottom: 18px !important;
+        left: 8px !important;
+        right: 8px !important;
+        border-radius: 18px !important;
+    }
+
+    body.mobile-card-action-open .hand-area {
+        padding-bottom: 90px !important;
+    }
+
+    body.mobile-card-action-open .battle-field {
+        padding-bottom: 160px !important;
+    }
+}
+
+@media (max-width: 380px), (max-height: 720px) {
+    .turn-panel {
+        margin-top: 6px !important;
+    }
+
+    .field-card-area,
+    .my-panel {
+        min-height: 58px !important;
+        height: 58px !important;
+        max-height: 58px !important;
+        padding: 6px 8px !important;
+    }
+
+    .mobile-action-panel {
+        bottom: 14px !important;
+    }
+
+    body.mobile-card-action-open .hand-area {
+        padding-bottom: 82px !important;
+    }
+
+    body.mobile-card-action-open .battle-field {
+        padding-bottom: 150px !important;
+    }
+}
