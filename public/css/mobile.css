@@ -4176,3 +4176,89 @@
         padding-bottom: 174px !important;
     }
 }
+
+/* =========================================================
+   スマホ版：URカード効果参照中のアニメーション維持
+   - 手札のUR装飾とは別に、中央の効果表示にもUR装飾を付ける
+   - 効果参照中は .mobile-effect-card が表示され続けるため、
+     タップ後もURアニメーションが継続する
+   ========================================================= */
+@media (max-width: 768px) {
+    body.battle-active .mobile-effect-card.rarity-ur {
+        position: relative !important;
+        overflow: visible !important;
+        color: #ffffff !important;
+        background:
+            linear-gradient(160deg, rgba(52, 28, 8, 0.9), rgba(29, 16, 45, 0.9)) !important;
+        border-color: rgba(255, 216, 92, 0.95) !important;
+        box-shadow:
+            0 0 0 2px rgba(255, 216, 92, 0.32),
+            0 0 24px rgba(255, 176, 0, 0.58),
+            0 0 42px rgba(255, 0, 200, 0.24),
+            inset 0 0 18px rgba(255, 216, 92, 0.08) !important;
+        animation: urCardGlow 2.6s ease-in-out infinite !important;
+    }
+
+    body.battle-active .mobile-effect-card.rarity-ur::before {
+        content: "";
+        position: absolute;
+        inset: -6px;
+        z-index: -1;
+        border-radius: 24px;
+        border: 1px solid rgba(255, 235, 140, 0.85);
+        background:
+            linear-gradient(90deg, rgba(255, 216, 92, 0.95), rgba(255, 0, 200, 0.42), rgba(0, 255, 225, 0.42), rgba(255, 216, 92, 0.95));
+        background-size: 240% 100%;
+        filter: drop-shadow(0 0 10px rgba(255, 176, 0, 0.55));
+        animation: urBorderFlow 3.2s linear infinite !important;
+        pointer-events: none;
+    }
+
+    body.battle-active .mobile-effect-card.rarity-ur::after {
+        content: "✦ ✧";
+        position: absolute;
+        right: 14px;
+        top: 10px;
+        z-index: 1;
+        color: #ffe88a;
+        font-size: 18px;
+        letter-spacing: 1px;
+        text-shadow:
+            0 0 6px rgba(255, 216, 92, 0.95),
+            0 0 12px rgba(255, 176, 0, 0.55);
+        opacity: 0.9;
+        animation: urStarTwinkle 1.9s ease-in-out infinite !important;
+        pointer-events: none;
+    }
+
+    body.battle-active .mobile-effect-card.rarity-ur .mobile-effect-title-row,
+    body.battle-active .mobile-effect-card.rarity-ur .mobile-effect-type,
+    body.battle-active .mobile-effect-card.rarity-ur p,
+    body.battle-active .mobile-effect-card.rarity-ur .mobile-effect-hate {
+        position: relative !important;
+        z-index: 2 !important;
+    }
+
+    body.battle-active .mobile-effect-card.rarity-ur .mobile-effect-title-row strong {
+        color: #ffffff !important;
+        text-shadow:
+            0 2px 3px rgba(0, 0, 0, 0.85),
+            0 0 8px rgba(255, 216, 92, 0.35) !important;
+    }
+
+    body.battle-active .mobile-effect-card.rarity-ur .mobile-effect-type,
+    body.battle-active .mobile-effect-card.rarity-ur .mobile-effect-hate {
+        color: #ffe88a !important;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8) !important;
+    }
+
+    body.battle-active .mobile-effect-card.rarity-ur .mobile-effect-rarity {
+        color: #2a1b00 !important;
+        text-shadow: none !important;
+        background: linear-gradient(135deg, #fff6c7, #ffcf4a 46%, #f2a900) !important;
+        border-color: rgba(255, 245, 170, 0.95) !important;
+        box-shadow:
+            0 0 14px rgba(255, 176, 0, 0.62),
+            0 0 24px rgba(255, 226, 120, 0.26) !important;
+    }
+}
