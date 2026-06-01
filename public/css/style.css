@@ -5336,3 +5336,251 @@ body.battle-active .mobile-trap-waiting-notice.show {
         right: 6px !important;
     }
 }
+/* =========================================================
+   スマホ版：場のプレイヤー情報だけコンパクト化 v6
+   目的：
+   - スマホ版の場レイアウト以外に影響させない
+   - スクロールなし
+   - 自分プレイヤー情報の状態異常がはみ出ないようにする
+   - 自分プレイヤー情報と自分伏せカードの高さを揃える
+   ========================================================= */
+
+@media (max-width: 768px) {
+    body.battle-active .my-panel,
+    body.battle-active .field-card-area {
+        min-height: 94px !important;
+        height: 94px !important;
+        max-height: 94px !important;
+        padding: 6px 8px !important;
+        overflow: hidden !important;
+        box-sizing: border-box !important;
+    }
+
+    body.battle-active .my-panel {
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: flex-start !important;
+        align-items: center !important;
+        gap: 1px !important;
+    }
+
+    body.battle-active .my-name {
+        width: 100% !important;
+        min-height: 13px !important;
+        height: 13px !important;
+        max-height: 13px !important;
+        line-height: 13px !important;
+        margin: 0 !important;
+        font-size: 10px !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        flex: 0 0 auto !important;
+    }
+
+    body.battle-active .my-panel .follower-line {
+        min-height: 14px !important;
+        height: 14px !important;
+        max-height: 14px !important;
+        line-height: 14px !important;
+        margin: 1px 0 0 !important;
+        font-size: 12px !important;
+        white-space: nowrap !important;
+        flex: 0 0 auto !important;
+    }
+
+    body.battle-active .my-panel .panel-hate {
+        min-height: 12px !important;
+        height: 12px !important;
+        max-height: 12px !important;
+        line-height: 12px !important;
+        margin: 1px 0 0 !important;
+        font-size: 9px !important;
+        letter-spacing: 1px !important;
+        white-space: nowrap !important;
+        flex: 0 0 auto !important;
+    }
+
+    body.battle-active .my-panel .status-effect-row {
+        width: 100% !important;
+        min-height: 18px !important;
+        height: 18px !important;
+        max-height: 18px !important;
+        margin: 2px 0 0 !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        gap: 2px !important;
+        flex-wrap: nowrap !important;
+        overflow: hidden !important;
+        flex: 0 0 auto !important;
+    }
+
+    body.battle-active .my-panel .status-effect-icon {
+        width: 18px !important;
+        height: 16px !important;
+        min-height: 16px !important;
+        max-height: 16px !important;
+        padding: 0 !important;
+        font-size: 9px !important;
+        line-height: 1 !important;
+        flex: 0 0 18px !important;
+    }
+
+    body.battle-active .my-panel .status-effect-icon span {
+        margin-left: -2px !important;
+        padding: 0 1px !important;
+        font-size: 7px !important;
+        line-height: 1 !important;
+    }
+
+    body.battle-active .field-card-area {
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: flex-start !important;
+        align-items: center !important;
+        gap: 0 !important;
+    }
+
+    body.battle-active .field-card-area h3 {
+        width: 100% !important;
+        min-height: 13px !important;
+        height: 13px !important;
+        max-height: 13px !important;
+        line-height: 13px !important;
+        margin: 0 0 8px !important;
+        font-size: 9px !important;
+        text-align: center !important;
+        flex: 0 0 auto !important;
+    }
+
+    body.battle-active #myFieldCards {
+        width: 100% !important;
+        min-height: 46px !important;
+        height: 46px !important;
+        max-height: 46px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 8px !important;
+        overflow: hidden !important;
+        flex: 0 0 auto !important;
+    }
+
+    body.battle-active .set-card {
+        width: 58px !important;
+        height: 32px !important;
+        min-height: 32px !important;
+        max-height: 32px !important;
+        font-size: 9px !important;
+        border-radius: 9px !important;
+    }
+
+    /* 他プレイヤー情報も場の中だけ少しだけコンパクトにして見切れを防ぐ */
+    body.battle-active .enemy-panel {
+        overflow: hidden !important;
+    }
+
+    body.battle-active .enemy-name {
+        font-size: 9px !important;
+        line-height: 1.05 !important;
+        min-height: 11px !important;
+        max-height: 11px !important;
+    }
+
+    body.battle-active .enemy-panel .follower-line {
+        font-size: 10px !important;
+        line-height: 1.05 !important;
+        min-height: 11px !important;
+        max-height: 11px !important;
+    }
+
+    body.battle-active .enemy-panel .panel-hate {
+        font-size: 8px !important;
+        line-height: 1 !important;
+        margin-top: 1px !important;
+    }
+
+    body.battle-active .enemy-panel .status-effect-row {
+        min-height: 15px !important;
+        height: 15px !important;
+        max-height: 15px !important;
+        margin-top: 2px !important;
+        gap: 1px !important;
+        flex-wrap: nowrap !important;
+        overflow: hidden !important;
+    }
+
+    body.battle-active .enemy-panel .status-effect-icon {
+        width: 16px !important;
+        height: 14px !important;
+        min-height: 14px !important;
+        max-height: 14px !important;
+        font-size: 8px !important;
+        flex: 0 0 16px !important;
+    }
+
+    body.battle-active .enemy-panel .status-effect-icon span {
+        font-size: 6px !important;
+        padding: 0 1px !important;
+    }
+}
+
+@media (max-width: 380px), (max-height: 720px) {
+    body.battle-active .my-panel,
+    body.battle-active .field-card-area {
+        min-height: 88px !important;
+        height: 88px !important;
+        max-height: 88px !important;
+        padding: 5px 7px !important;
+    }
+
+    body.battle-active .my-name {
+        font-size: 9px !important;
+        min-height: 12px !important;
+        height: 12px !important;
+        line-height: 12px !important;
+    }
+
+    body.battle-active .my-panel .follower-line {
+        font-size: 11px !important;
+        min-height: 13px !important;
+        height: 13px !important;
+        line-height: 13px !important;
+    }
+
+    body.battle-active .my-panel .panel-hate {
+        font-size: 8px !important;
+        min-height: 11px !important;
+        height: 11px !important;
+        line-height: 11px !important;
+    }
+
+    body.battle-active .my-panel .status-effect-row {
+        min-height: 16px !important;
+        height: 16px !important;
+        max-height: 16px !important;
+        gap: 1px !important;
+    }
+
+    body.battle-active .my-panel .status-effect-icon {
+        width: 16px !important;
+        height: 14px !important;
+        min-height: 14px !important;
+        max-height: 14px !important;
+        font-size: 8px !important;
+        flex-basis: 16px !important;
+    }
+
+    body.battle-active #myFieldCards {
+        min-height: 42px !important;
+        height: 42px !important;
+        max-height: 42px !important;
+    }
+
+    body.battle-active .set-card {
+        height: 30px !important;
+        min-height: 30px !important;
+        max-height: 30px !important;
+    }
+}
