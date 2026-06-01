@@ -59,7 +59,7 @@
 
 @media (min-width: 769px) {
     .my-panel {
-        height: 160px !important;
+        height: 165px !important;
         bottom: 190px !important;
         padding-bottom: 12px !important;
     }
