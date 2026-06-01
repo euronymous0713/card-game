@@ -184,11 +184,39 @@ window.onload = () => {
     }
 
     function playSoundForPlayedCardLog(log) {
+        if (!log) return;
+
+        const isMyImmediateActionLog =
+            log.playerId === socket.id &&
+            log.actionType !== "trap" &&
+            log.actionType !== "trapEffect" &&
+            log.actionType !== "statusEffect" &&
+            log.actionType !== "extraTurn";
+
+        // 自分が直接行った「カード使用 / 罠セット / 捨て札」は、
+        // socket.emit の直前で先に鳴らすため、updateGame 後の二重再生を防ぎます。
+        if (isMyImmediateActionLog) return;
+
         const soundName = soundNameFromPlayedCardLog(log);
 
         if (!soundName) return;
 
         playSound(soundName);
+    }
+
+    function soundNameFromCard(card) {
+        if (!card) return "special";
+
+        const kind = card.kind || "";
+        const type = card.type || "";
+
+        if (kind === "trap" || type === "罠") return "setTrap";
+        if (kind === "hate" || type === "妨害") return "hate";
+        if (kind === "special" || type === "特殊") return "special";
+        if (kind === "support" || type === "防御" || type === "補助" || type === "防御/補助") return "heal";
+        if (kind === "attack" || type === "攻撃") return "attack";
+
+        return "special";
     }
 
 
@@ -1350,6 +1378,8 @@ window.onload = () => {
             return;
         }
 
+        playSound(soundNameFromCard(card));
+
         socket.emit("playCard", {
             roomId: currentRoomId,
             cardInstanceId: card.instanceId,
@@ -1374,6 +1404,8 @@ window.onload = () => {
         const card = getSelectedMobileCard();
 
         if (!card) return;
+
+        playSound("discard");
 
         socket.emit("discardCard", {
             roomId: currentRoomId,
@@ -1934,6 +1966,8 @@ window.onload = () => {
             return;
         }
 
+        playSound(soundNameFromCard(draggedCard));
+
         socket.emit("playCard", {
             roomId: currentRoomId,
             cardInstanceId: draggedCard.instanceId,
@@ -1960,6 +1994,8 @@ window.onload = () => {
         }
 
         if (!draggedCard) return;
+
+        playSound("discard");
 
         socket.emit("discardCard", {
             roomId: currentRoomId,
