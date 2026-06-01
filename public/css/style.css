@@ -4999,3 +4999,206 @@ body.battle-active .mobile-trap-waiting-notice.show {
         padding-bottom: 150px !important;
     }
 }
+/* =========================================================
+   スマホ版：プレイヤー情報の見切れ修正 v4
+   - 他プレイヤー情報の中身が切れないようにする
+   - 自分に状態異常が付いても名前が見えるようにする
+   - 自分情報と伏せカード情報の高さを揃える
+   ========================================================= */
+
+@media (max-width: 768px) {
+    .enemy-slots {
+        min-height: 96px !important;
+        height: 96px !important;
+        align-items: stretch !important;
+        overflow: visible !important;
+    }
+
+    .enemy-panel {
+        height: 92px !important;
+        min-height: 92px !important;
+        max-height: 92px !important;
+        padding: 6px 5px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: flex-start !important;
+        overflow: visible !important;
+    }
+
+    .enemy-name {
+        display: block !important;
+        width: 100% !important;
+        min-height: 14px !important;
+        height: 14px !important;
+        line-height: 14px !important;
+        margin-bottom: 2px !important;
+        font-size: 10px !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        flex: 0 0 auto !important;
+    }
+
+    .enemy-panel .follower-line {
+        min-height: 14px !important;
+        height: 14px !important;
+        line-height: 14px !important;
+        margin-top: 1px !important;
+        font-size: 11px !important;
+        flex: 0 0 auto !important;
+    }
+
+    .enemy-panel .panel-hate {
+        min-height: 12px !important;
+        height: 12px !important;
+        line-height: 12px !important;
+        margin-top: 2px !important;
+        font-size: 9px !important;
+        letter-spacing: 1px !important;
+        flex: 0 0 auto !important;
+    }
+
+    .enemy-panel .status-effect-row {
+        min-height: 18px !important;
+        height: 18px !important;
+        max-height: 18px !important;
+        margin-top: 3px !important;
+        gap: 2px !important;
+        flex-wrap: nowrap !important;
+        overflow: visible !important;
+        flex: 0 0 auto !important;
+    }
+
+    .enemy-panel .enemy-field-cards {
+        min-height: 13px !important;
+        height: 13px !important;
+        max-height: 13px !important;
+        margin-top: 2px !important;
+        overflow: visible !important;
+        flex: 0 0 auto !important;
+    }
+
+    .my-panel,
+    .field-card-area {
+        min-height: 78px !important;
+        height: 78px !important;
+        max-height: 78px !important;
+        padding: 7px 10px !important;
+        overflow: visible !important;
+    }
+
+    .my-panel {
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: flex-start !important;
+    }
+
+    .my-name {
+        display: block !important;
+        width: 100% !important;
+        min-height: 15px !important;
+        height: 15px !important;
+        line-height: 15px !important;
+        margin-bottom: 2px !important;
+        font-size: 11px !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        flex: 0 0 auto !important;
+    }
+
+    .my-panel .follower-line {
+        min-height: 15px !important;
+        height: 15px !important;
+        line-height: 15px !important;
+        margin-top: 1px !important;
+        font-size: 13px !important;
+        flex: 0 0 auto !important;
+    }
+
+    .my-panel .panel-hate {
+        min-height: 13px !important;
+        height: 13px !important;
+        line-height: 13px !important;
+        margin-top: 2px !important;
+        font-size: 10px !important;
+        flex: 0 0 auto !important;
+    }
+
+    .my-panel .status-effect-row {
+        min-height: 19px !important;
+        height: 19px !important;
+        max-height: 19px !important;
+        margin-top: 4px !important;
+        overflow: visible !important;
+        flex-wrap: nowrap !important;
+        justify-content: center !important;
+        flex: 0 0 auto !important;
+    }
+
+    .field-card-area {
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: flex-start !important;
+    }
+
+    .field-card-area h3 {
+        min-height: 14px !important;
+        height: 14px !important;
+        line-height: 14px !important;
+        margin-bottom: 8px !important;
+        font-size: 10px !important;
+        text-align: center !important;
+        flex: 0 0 auto !important;
+    }
+
+    #myFieldCards {
+        min-height: 38px !important;
+        height: 38px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 8px !important;
+        flex: 0 0 auto !important;
+    }
+
+    .set-card {
+        height: 32px !important;
+        min-height: 32px !important;
+    }
+}
+
+@media (max-width: 380px), (max-height: 720px) {
+    .enemy-slots {
+        min-height: 88px !important;
+        height: 88px !important;
+    }
+
+    .enemy-panel {
+        height: 84px !important;
+        min-height: 84px !important;
+        max-height: 84px !important;
+    }
+
+    .my-panel,
+    .field-card-area {
+        min-height: 70px !important;
+        height: 70px !important;
+        max-height: 70px !important;
+    }
+
+    .my-panel .status-effect-row {
+        min-height: 17px !important;
+        height: 17px !important;
+    }
+
+    #myFieldCards {
+        min-height: 34px !important;
+        height: 34px !important;
+    }
+
+    .set-card {
+        height: 29px !important;
+        min-height: 29px !important;
+    }
+}
