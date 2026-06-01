@@ -13,6 +13,7 @@ app.use(express.static("public"));
 const rooms = {};
 const pendingTrapChoices = {};
 const DEV_MODE = true;
+const RECONNECT_TIMEOUT_MS = 5 * 60 * 1000;
 
 const RARITY_INFO = {
     C: { label: "コモン", weight: 55 },
@@ -69,6 +70,10 @@ function generateChoiceId() {
     return `choice-${Date.now()}-${Math.random()}`;
 }
 
+function generateReconnectToken() {
+    return `reconnect-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
 function generateCardInstance(cardId = null) {
     const baseCard = cardId
         ? CARD_MASTER.find(card => card.id === cardId)
@@ -103,10 +108,12 @@ function createGameState(players) {
     const turnOrder = shuffleArray(players).map(player => {
         const gamePlayer = {
             id: player.id,
+            reconnectToken: player.reconnectToken || generateReconnectToken(),
             name: player.name,
             followers: 10000,
             hate: 0,
             host: player.host,
+            disconnected: Boolean(player.disconnected),
             hand: [],
             fieldCards: [],
             defeated: false,
@@ -685,6 +692,169 @@ function findRoomBySocketId(socketId) {
     return null;
 }
 
+function findRoomByReconnectToken(roomId, reconnectToken) {
+    const room = rooms[roomId];
+
+    if (!room || !reconnectToken) return null;
+
+    const player = room.players.find(player => player.reconnectToken === reconnectToken);
+
+    if (!player) return null;
+
+    return { roomId, room, player };
+}
+
+function emitRoomUpdate(roomId) {
+    const room = rooms[roomId];
+    if (!room) return;
+
+    emitRoomUpdate(roomId);
+}
+
+function updateIdInLogs(logs, oldId, newId) {
+    if (!Array.isArray(logs)) return;
+
+    logs.forEach(log => {
+        if (!log) return;
+        if (log.playerId === oldId) log.playerId = newId;
+        if (log.sourcePlayerId === oldId) log.sourcePlayerId = newId;
+        if (log.targetPlayerId === oldId) log.targetPlayerId = newId;
+    });
+}
+
+function updateIdInStatusEffects(players, oldId, newId) {
+    if (!Array.isArray(players)) return;
+
+    players.forEach(player => {
+        if (!Array.isArray(player.statusEffects)) return;
+
+        player.statusEffects.forEach(effect => {
+            if (!effect) return;
+            if (effect.sourcePlayerId === oldId) effect.sourcePlayerId = newId;
+        });
+    });
+}
+
+function replacePlayerSocketId(room, oldId, newId) {
+    if (!room || oldId === newId) return;
+
+    room.players.forEach(player => {
+        if (player.id === oldId) {
+            player.id = newId;
+        }
+    });
+
+    if (room.game) {
+        room.game.turnOrder.forEach(player => {
+            if (player.id === oldId) {
+                player.id = newId;
+            }
+        });
+
+        if (room.game.waitingTrapPlayerId === oldId) {
+            room.game.waitingTrapPlayerId = newId;
+        }
+
+        updateIdInLogs(room.game.playedCards, oldId, newId);
+        updateIdInStatusEffects(room.game.turnOrder, oldId, newId);
+    }
+
+    Object.values(pendingTrapChoices).forEach(pending => {
+        if (!pending) return;
+        if (pending.targetPlayerId === oldId) pending.targetPlayerId = newId;
+        if (pending.sourcePlayerId === oldId) pending.sourcePlayerId = newId;
+    });
+}
+
+function clearReconnectCleanupTimer(room, reconnectToken) {
+    if (!room || !room.reconnectCleanupTimers || !reconnectToken) return;
+
+    const timer = room.reconnectCleanupTimers[reconnectToken];
+
+    if (timer) {
+        clearTimeout(timer);
+        delete room.reconnectCleanupTimers[reconnectToken];
+    }
+}
+
+function scheduleReconnectCleanup(roomId, reconnectToken) {
+    const room = rooms[roomId];
+    if (!room || !reconnectToken) return;
+
+    room.reconnectCleanupTimers = room.reconnectCleanupTimers || {};
+    clearReconnectCleanupTimer(room, reconnectToken);
+
+    room.reconnectCleanupTimers[reconnectToken] = setTimeout(() => {
+        const currentRoom = rooms[roomId];
+        if (!currentRoom) return;
+
+        const player = currentRoom.players.find(player => player.reconnectToken === reconnectToken);
+        if (!player || !player.disconnected) return;
+
+        if (currentRoom.players.every(player => player.disconnected)) {
+            delete rooms[roomId];
+            return;
+        }
+
+        if (!currentRoom.game) {
+            if (player.host) {
+                io.to(roomId).emit("roomDisbanded");
+                delete rooms[roomId];
+                return;
+            }
+
+            currentRoom.players = currentRoom.players.filter(player => player.reconnectToken !== reconnectToken);
+            emitRoomUpdate(roomId);
+        }
+    }, RECONNECT_TIMEOUT_MS);
+}
+
+function sendPendingTrapChoiceToPlayer(roomId, player, targetSocket) {
+    const room = rooms[roomId];
+    if (!room || !room.game || !player || !targetSocket) return;
+
+    const pendingEntry = Object.entries(pendingTrapChoices).find(([, pending]) => {
+        return pending &&
+            pending.roomId === roomId &&
+            pending.targetPlayerId === player.id;
+    });
+
+    if (!pendingEntry) return;
+
+    const [choiceId, pending] = pendingEntry;
+    const sourcePlayer = room.game.turnOrder.find(candidate => candidate.id === pending.sourcePlayerId);
+
+    if (!sourcePlayer) return;
+
+    const allTraps = player.fieldCards.map(card => {
+        const canActivate = card.trapCondition === pending.condition;
+
+        return {
+            fieldId: card.fieldId,
+            name: card.name,
+            type: card.type,
+            rarity: normalizeRarity(card.rarity),
+            effect: card.effect,
+            hateText: card.hateText,
+            trapCondition: card.trapCondition,
+            conditionText: conditionText(card.trapCondition),
+            canActivate,
+            disabledReason: canActivate
+                ? ""
+                : `発動条件が違います：${conditionText(card.trapCondition)}`
+        };
+    });
+
+    targetSocket.emit("chooseTrap", {
+        choiceId,
+        sourcePlayerName: sourcePlayer.name,
+        condition: pending.condition,
+        conditionText: conditionText(pending.condition),
+        context: pending.context,
+        traps: allTraps
+    });
+}
+
 function removeTrapByFieldId(player, fieldId) {
     const index = player.fieldCards.findIndex(card => card.fieldId === fieldId);
     if (index === -1) return null;
@@ -1150,22 +1320,81 @@ io.on("connection", socket => {
         socket.emit("devCardList", CARD_MASTER.map(normalizeCard));
     }
 
+    socket.on("reconnectPlayer", ({ roomId, reconnectToken }) => {
+        const result = findRoomByReconnectToken(roomId, reconnectToken);
+
+        if (!result) {
+            socket.emit("reconnectFailed", "復帰できるルームが見つかりません");
+            return;
+        }
+
+        const { room, player } = result;
+        const oldId = player.id;
+
+        clearReconnectCleanupTimer(room, reconnectToken);
+        replacePlayerSocketId(room, oldId, socket.id);
+
+        player.id = socket.id;
+        player.disconnected = false;
+        player.disconnectedAt = null;
+
+        if (room.game) {
+            const gamePlayer = room.game.turnOrder.find(candidate => candidate.reconnectToken === reconnectToken);
+
+            if (gamePlayer) {
+                gamePlayer.id = socket.id;
+                gamePlayer.disconnected = false;
+                gamePlayer.disconnectedAt = null;
+            }
+        }
+
+        socket.join(roomId);
+        socket.data.roomId = roomId;
+        socket.data.reconnectToken = reconnectToken;
+
+        socket.emit("reconnectInfo", { roomId, reconnectToken });
+        socket.emit("reconnectSuccess", {
+            roomId,
+            isHost: Boolean(player.host),
+            ready: Boolean(player.ready),
+            phase: room.game ? "battle" : "lobby"
+        });
+
+        emitRoomUpdate(roomId);
+
+        if (room.game) {
+            emitGameUpdate(roomId);
+
+            const gamePlayer = room.game.turnOrder.find(candidate => candidate.id === socket.id);
+            sendPendingTrapChoiceToPlayer(roomId, gamePlayer, socket);
+        }
+    });
+
     socket.on("createRoom", playerName => {
         const roomId = generateRoomId();
+
+        const reconnectToken = generateReconnectToken();
 
         rooms[roomId] = {
             players: [{
                 id: socket.id,
+                reconnectToken,
                 name: playerName,
                 ready: false,
-                host: true
+                host: true,
+                disconnected: false,
+                disconnectedAt: null
             }],
-            game: null
+            game: null,
+            reconnectCleanupTimers: {}
         };
 
         socket.join(roomId);
+        socket.data.roomId = roomId;
+        socket.data.reconnectToken = reconnectToken;
         socket.emit("roomCreated", roomId);
-        io.to(roomId).emit("updateRoom", rooms[roomId].players);
+        socket.emit("reconnectInfo", { roomId, reconnectToken });
+        emitRoomUpdate(roomId);
     });
 
     socket.on("joinRoom", ({ roomId, playerName }) => {
@@ -1182,16 +1411,24 @@ io.on("connection", socket => {
             return;
         }
 
+        const reconnectToken = generateReconnectToken();
+
         room.players.push({
             id: socket.id,
+            reconnectToken,
             name: playerName,
             ready: false,
-            host: false
+            host: false,
+            disconnected: false,
+            disconnectedAt: null
         });
 
         socket.join(roomId);
+        socket.data.roomId = roomId;
+        socket.data.reconnectToken = reconnectToken;
         socket.emit("joinSuccess", roomId);
-        io.to(roomId).emit("updateRoom", room.players);
+        socket.emit("reconnectInfo", { roomId, reconnectToken });
+        emitRoomUpdate(roomId);
     });
 
     socket.on("toggleReady", ({ roomId }) => {
@@ -1202,7 +1439,7 @@ io.on("connection", socket => {
         if (!player) return;
 
         player.ready = !player.ready;
-        io.to(roomId).emit("updateRoom", room.players);
+        emitRoomUpdate(roomId);
     });
 
     socket.on("startGame", roomId => {
@@ -1814,10 +2051,11 @@ io.on("connection", socket => {
             return;
         }
 
+        clearReconnectCleanupTimer(room, player.reconnectToken);
         room.players = room.players.filter(player => player.id !== socket.id);
 
         socket.leave(roomId);
-        io.to(roomId).emit("updateRoom", room.players);
+        emitRoomUpdate(roomId);
     });
 
     socket.on("disbandRoom", roomId => {
@@ -1863,14 +2101,25 @@ io.on("connection", socket => {
 
             if (!player) continue;
 
-            if (player.host) {
-                io.to(roomId).emit("roomDisbanded");
-                delete rooms[roomId];
+            player.disconnected = true;
+            player.disconnectedAt = Date.now();
+
+            if (room.game) {
+                const gamePlayer = room.game.turnOrder.find(candidate => candidate.id === socket.id);
+
+                if (gamePlayer) {
+                    gamePlayer.disconnected = true;
+                    gamePlayer.disconnectedAt = player.disconnectedAt;
+                }
+
+                emitRoomUpdate(roomId);
+                emitGameUpdate(roomId);
+                scheduleReconnectCleanup(roomId, player.reconnectToken);
                 continue;
             }
 
-            room.players = room.players.filter(player => player.id !== socket.id);
-            io.to(roomId).emit("updateRoom", rooms[roomId]?.players || []);
+            emitRoomUpdate(roomId);
+            scheduleReconnectCleanup(roomId, player.reconnectToken);
         }
     });
 });

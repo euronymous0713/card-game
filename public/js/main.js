@@ -98,10 +98,48 @@ window.onload = () => {
     let cardListSearchTimer = null;
     let gameOverSoundPlayed = false;
 
+    const RECONNECT_ROOM_KEY = "internetSeikimatsuRoomId";
+    const RECONNECT_TOKEN_KEY = "internetSeikimatsuReconnectToken";
+    let reconnectAttempted = false;
+
     function setScreenMode(mode) {
         document.body.classList.toggle("title-active", mode === "title");
         document.body.classList.toggle("lobby-active", mode === "lobby");
         document.body.classList.toggle("battle-active", mode === "battle");
+    }
+
+    function saveReconnectInfo(roomId, reconnectToken) {
+        if (!roomId || !reconnectToken) return;
+
+        localStorage.setItem(RECONNECT_ROOM_KEY, roomId);
+        localStorage.setItem(RECONNECT_TOKEN_KEY, reconnectToken);
+    }
+
+    function clearReconnectInfo() {
+        localStorage.removeItem(RECONNECT_ROOM_KEY);
+        localStorage.removeItem(RECONNECT_TOKEN_KEY);
+    }
+
+    function getReconnectInfo() {
+        return {
+            roomId: localStorage.getItem(RECONNECT_ROOM_KEY) || "",
+            reconnectToken: localStorage.getItem(RECONNECT_TOKEN_KEY) || ""
+        };
+    }
+
+    function attemptReconnect() {
+        if (reconnectAttempted || currentRoomId) return;
+
+        const reconnectInfo = getReconnectInfo();
+
+        if (!reconnectInfo.roomId || !reconnectInfo.reconnectToken) return;
+
+        reconnectAttempted = true;
+        socket.emit("reconnectPlayer", reconnectInfo);
+    }
+
+    function disconnectedLabel(player) {
+        return player?.disconnected ? "（再接続待ち）" : "";
     }
 
     setScreenMode("title");
@@ -127,6 +165,50 @@ window.onload = () => {
 
     document.addEventListener("pointerdown", unlockSoundOnce, { once: true });
     document.addEventListener("keydown", unlockSoundOnce, { once: true });
+
+    socket.on("connect", () => {
+        attemptReconnect();
+    });
+
+    if (socket.connected) {
+        attemptReconnect();
+    }
+
+    socket.on("reconnectInfo", ({ roomId, reconnectToken }) => {
+        saveReconnectInfo(roomId, reconnectToken);
+    });
+
+    socket.on("reconnectSuccess", data => {
+        currentRoomId = data.roomId || currentRoomId;
+        isHost = Boolean(data.isHost);
+        isReady = Boolean(data.ready);
+        endTurnRequestPending = false;
+        previousGame = null;
+        gameOverSoundPlayed = false;
+
+        roomIdText.innerText = `ルームID : ${currentRoomId}`;
+        leaveRoomButton.innerText = isHost ? "ルーム解散" : "退出";
+        readyButton.innerText = isReady ? "準備解除" : "準備完了";
+        readyButton.classList.toggle("cancel-ready", isReady);
+        startGameButton.style.display = isHost ? "block" : "none";
+
+        titleScreen.style.display = "none";
+
+        if (data.phase === "battle") {
+            setScreenMode("battle");
+            lobbyScreen.style.display = "none";
+            battleScreen.style.display = "block";
+            gameOverOverlay.style.display = "none";
+        } else {
+            setScreenMode("lobby");
+            lobbyScreen.style.display = "flex";
+            battleScreen.style.display = "none";
+        }
+    });
+
+    socket.on("reconnectFailed", () => {
+        clearReconnectInfo();
+    });
 
     function soundNameFromPlayedCardLog(log) {
         if (!log) return "";
@@ -1502,6 +1584,7 @@ window.onload = () => {
             return;
         }
 
+        clearReconnectInfo();
         localStorage.setItem("playerName", playerName);
         socket.emit("createRoom", playerName);
     };
@@ -1518,6 +1601,7 @@ window.onload = () => {
 
         if (!roomId) return;
 
+        clearReconnectInfo();
         localStorage.setItem("playerName", playerName);
 
         socket.emit("joinRoom", {
@@ -1552,6 +1636,7 @@ window.onload = () => {
         isHost = false;
         isReady = false;
 
+        setScreenMode("lobby");
         titleScreen.style.display = "none";
         lobbyScreen.style.display = "flex";
         battleScreen.style.display = "none";
@@ -1577,15 +1662,21 @@ window.onload = () => {
         }
 
         players.forEach(player => {
+            const statusText = player.disconnected
+                ? "再接続待ち"
+                : player.ready
+                    ? "準備完了"
+                    : "待機中";
+
             playerList.innerHTML += `
-                <div class="player-card ${player.ready ? "ready" : "not-ready"}">
-                    <span class="player-name">${player.host ? "👑 " : ""}${player.name}</span>
-                    <span class="player-status">${player.ready ? "準備完了" : "待機中"}</span>
+                <div class="player-card ${player.ready ? "ready" : "not-ready"} ${player.disconnected ? "disconnected-player-card" : ""}">
+                    <span class="player-name">${player.host ? "👑 " : ""}${player.name}${disconnectedLabel(player)}</span>
+                    <span class="player-status">${statusText}</span>
                 </div>
             `;
         });
 
-        const allReady = players.every(player => player.ready);
+        const allReady = players.every(player => player.ready && !player.disconnected);
         const canStart = players.length >= 2 && allReady;
 
         if (isHost) {
@@ -1690,7 +1781,7 @@ window.onload = () => {
             myPanel.classList.toggle("defeated-player", me.defeated);
 
             myPanel.innerHTML = `
-                <div class="my-name">${me.defeated ? "💀 " : ""}${me.hate >= 3 ? "🔥 " : ""}${me.name}</div>
+                <div class="my-name">${me.defeated ? "💀 " : ""}${me.hate >= 3 ? "🔥 " : ""}${me.name}${disconnectedLabel(me)}</div>
                 <div class="follower-line ${me.defeated ? "owakon-text" : ""}">
                     ${followerText(me)}
                 </div>
@@ -1713,7 +1804,7 @@ window.onload = () => {
                 slot.classList.toggle("defeated-player", enemy.defeated);
 
                 slot.innerHTML = `
-                    <div class="enemy-name">${enemy.defeated ? "💀 " : ""}${enemy.hate >= 3 ? "🔥 " : ""}${enemy.name}</div>
+                    <div class="enemy-name">${enemy.defeated ? "💀 " : ""}${enemy.hate >= 3 ? "🔥 " : ""}${enemy.name}${disconnectedLabel(enemy)}</div>
                     <div class="follower-line ${enemy.defeated ? "owakon-text" : ""}">
                         ${followerText(enemy)}
                     </div>
@@ -2046,6 +2137,7 @@ window.onload = () => {
     };
 
     function resetToTitle() {
+        clearReconnectInfo();
         currentRoomId = "";
         isHost = false;
         isReady = false;
