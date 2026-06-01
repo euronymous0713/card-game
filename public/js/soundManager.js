@@ -32,7 +32,8 @@ window.SoundManager = (() => {
         Object.entries(SOUND_LIST).forEach(([key, path]) => {
             const audio = new Audio(path);
 
-            audio.preload = "auto";
+            // preload は metadata に抑えます。スマホで読み込み時に音が鳴る事故を避けるためです。
+            audio.preload = "metadata";
             audio.volume = DEFAULT_VOLUME;
 
             sounds[key] = audio;
@@ -42,33 +43,18 @@ window.SoundManager = (() => {
     }
 
     function unlock() {
+        // 以前はここで各音源を volume:0 で play/pause していました。
+        // 一部スマホ環境ではその無音再生が通常音量で鳴ることがあるため、
+        // unlock では再生せず「ユーザー操作済み」フラグだけ立てます。
         init();
-
-        if (unlocked) return;
-
-        const unlockPromises = Object.values(sounds).map(audio => {
-            const originalVolume = audio.volume;
-
-            audio.volume = 0;
-
-            return audio.play()
-                .then(() => {
-                    audio.pause();
-                    audio.currentTime = 0;
-                    audio.volume = originalVolume;
-                })
-                .catch(() => {
-                    audio.volume = originalVolume;
-                });
-        });
-
-        Promise.allSettled(unlockPromises).finally(() => {
-            unlocked = true;
-        });
+        unlocked = true;
     }
 
     function play(name) {
         init();
+
+        // 読み込み直後や、ユーザー操作前の socket 更新では鳴らさない。
+        if (!unlocked) return;
 
         const original = sounds[name];
 
@@ -86,6 +72,8 @@ window.SoundManager = (() => {
     }
 
     function setVolume(volume) {
+        init();
+
         const nextVolume = Math.max(0, Math.min(1, Number(volume)));
 
         Object.values(sounds).forEach(audio => {
