@@ -65,6 +65,20 @@ window.onload = () => {
     mobileHistoryButton.title = "使用履歴";
     document.body.appendChild(mobileHistoryButton);
 
+    const mobileSettingsButton = document.createElement("button");
+    mobileSettingsButton.id = "mobileSettingsButton";
+    mobileSettingsButton.className = "mobile-settings-button";
+    mobileSettingsButton.type = "button";
+    mobileSettingsButton.innerText = "⚙";
+    mobileSettingsButton.setAttribute("aria-label", "設定を表示");
+    mobileSettingsButton.title = "設定";
+    document.body.appendChild(mobileSettingsButton);
+
+    const mobileSettingsOverlay = document.createElement("div");
+    mobileSettingsOverlay.id = "mobileSettingsOverlay";
+    mobileSettingsOverlay.className = "mobile-settings-overlay";
+    document.body.appendChild(mobileSettingsOverlay);
+
     const mobileEffectOverlay = document.createElement("div");
     mobileEffectOverlay.id = "mobileEffectOverlay";
     mobileEffectOverlay.className = "mobile-effect-overlay";
@@ -1367,9 +1381,89 @@ window.onload = () => {
         historyPanel.classList.toggle("show-mobile-history");
     }
 
+    function closeMobileSettings() {
+        if (!mobileSettingsOverlay) return;
+
+        mobileSettingsOverlay.classList.remove("show-mobile-settings");
+        mobileSettingsOverlay.innerHTML = "";
+    }
+
+    function openMobileSettings() {
+        if (!isMobileLayout() || !mobileSettingsOverlay) return;
+
+        clearMobileCardSelection();
+        closeMobileHistory();
+
+        mobileSettingsOverlay.innerHTML = `
+            <div class="mobile-settings-box">
+                <div class="mobile-settings-header">
+                    <strong>設定</strong>
+                    <button id="mobileSettingsCloseButton" type="button" aria-label="設定を閉じる">×</button>
+                </div>
+                <div class="mobile-settings-room-id">
+                    <span>ルームID</span>
+                    <strong>${currentRoomId || "----"}</strong>
+                </div>
+                <button id="mobileBattleLeaveButton" class="mobile-battle-leave-button" type="button">
+                    退出してオワコンになる
+                </button>
+            </div>
+        `;
+
+        mobileSettingsOverlay.classList.add("show-mobile-settings");
+
+        const closeButton = document.getElementById("mobileSettingsCloseButton");
+        const leaveButton = document.getElementById("mobileBattleLeaveButton");
+
+        if (closeButton) {
+            closeButton.onclick = () => {
+                closeMobileSettings();
+            };
+        }
+
+        if (leaveButton) {
+            leaveButton.onclick = () => {
+                if (!currentRoomId) return;
+
+                const ok = confirm("対戦から退出します。あなたはオワコンになります。よろしいですか？");
+
+                if (!ok) return;
+
+                socket.emit("battleLeaveRoom", {
+                    roomId: currentRoomId
+                });
+
+                closeMobileSettings();
+                resetToTitle();
+            };
+        }
+    }
+
+    function toggleMobileSettings() {
+        if (!isMobileLayout() || !mobileSettingsOverlay) return;
+
+        if (mobileSettingsOverlay.classList.contains("show-mobile-settings")) {
+            closeMobileSettings();
+        } else {
+            openMobileSettings();
+        }
+    }
+
     mobileHistoryButton.onclick = () => {
         toggleMobileHistory();
     };
+
+    mobileSettingsButton.onclick = () => {
+        toggleMobileSettings();
+    };
+
+    if (mobileSettingsOverlay) {
+        mobileSettingsOverlay.onclick = event => {
+            if (event.target === mobileSettingsOverlay) {
+                closeMobileSettings();
+            }
+        };
+    }
 
     if (historyPanel) {
         historyPanel.onclick = event => {
@@ -2150,6 +2244,7 @@ window.onload = () => {
         draggedCard = null;
         document.body.classList.remove("mobile-card-action-open");
         closeMobileHistory();
+        closeMobileSettings();
         hideTrapWaitingNotice();
         updateMobileActionPanel();
 

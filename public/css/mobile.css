@@ -3963,300 +3963,31 @@
 }
 
 /* =========================================================
-   スマホ版：タイトル/ルーム画面の全体スケール調整 v8
-   目的：
-   - バトル画面には影響させない
-   - タイトル画面とルーム画面だけ、文字・ボタンを少し小さくする
-   - 既存レイアウトを崩さず、余白も少しだけ詰める
+   スマホ版：タイトル/ルームのクレジット重なり修正 v2
    ========================================================= */
 @media (max-width: 768px) {
     body:not(.battle-active) {
-        padding: 16px !important;
+        padding-bottom: calc(92px + env(safe-area-inset-bottom)) !important;
     }
 
     body:not(.battle-active) .title-screen,
     body:not(.battle-active) #lobbyScreen {
-        max-width: 640px !important;
-    }
-
-    body:not(.battle-active) .game-title {
-        font-size: clamp(26px, 8.6vw, 44px) !important;
-        line-height: 1.12 !important;
-        margin-bottom: 14px !important;
-    }
-
-    body:not(.battle-active) .subtitle {
-        font-size: 12px !important;
-        line-height: 1.62 !important;
-        margin-bottom: 20px !important;
-    }
-
-    body:not(.battle-active) #nameInput {
-        max-width: 300px !important;
-        padding: 12px 13px !important;
-        margin-bottom: 20px !important;
-        font-size: 14px !important;
-        border-radius: 11px !important;
-    }
-
-    body:not(.battle-active) .menu-buttons,
-    body:not(.battle-active) .lobby-buttons {
-        width: min(300px, 100%) !important;
-        gap: 10px !important;
-    }
-
-    body:not(.battle-active) button {
-        min-height: 42px !important;
-        padding: 10px 15px !important;
-        border-radius: 12px !important;
-        font-size: 14px !important;
-    }
-
-    body:not(.battle-active) .title-sub-buttons {
-        margin-top: 11px !important;
-    }
-
-    body:not(.battle-active) .card-list-title-button {
-        min-width: 190px !important;
-    }
-
-    body:not(.battle-active) #lobbyScreen h2 {
-        margin-bottom: 8px !important;
-        font-size: 22px !important;
-        line-height: 1.2 !important;
-    }
-
-    body:not(.battle-active) #roomIdText {
-        margin-top: 8px !important;
-        margin-bottom: 14px !important;
-        font-size: 16px !important;
-    }
-
-    body:not(.battle-active) #playerList {
-        gap: 0 !important;
-    }
-
-    body:not(.battle-active) .player-card {
-        max-width: 360px !important;
-        margin-top: 9px !important;
-        padding: 10px 13px !important;
-        border-radius: 11px !important;
-        font-size: 14px !important;
-    }
-
-    body:not(.battle-active) .player-status {
-        font-size: 11px !important;
-    }
-
-    body:not(.battle-active) .lobby-buttons {
-        margin-top: 22px !important;
-    }
-
-    body:not(.battle-active) #startGameButton {
-        width: min(300px, 100%) !important;
-        margin-top: 22px !important;
-        padding: 11px 18px !important;
-        font-size: 15px !important;
+        margin-bottom: calc(42px + env(safe-area-inset-bottom)) !important;
     }
 
     body:not(.battle-active) .creator-credit {
-        right: 10px !important;
-        bottom: 8px !important;
-        font-size: 10px !important;
-    }
-}
-
-@media (max-width: 380px), (max-height: 720px) {
-    body:not(.battle-active) {
-        padding: 14px !important;
-    }
-
-    body:not(.battle-active) .game-title {
-        font-size: clamp(24px, 8vw, 38px) !important;
-        margin-bottom: 12px !important;
-    }
-
-    body:not(.battle-active) .subtitle {
-        font-size: 11px !important;
-        line-height: 1.55 !important;
-        margin-bottom: 17px !important;
-    }
-
-    body:not(.battle-active) #nameInput {
-        padding: 11px 12px !important;
-        margin-bottom: 17px !important;
-        font-size: 13px !important;
-    }
-
-    body:not(.battle-active) button {
-        min-height: 40px !important;
-        padding: 9px 13px !important;
-        font-size: 13px !important;
-    }
-
-    body:not(.battle-active) #lobbyScreen h2 {
-        font-size: 20px !important;
-    }
-
-    body:not(.battle-active) #roomIdText {
-        font-size: 15px !important;
-    }
-
-    body:not(.battle-active) .player-card {
-        padding: 9px 12px !important;
-        font-size: 13px !important;
-    }
-}
-
-
-/* =========================================================
-   スマホ版：タイトル/ルーム画面の見た目スケール再調整 v9
-   - 既存の後勝ち指定に負けないよう、ファイル末尾で強めに上書き
-   - バトル画面には影響させない
-   ========================================================= */
-@media (max-width: 768px) {
-    body.title-active .title-screen,
-    body.lobby-active #lobbyScreen {
-        transform: scale(0.88) !important;
-        transform-origin: center center !important;
-    }
-
-    body.title-active .game-title {
-        font-size: clamp(22px, 7.2vw, 36px) !important;
-        line-height: 1.1 !important;
-        margin-bottom: 12px !important;
-        white-space: nowrap !important;
-    }
-
-    body.title-active .subtitle {
-        font-size: 11px !important;
-        line-height: 1.55 !important;
-        margin-bottom: 16px !important;
-    }
-
-    body.title-active #nameInput {
-        max-width: 280px !important;
-        padding: 10px 12px !important;
-        margin-bottom: 16px !important;
-        font-size: 13px !important;
-        border-radius: 10px !important;
-    }
-
-    body.title-active .menu-buttons,
-    body.title-active .title-sub-buttons,
-    body.lobby-active .lobby-buttons {
-        width: min(280px, 100%) !important;
-        gap: 8px !important;
-    }
-
-    body.title-active button,
-    body.lobby-active button {
-        min-height: 38px !important;
-        padding: 8px 13px !important;
-        border-radius: 11px !important;
-        font-size: 13px !important;
-    }
-
-    body.title-active .card-list-title-button {
-        min-width: 170px !important;
-    }
-
-    body.lobby-active #lobbyScreen h2 {
-        margin-bottom: 6px !important;
-        font-size: 19px !important;
-        line-height: 1.15 !important;
-    }
-
-    body.lobby-active #roomIdText {
-        margin-top: 6px !important;
-        margin-bottom: 12px !important;
-        font-size: 14px !important;
-    }
-
-    body.lobby-active .player-card {
-        max-width: 330px !important;
-        margin-top: 7px !important;
-        padding: 8px 11px !important;
-        border-radius: 10px !important;
-        font-size: 12px !important;
-    }
-
-    body.lobby-active .player-status {
-        font-size: 10px !important;
-    }
-
-    body.lobby-active .lobby-buttons {
-        margin-top: 18px !important;
-    }
-
-    body.lobby-active #startGameButton {
-        width: min(280px, 100%) !important;
-        margin-top: 18px !important;
-        padding: 9px 15px !important;
-        font-size: 13px !important;
-    }
-
-    body.title-active .creator-credit,
-    body.lobby-active .creator-credit {
-        font-size: 9px !important;
-    }
-}
-
-@media (max-width: 380px), (max-height: 720px) {
-    body.title-active .title-screen,
-    body.lobby-active #lobbyScreen {
-        transform: scale(0.82) !important;
-    }
-
-    body.title-active .game-title {
-        font-size: clamp(20px, 6.8vw, 31px) !important;
-    }
-
-    body.title-active .subtitle {
-        font-size: 10px !important;
-    }
-
-    body.title-active button,
-    body.lobby-active button {
-        min-height: 36px !important;
-        font-size: 12px !important;
-    }
-}
-
-/* =========================================================
-   スマホ版：Created by 表示の重なり修正 v10
-   - タイトル/ルーム画面だけ下部余白を確保
-   - クレジットを画面下に固定しつつ、中央UIと被らないようにする
-   - バトル画面には影響させない
-   ========================================================= */
-@media (max-width: 768px) {
-    body.title-active,
-    body.lobby-active {
-        padding-bottom: 54px !important;
-        align-items: center !important;
-    }
-
-    body.title-active .title-screen,
-    body.lobby-active #lobbyScreen {
-        transform-origin: center center !important;
-        margin-bottom: 18px !important;
-    }
-
-    body.title-active .creator-credit,
-    body.lobby-active .creator-credit {
         position: fixed !important;
         left: 0 !important;
         right: 0 !important;
-        bottom: 8px !important;
+        bottom: calc(8px + env(safe-area-inset-bottom)) !important;
+        z-index: 10 !important;
         width: 100% !important;
-        margin: 0 !important;
         padding: 0 12px !important;
         text-align: center !important;
         font-size: 9px !important;
         line-height: 1.35 !important;
-        color: rgba(255, 255, 255, 0.34) !important;
+        opacity: 0.58 !important;
         pointer-events: none !important;
-        z-index: 2 !important;
     }
 
     body.battle-active .creator-credit {
@@ -4264,140 +3995,138 @@
     }
 }
 
-@media (max-width: 380px), (max-height: 720px) {
-    body.title-active,
-    body.lobby-active {
-        padding-bottom: 44px !important;
-    }
-
-    body.title-active .title-screen,
-    body.lobby-active #lobbyScreen {
-        margin-bottom: 10px !important;
-    }
-
-    body.title-active .creator-credit,
-    body.lobby-active .creator-credit {
-        bottom: 6px !important;
-        font-size: 8px !important;
-        line-height: 1.25 !important;
-    }
-}
-
 /* =========================================================
-   スマホ版：カード効果と操作パネルの重なり再調整 v11
-   - カード効果表示を少し小さくして中央付近に余白を作る
-   - 「使う / 捨てる」パネルを自分情報の上に逃がす
-   - 自分プレイヤー情報には被せない
-   - バトル画面だけに限定
+   スマホ版：バトル中設定ボタン / 設定パネル
    ========================================================= */
+.mobile-settings-button,
+.mobile-settings-overlay {
+    display: none;
+}
+
 @media (max-width: 768px) {
-    body.battle-active .mobile-effect-card {
-        width: min(300px, 84vw) !important;
-        max-height: 34dvh !important;
-        padding: 12px 13px 11px !important;
-        border-radius: 16px !important;
-        transform: translateY(-38px) !important;
+    body.battle-active .mobile-settings-button {
+        position: fixed !important;
+        left: 8px !important;
+        top: 132px !important;
+        z-index: 9700 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 42px !important;
+        height: 42px !important;
+        min-height: 42px !important;
+        padding: 0 !important;
+        border-radius: 999px !important;
+        font-size: 20px !important;
+        line-height: 1 !important;
+        color: white !important;
+        background: rgba(0, 0, 0, 0.68) !important;
+        border: 1px solid rgba(255, 176, 0, 0.62) !important;
+        box-shadow: 0 0 14px rgba(255, 176, 0, 0.24) !important;
     }
 
-    body.battle-active .mobile-effect-title-row {
-        gap: 6px !important;
-        padding-right: 0 !important;
-        font-size: 14px !important;
-        line-height: 1.2 !important;
+    body:not(.battle-active) .mobile-settings-button,
+    body:not(.battle-active) .mobile-settings-overlay {
+        display: none !important;
     }
 
-    body.battle-active .mobile-effect-rarity {
-        min-width: 28px !important;
-        padding: 2px 6px !important;
-        font-size: 9px !important;
+    body.battle-active .mobile-settings-overlay {
+        position: fixed !important;
+        inset: 0 !important;
+        z-index: 9900 !important;
+        display: none !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 16px !important;
+        background: rgba(0, 0, 0, 0.48) !important;
+        backdrop-filter: blur(3px) !important;
+        -webkit-backdrop-filter: blur(3px) !important;
     }
 
-    body.battle-active .mobile-effect-type {
-        margin-top: 5px !important;
-        font-size: 10px !important;
-        line-height: 1.2 !important;
+    body.battle-active .mobile-settings-overlay.show-mobile-settings {
+        display: flex !important;
     }
 
-    body.battle-active .mobile-effect-card p {
-        margin-top: 5px !important;
-        font-size: 11px !important;
-        line-height: 1.38 !important;
+    .mobile-settings-box {
+        width: min(320px, 90vw) !important;
+        padding: 16px !important;
+        border-radius: 18px !important;
+        color: white !important;
+        background: rgba(0, 0, 0, 0.88) !important;
+        border: 1px solid rgba(0, 255, 225, 0.42) !important;
+        box-shadow:
+            0 0 22px rgba(0, 255, 225, 0.22),
+            0 0 34px rgba(255, 0, 200, 0.12) !important;
     }
 
-    body.battle-active .mobile-effect-hate {
-        margin-top: 6px !important;
-        font-size: 10px !important;
-        line-height: 1.25 !important;
+    .mobile-settings-header {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 12px !important;
+        margin-bottom: 14px !important;
     }
 
-    body.battle-active .mobile-action-panel {
-        left: 10px !important;
-        right: 10px !important;
-        bottom: 206px !important;
-        padding: 5px 6px !important;
-        border-radius: 13px !important;
-        z-index: 9600 !important;
-        background: rgba(0, 0, 0, 0.86) !important;
+    .mobile-settings-header strong {
+        color: #00ffe1 !important;
+        font-size: 18px !important;
     }
 
-    body.battle-active .mobile-selected-card-name {
-        margin-bottom: 4px !important;
-        font-size: 10px !important;
-        line-height: 1.15 !important;
-    }
-
-    body.battle-active .mobile-action-buttons {
-        grid-template-columns: 1fr 1fr !important;
-        gap: 6px !important;
-    }
-
-    body.battle-active .mobile-action-buttons button {
+    #mobileSettingsCloseButton {
+        width: 32px !important;
+        height: 32px !important;
         min-height: 32px !important;
-        padding: 5px 6px !important;
-        border-radius: 10px !important;
-        font-size: 11px !important;
-        line-height: 1.1 !important;
+        padding: 0 !important;
+        border-radius: 999px !important;
+        font-size: 20px !important;
+        line-height: 1 !important;
+        background: rgba(255, 255, 255, 0.12) !important;
+        border: 1px solid rgba(255, 255, 255, 0.22) !important;
     }
 
-    body.battle-active.mobile-card-action-open .battle-field {
-        padding-bottom: 214px !important;
+    .mobile-settings-room-id {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 10px !important;
+        margin-bottom: 14px !important;
+        padding: 11px 12px !important;
+        border-radius: 12px !important;
+        background: rgba(255, 255, 255, 0.07) !important;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    }
+
+    .mobile-settings-room-id span {
+        color: rgba(255, 255, 255, 0.68) !important;
+        font-size: 12px !important;
+        font-weight: 800 !important;
+    }
+
+    .mobile-settings-room-id strong {
+        color: #ffb000 !important;
+        font-size: 20px !important;
+        letter-spacing: 1px !important;
+    }
+
+    .mobile-battle-leave-button {
+        width: 100% !important;
+        min-height: 42px !important;
+        padding: 10px 12px !important;
+        border-radius: 12px !important;
+        font-size: 13px !important;
+        background: linear-gradient(135deg, #ff4d4d, #8a0000) !important;
+        box-shadow: 0 0 16px rgba(255, 48, 48, 0.26) !important;
     }
 }
 
 @media (max-width: 380px), (max-height: 720px) {
-    body.battle-active .mobile-effect-card {
-        width: min(286px, 84vw) !important;
-        max-height: 30dvh !important;
-        padding: 10px 11px !important;
-        transform: translateY(-44px) !important;
-    }
-
-    body.battle-active .mobile-effect-title-row {
-        font-size: 13px !important;
-    }
-
-    body.battle-active .mobile-effect-card p {
-        font-size: 10px !important;
-        line-height: 1.32 !important;
-    }
-
-    body.battle-active .mobile-action-panel {
-        left: 8px !important;
-        right: 8px !important;
-        bottom: 184px !important;
-        padding: 5px !important;
-    }
-
-    body.battle-active .mobile-selected-card-name {
-        font-size: 9px !important;
-    }
-
-    body.battle-active .mobile-action-buttons button {
-        min-height: 29px !important;
-        font-size: 10px !important;
-    }
-
-    body.battle-active.mobile-card-action-open .battle-field {
-        padding-bottom: 196px !important;
+    body.battle-active .mobile-settings-button {
+        left: 6px !important;
+        top: 120px !important;
+        width: 38px !important;
+        height: 38px !important;
+        min-height: 38px !important;
+        font-size: 18px !important;
     }
 }
+

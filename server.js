@@ -1311,6 +1311,73 @@ function resolveTrapEffect(game, roomId, trapOwner, sourcePlayer, trap, context,
     return { canceled: false };
 }
 
+
+function makePlayerOwakonBySocket(roomId, socketId) {
+    const room = rooms[roomId];
+
+    if (!room || !room.game) {
+        return false;
+    }
+
+    const lobbyPlayer = room.players.find(player => player.id === socketId);
+    const game = room.game;
+    const gamePlayer = game.turnOrder.find(player => player.id === socketId);
+
+    if (!gamePlayer || gamePlayer.defeated) {
+        return false;
+    }
+
+    const wasCurrentTurn = getCurrentPlayer(game)?.id === socketId;
+
+    gamePlayer.followers = 0;
+    gamePlayer.defeated = true;
+    gamePlayer.disconnected = true;
+    gamePlayer.disconnectedAt = Date.now();
+
+    if (lobbyPlayer) {
+        lobbyPlayer.disconnected = true;
+        lobbyPlayer.disconnectedAt = gamePlayer.disconnectedAt;
+    }
+
+    Object.entries(pendingTrapChoices).forEach(([choiceId, pending]) => {
+        if (!pending) return;
+        if (pending.roomId !== roomId) return;
+        if (pending.targetPlayerId !== socketId && pending.sourcePlayerId !== socketId) return;
+
+        delete pendingTrapChoices[choiceId];
+        game.waitingTrapChoice = false;
+        game.waitingTrapPlayerId = null;
+        game.waitingTrapPlayerName = "";
+
+        if (typeof pending.onResolved === "function") {
+            pending.onResolved({ canceled: false, pending: false });
+        }
+    });
+
+    addLog(game, {
+        actionType: "defeated",
+        playerId: gamePlayer.id,
+        playerName: gamePlayer.name,
+        targetName: gamePlayer.name,
+        cardName: "途中退出",
+        cardType: "特殊",
+        cardRarity: "C",
+        hateText: "対戦から退出してオワコンになった",
+        log: `${gamePlayer.name} は対戦から退出してオワコンになった`,
+        specialText: "途中退出"
+    });
+
+    checkGameOver(game);
+
+    if (!game.gameOver && wasCurrentTurn) {
+        moveToNextAliveTurn(game);
+    }
+
+    checkGameOver(game);
+
+    return true;
+}
+
 io.on("connection", socket => {
     console.log("接続:", socket.id);
 
@@ -2037,6 +2104,37 @@ io.on("connection", socket => {
 
         player.fieldCards = [];
         emitGameUpdate(result.roomId);
+    });
+
+    socket.on("battleLeaveRoom", ({ roomId }) => {
+        const room = rooms[roomId];
+        if (!room) return;
+
+        const player = room.players.find(player => player.id === socket.id);
+        if (!player) return;
+
+        if (!room.game) {
+            socket.emit("errorMessage", "対戦中ではありません");
+            return;
+        }
+
+        clearReconnectCleanupTimer(room, player.reconnectToken);
+        const changed = makePlayerOwakonBySocket(roomId, socket.id);
+
+        socket.leave(roomId);
+        socket.data.roomId = null;
+        socket.data.reconnectToken = null;
+
+        emitRoomUpdate(roomId);
+        emitGameUpdate(roomId);
+
+        if (room.game && room.game.gameOver) {
+            io.to(roomId).emit("gameOver", room.game.winner);
+        }
+
+        if (changed) {
+            socket.emit("battleLeaveSuccess");
+        }
     });
 
     socket.on("leaveRoom", roomId => {
