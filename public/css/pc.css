@@ -85,8 +85,8 @@
     }
 
     .enemy-panel {
-        height: 184px !important;
-        min-height: 184px !important;
+        height: 179px !important;
+        min-height: 179px !important;
         padding: 13px 18px !important;
         overflow: visible !important;
     }
