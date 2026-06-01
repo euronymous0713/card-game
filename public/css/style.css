@@ -5202,3 +5202,137 @@ body.battle-active .mobile-trap-waiting-notice.show {
         min-height: 29px !important;
     }
 }
+/* =========================================================
+   スマホ版：自分情報・伏せカード・履歴/ターン終了 微調整 v5
+   ========================================================= */
+
+@media (max-width: 768px) {
+    /* 自分プレイヤー情報と自分伏せカードの縦幅をさらに増やして揃える */
+    .my-panel,
+    .field-card-area {
+        min-height: 92px !important;
+        height: 92px !important;
+        max-height: 92px !important;
+        padding: 8px 10px !important;
+        overflow: visible !important;
+    }
+
+    .my-panel {
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: flex-start !important;
+    }
+
+    .my-name {
+        min-height: 16px !important;
+        height: 16px !important;
+        line-height: 16px !important;
+        margin-bottom: 3px !important;
+    }
+
+    .my-panel .follower-line {
+        min-height: 16px !important;
+        height: 16px !important;
+        line-height: 16px !important;
+        margin-top: 1px !important;
+    }
+
+    .my-panel .panel-hate {
+        min-height: 14px !important;
+        height: 14px !important;
+        line-height: 14px !important;
+        margin-top: 3px !important;
+    }
+
+    .my-panel .status-effect-row {
+        min-height: 24px !important;
+        height: 24px !important;
+        max-height: 24px !important;
+        margin-top: 5px !important;
+        overflow: visible !important;
+        flex-wrap: nowrap !important;
+        justify-content: center !important;
+    }
+
+    .field-card-area {
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: flex-start !important;
+    }
+
+    .field-card-area h3 {
+        min-height: 16px !important;
+        height: 16px !important;
+        line-height: 16px !important;
+        margin-bottom: 9px !important;
+        font-size: 10px !important;
+        text-align: center !important;
+    }
+
+    #myFieldCards {
+        min-height: 48px !important;
+        height: 48px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 9px !important;
+    }
+
+    .set-card {
+        height: 34px !important;
+        min-height: 34px !important;
+    }
+
+    /* 使用履歴ボタンを少し下げる */
+    body.battle-active .mobile-history-button,
+    .mobile-history-button {
+        top: 165px !important;
+    }
+
+    /* ターン終了ボタンを少し下げる */
+    .battle-buttons {
+        top: 210px !important;
+        right: 8px !important;
+        bottom: auto !important;
+    }
+
+    #endTurnButton {
+        min-height: 40px !important;
+    }
+}
+
+@media (max-width: 380px), (max-height: 720px) {
+    .my-panel,
+    .field-card-area {
+        min-height: 82px !important;
+        height: 82px !important;
+        max-height: 82px !important;
+        padding: 7px 8px !important;
+    }
+
+    .my-panel .status-effect-row {
+        min-height: 21px !important;
+        height: 21px !important;
+        max-height: 21px !important;
+    }
+
+    #myFieldCards {
+        min-height: 42px !important;
+        height: 42px !important;
+    }
+
+    .set-card {
+        height: 31px !important;
+        min-height: 31px !important;
+    }
+
+    body.battle-active .mobile-history-button,
+    .mobile-history-button {
+        top: 150px !important;
+    }
+
+    .battle-buttons {
+        top: 190px !important;
+        right: 6px !important;
+    }
+}
