@@ -10,6 +10,7 @@ window.SoundManager = (() => {
         gameStart: "sounds/game-start.wav",
         turnStart: "sounds/turn-start.wav",
         turnEnd: "sounds/turn-end.wav",
+        discard: "sounds/discard.wav",
         attack: "sounds/attack.wav",
         heal: "sounds/heal.wav",
         setTrap: "sounds/set-trap.wav",

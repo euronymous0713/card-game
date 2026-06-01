@@ -5,6 +5,7 @@
 - game-start.wav
 - turn-start.wav
 - turn-end.wav
+- discard.wav
 - attack.wav
 - heal.wav
 - set-trap.wav
@@ -20,3 +21,8 @@
 例:
 public/sounds/attack.wav
 public/sounds/trap.wav
+
+
+## 追加音
+
+- discard.wav：カードを捨てた時に再生されます。

@@ -141,7 +141,8 @@ window.onload = () => {
         if (actionType === "setTrap") return "setTrap";
         if (actionType === "trap") return "trap";
 
-        if (actionType === "discard" || actionType === "trapEffect") return "";
+        if (actionType === "discard") return "discard";
+        if (actionType === "trapEffect") return "";
 
         if (
             actionType === "statusEffect" ||
