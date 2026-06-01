@@ -305,3 +305,23 @@
         box-shadow: 0 0 16px rgba(255, 48, 48, 0.26) !important;
     }
 }
+
+/* =========================================================
+   PC版：設定ボタン位置調整
+   - 捨て札エリアの上あたりへ配置
+   ========================================================= */
+@media (min-width: 769px) {
+    body.battle-active .mobile-settings-button {
+        position: absolute !important;
+        left: 28px !important;
+        top: auto !important;
+        bottom: 218px !important;
+        width: 220px !important;
+        height: 40px !important;
+        min-height: 40px !important;
+        padding: 0 14px !important;
+        font-size: 18px !important;
+        border-radius: 999px !important;
+        z-index: 45 !important;
+    }
+}
