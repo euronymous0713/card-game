@@ -4413,48 +4413,48 @@ body.battle-active .mobile-trap-waiting-notice.show {
 @media (min-width: 769px) {
     .card-detail {
         position: absolute !important;
-        right: 20px !important;
-        top: 230px !important;
-        width: 380px !important;
-        height: 360px !important;
-        max-height: calc(100vh - 330px) !important;
-        padding: 18px !important;
+        right: 28px !important;
+        top: 250px !important;
+        width: 300px !important;
+        height: 230px !important;
+        max-height: 230px !important;
+        padding: 15px !important;
         border-radius: 16px !important;
-        background: rgba(0, 0, 0, 0.50) !important;
-        border: 1px solid rgba(0, 255, 225, 0.24) !important;
+        background: rgba(0, 0, 0, 0.48) !important;
+        border: 1px solid rgba(0, 255, 225, 0.22) !important;
         box-shadow:
-            0 0 20px rgba(0, 255, 225, 0.14),
-            inset 0 0 18px rgba(255, 255, 255, 0.035) !important;
+            0 0 18px rgba(0, 255, 225, 0.12),
+            inset 0 0 16px rgba(255, 255, 255, 0.03) !important;
         overflow-y: auto !important;
         overflow-x: hidden !important;
         z-index: 8 !important;
     }
 
     .card-detail h3 {
-        margin-bottom: 10px !important;
-        font-size: 19px !important;
+        margin-bottom: 8px !important;
+        font-size: 17px !important;
         line-height: 1.25 !important;
     }
 
     .card-detail p {
-        font-size: 14px !important;
-        line-height: 1.65 !important;
+        font-size: 13px !important;
+        line-height: 1.55 !important;
         opacity: 0.94 !important;
     }
 
     .card-detail .detail-rarity {
-        margin-bottom: 8px !important;
+        margin-bottom: 6px !important;
     }
 
     .card-detail .detail-type {
-        margin-bottom: 8px !important;
-        font-size: 14px !important;
+        margin-bottom: 6px !important;
+        font-size: 13px !important;
     }
 
     .card-detail .detail-hate {
-        margin-top: 10px !important;
-        font-size: 14px !important;
-        line-height: 1.5 !important;
+        margin-top: 8px !important;
+        font-size: 13px !important;
+        line-height: 1.45 !important;
     }
 }
 
