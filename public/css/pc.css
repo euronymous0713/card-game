@@ -651,3 +651,60 @@
         overflow: hidden !important;
     }
 }
+
+/* =========================================================
+   PC版：オワコン後の手札位置固定 / オワコン表示のみ重ねる
+   - 観戦説明を手札の並びに参加させず、カード4枚の位置をずらさない
+   - 自分プレイヤー情報と観戦手札が被らないよう、観戦中だけ情報枠を上へ固定
+   ========================================================= */
+@media (min-width: 769px) {
+    body.battle-active.spectator-hand-view .hand-area.spectator-hand-area {
+        position: absolute !important;
+        left: 50% !important;
+        right: auto !important;
+        bottom: 24px !important;
+        transform: translateX(-50%) !important;
+        display: flex !important;
+        flex-direction: row !important;
+        justify-content: center !important;
+        align-items: flex-end !important;
+        gap: 18px !important;
+        padding: 0 !important;
+        width: auto !important;
+        z-index: 9300 !important;
+    }
+
+    body.battle-active.spectator-hand-view .hand-area.spectator-hand-area .spectator-hand-notice {
+        position: absolute !important;
+        left: 50% !important;
+        bottom: 206px !important;
+        transform: translateX(-50%) !important;
+        width: 420px !important;
+        min-height: 42px !important;
+        height: auto !important;
+        padding: 8px 14px !important;
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 12px !important;
+        pointer-events: none !important;
+        z-index: 9400 !important;
+    }
+
+    body.battle-active.spectator-hand-view .hand-area.spectator-hand-area .spectator-hand-notice strong,
+    body.battle-active.spectator-hand-view .hand-area.spectator-hand-area .spectator-hand-notice span {
+        white-space: nowrap !important;
+    }
+
+    body.battle-active.spectator-hand-view .my-panel.owakon-viewer-panel {
+        right: 28px !important;
+        bottom: 226px !important;
+        width: 300px !important;
+        height: 190px !important;
+        min-height: 190px !important;
+        max-height: 190px !important;
+        overflow: hidden !important;
+        z-index: 9200 !important;
+    }
+}
