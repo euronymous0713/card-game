@@ -1551,7 +1551,6 @@ window.onload = () => {
                 ${needsEnemyTarget && selectedEnemy ? ` / 対象：${selectedEnemy.name}` : ""}
                 ${needsEnemyTarget && !selectedEnemy ? " / 対象を選択してください" : ""}
             </div>
-            <div class="mobile-selected-card-effect">${card.effect || ""}</div>
             <div class="mobile-action-buttons">
                 <button id="mobileUseCardButton" ${isMyTurn ? "" : "disabled"}>
                     使う
