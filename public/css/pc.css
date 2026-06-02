@@ -625,3 +625,29 @@
         opacity: 1 !important;
     }
 }
+
+/* =========================================================
+   PC版：自分プレイヤー情報枠を状態異常ありサイズで固定
+   - 状態異常の有無で枠サイズが伸び縮みしないようにする
+   - ターン終了ボタン上の表示位置は維持
+   ========================================================= */
+@media (min-width: 769px) {
+    body.battle-active .my-panel,
+    body.battle-active.spectator-hand-view .my-panel,
+    body.battle-active.spectator-hand-view .my-panel.owakon-viewer-panel {
+        width: 300px !important;
+        height: 190px !important;
+        min-height: 190px !important;
+        max-height: 190px !important;
+        box-sizing: border-box !important;
+        overflow: hidden !important;
+    }
+
+    body.battle-active .my-panel .status-effect-row {
+        min-height: 28px !important;
+        height: 28px !important;
+        max-height: 28px !important;
+        margin-top: 8px !important;
+        overflow: hidden !important;
+    }
+}

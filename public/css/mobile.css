@@ -4793,3 +4793,68 @@
         bottom: 174px !important;
     }
 }
+
+/* =========================================================
+   スマホ版：カード効果 / 使用有無パネルを上へ移動
+   - 自分プレイヤー情報にぶつからないよう、効果枠と操作パネルをさらに上へ逃がす
+   - 使用有無パネル内の効果文は引き続き非表示
+   ========================================================= */
+@media (max-width: 768px) {
+    body.battle-active .card-detail {
+        transform: translateY(-14px) !important;
+        margin-bottom: -8px !important;
+        min-height: 74px !important;
+        height: auto !important;
+        max-height: 104px !important;
+        padding: 7px 10px !important;
+    }
+
+    body.battle-active .card-detail h3 {
+        font-size: 12.5px !important;
+        line-height: 1.18 !important;
+        margin-bottom: 3px !important;
+    }
+
+    body.battle-active .card-detail p {
+        font-size: 10px !important;
+        line-height: 1.32 !important;
+    }
+
+    body.battle-active .mobile-selected-card-effect {
+        display: none !important;
+    }
+
+    body.battle-active .mobile-action-panel {
+        bottom: 226px !important;
+        left: 8px !important;
+        right: 8px !important;
+        padding: 6px 8px !important;
+        border-radius: 13px !important;
+        z-index: 9600 !important;
+    }
+
+    body.battle-active .mobile-action-buttons button {
+        min-height: 32px !important;
+        padding: 5px 6px !important;
+        font-size: 11.5px !important;
+    }
+
+    body.battle-active.mobile-card-action-open .battle-field {
+        padding-bottom: 250px !important;
+    }
+}
+
+@media (max-width: 380px), (max-height: 720px) {
+    body.battle-active .card-detail {
+        transform: translateY(-12px) !important;
+        max-height: 96px !important;
+    }
+
+    body.battle-active .mobile-action-panel {
+        bottom: 208px !important;
+    }
+
+    body.battle-active.mobile-card-action-open .battle-field {
+        padding-bottom: 232px !important;
+    }
+}
