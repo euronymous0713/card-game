@@ -708,3 +708,47 @@
         z-index: 9200 !important;
     }
 }
+
+/* =========================================================
+   PC版：オワコン後も自分プレイヤー情報の配置を変えない最終固定
+   - 通常時の my-panel と同じ位置・同じサイズを強制
+   - オワコン観戦用の過去上書きで bottom が変わる問題を防ぐ
+   ========================================================= */
+@media (min-width: 769px) {
+    body.battle-active.spectator-hand-view .my-panel,
+    body.battle-active.spectator-hand-view .my-panel.owakon-viewer-panel {
+        position: absolute !important;
+        right: 28px !important;
+        bottom: 122px !important;
+        top: auto !important;
+        left: auto !important;
+        transform: none !important;
+        width: 300px !important;
+        height: 190px !important;
+        min-height: 190px !important;
+        max-height: 190px !important;
+        margin: 0 !important;
+        padding: 14px 18px !important;
+        overflow: hidden !important;
+        box-sizing: border-box !important;
+        display: block !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        z-index: 9700 !important;
+    }
+
+    body.battle-active.spectator-hand-view .hand-area.spectator-hand-area {
+        position: absolute !important;
+        left: 50% !important;
+        right: auto !important;
+        bottom: 24px !important;
+        transform: translateX(-50%) !important;
+        display: flex !important;
+        flex-direction: row !important;
+        justify-content: center !important;
+        align-items: flex-end !important;
+        gap: 18px !important;
+        padding: 0 !important;
+        width: auto !important;
+    }
+}
