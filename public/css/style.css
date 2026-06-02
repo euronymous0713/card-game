@@ -1822,3 +1822,122 @@ body.battle-active .mobile-trap-waiting-notice.show {
         align-content: start !important;
     }
 }
+
+
+/* =========================================================
+   対象選択表示 / オワコン後の観戦手札表示
+   - ヘイト3の赤い演出中でも選択中が分かるようにする
+   - オワコンになったプレイヤーだけ、他プレイヤーの手札を小さく確認できる
+   ========================================================= */
+
+.enemy-panel,
+.my-panel {
+    position: relative;
+}
+
+.enemy-panel.selected-target {
+    border-width: 4px !important;
+    border-color: #fff200 !important;
+    outline: 3px solid rgba(0, 255, 225, 0.95) !important;
+    outline-offset: -8px !important;
+    box-shadow:
+        0 0 0 4px rgba(0, 0, 0, 0.74),
+        0 0 28px rgba(255, 242, 0, 0.95),
+        0 0 42px rgba(0, 255, 225, 0.64) !important;
+}
+
+.enemy-panel.selected-target.max-hate-player {
+    border-color: #fff200 !important;
+    outline-color: rgba(0, 255, 225, 1) !important;
+    box-shadow:
+        0 0 0 4px rgba(0, 0, 0, 0.78),
+        0 0 30px rgba(255, 242, 0, 1),
+        0 0 46px rgba(0, 255, 225, 0.72),
+        inset 0 0 18px rgba(255, 0, 0, 0.25) !important;
+}
+
+.enemy-panel.selected-target::after {
+    content: "選択中";
+    position: absolute;
+    right: 10px;
+    top: 8px;
+    z-index: 20;
+    padding: 3px 9px;
+    border-radius: 999px;
+    color: #080814;
+    background: #fff200;
+    border: 2px solid #00ffe1;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    box-shadow:
+        0 0 10px rgba(255, 242, 0, 0.9),
+        0 0 16px rgba(0, 255, 225, 0.55);
+    pointer-events: none;
+}
+
+.enemy-spectator-hand {
+    margin-top: 8px;
+    padding: 7px;
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.42);
+    border: 1px solid rgba(255, 242, 0, 0.34);
+}
+
+.enemy-spectator-hand-title {
+    margin-bottom: 5px;
+    color: #fff200;
+    font-size: 11px;
+    font-weight: 900;
+    line-height: 1;
+}
+
+.enemy-spectator-hand-list {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 5px;
+}
+
+.spectator-hand-card {
+    width: 100%;
+    min-width: 0;
+    min-height: 38px;
+    padding: 4px;
+    border-radius: 8px;
+    border: 1px solid rgba(0, 255, 225, 0.42);
+    background: rgba(255, 255, 255, 0.07);
+    color: white;
+    font-size: 10px;
+    line-height: 1.15;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+    transform: none !important;
+}
+
+.spectator-hand-card:hover {
+    border-color: #fff200;
+    box-shadow: 0 0 10px rgba(255, 242, 0, 0.5);
+    opacity: 1;
+    transform: none !important;
+}
+
+.spectator-empty-hand-card {
+    opacity: 0.38;
+    cursor: default;
+}
+
+.spectator-card-rarity {
+    color: #ffb000;
+    font-size: 9px;
+    font-weight: 900;
+}
+
+.spectator-card-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 800;
+}

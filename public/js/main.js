@@ -692,6 +692,80 @@ window.onload = () => {
         `;
     }
 
+    function getMeFromLatestGame() {
+        if (!latestGame || !Array.isArray(latestGame.turnOrder)) return null;
+
+        return latestGame.turnOrder.find(player => player.id === socket.id) || null;
+    }
+
+    function isDefeatedViewer() {
+        const me = getMeFromLatestGame();
+
+        return Boolean(me && me.defeated);
+    }
+
+    function spectatorEnemyHandHtml(me, enemy) {
+        if (!me || !me.defeated) return "";
+        if (!enemy || !Array.isArray(enemy.hand)) return "";
+
+        const handCards = [];
+
+        for (let i = 0; i < 4; i++) {
+            const card = enemy.hand[i];
+
+            if (!card) {
+                handCards.push(`
+                    <button class="spectator-hand-card spectator-empty-hand-card" type="button" disabled>
+                        空
+                    </button>
+                `);
+                continue;
+            }
+
+            handCards.push(`
+                <button class="spectator-hand-card ${rarityClass(card.rarity)}" type="button" data-hand-index="${i}">
+                    <span class="spectator-card-rarity">${normalizeRarity(card.rarity)}</span>
+                    <span class="spectator-card-name">${card.name}</span>
+                </button>
+            `);
+        }
+
+        return `
+            <div class="enemy-spectator-hand">
+                <div class="enemy-spectator-hand-title">観戦：手札</div>
+                <div class="enemy-spectator-hand-list">
+                    ${handCards.join("")}
+                </div>
+            </div>
+        `;
+    }
+
+    function bindSpectatorHandEvents(container, enemy) {
+        if (!container || !enemy || !isDefeatedViewer()) return;
+
+        container.querySelectorAll(".spectator-hand-card[data-hand-index]").forEach(cardButton => {
+            const handIndex = Number(cardButton.dataset.handIndex);
+            const card = enemy.hand?.[handIndex];
+
+            if (!card) return;
+
+            cardButton.onmouseenter = () => {
+                cardDetail.innerHTML = cardDetailHtml(card);
+            };
+
+            cardButton.onmouseleave = () => {
+                if (!isMobileLayout()) {
+                    resetCardDetail();
+                }
+            };
+
+            cardButton.onclick = event => {
+                event.stopPropagation();
+                cardDetail.innerHTML = cardDetailHtml(card);
+            };
+        });
+    }
+
 
     function cardKindLabel(kind) {
         const labels = {
@@ -1825,6 +1899,8 @@ window.onload = () => {
         latestGame = game;
         endTurnRequestPending = false;
 
+        document.body.classList.toggle("spectator-hand-view", isDefeatedViewer());
+
         updateTrapWaitingNotice();
 
         if (isMobileLayout() && selectedMobileCardInstanceId && !getSelectedMobileCard()) {
@@ -1898,6 +1974,7 @@ window.onload = () => {
                 slot.classList.toggle("selected-target", selectedTargetId === enemy.id);
                 slot.classList.toggle("max-hate-player", enemy.hate >= 3);
                 slot.classList.toggle("defeated-player", enemy.defeated);
+                slot.classList.toggle("spectator-hand-owner", Boolean(me && me.defeated && Array.isArray(enemy.hand) && enemy.hand.length > 0));
 
                 slot.innerHTML = `
                     <div class="enemy-name">${enemy.defeated ? "💀 " : ""}${enemy.hate >= 3 ? "🔥 " : ""}${enemy.name}${disconnectedLabel(enemy)}</div>
@@ -1911,9 +1988,11 @@ window.onload = () => {
                     <div class="enemy-field-cards">
                         ${enemy.fieldCards.map(() => `<span class="mini-set-card">伏</span>`).join("")}
                     </div>
+                    ${spectatorEnemyHandHtml(me, enemy)}
                 `;
 
                 bindStatusEffectEvents(slot);
+                bindSpectatorHandEvents(slot, enemy);
 
                 slot.onclick = () => {
                     if (enemy.defeated) return;
@@ -1928,6 +2007,7 @@ window.onload = () => {
                 slot.classList.remove("selected-target");
                 slot.classList.remove("max-hate-player");
                 slot.classList.remove("defeated-player");
+                slot.classList.remove("spectator-hand-owner");
                 slot.onclick = null;
 
                 slot.innerHTML = `
@@ -2253,6 +2333,7 @@ window.onload = () => {
         selectedMobileStatusKey = "";
         draggedCard = null;
         document.body.classList.remove("mobile-card-action-open");
+        document.body.classList.remove("spectator-hand-view");
         closeMobileHistory();
         closeMobileSettings();
         hideTrapWaitingNotice();

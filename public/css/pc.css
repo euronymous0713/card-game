@@ -435,3 +435,42 @@
     }
 
 }
+
+
+/* =========================================================
+   PC版：オワコン後の観戦手札表示
+   - 敵パネル内に4枚ぶんの小さい手札欄を追加
+   - 既存の通常バトル配置には影響させない
+   ========================================================= */
+@media (min-width: 769px) {
+    body.battle-active.spectator-hand-view .enemy-panel {
+        height: 238px !important;
+        min-height: 238px !important;
+        padding-bottom: 12px !important;
+    }
+
+    body.battle-active.spectator-hand-view .turn-panel {
+        top: 282px !important;
+    }
+
+    body.battle-active.spectator-hand-view .history-panel {
+        top: 392px !important;
+        max-height: 138px !important;
+    }
+
+    body.battle-active.spectator-hand-view .played-card-list {
+        max-height: 78px !important;
+    }
+
+    body.battle-active.spectator-hand-view .mobile-settings-button {
+        top: 536px !important;
+    }
+
+    body.battle-active.spectator-hand-view .enemy-panel .enemy-name {
+        padding-right: 58px !important;
+    }
+
+    body.battle-active.spectator-hand-view .enemy-spectator-hand {
+        margin-top: 7px !important;
+    }
+}

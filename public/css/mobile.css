@@ -4138,3 +4138,46 @@
         font-size: 18px !important;
     }
 }
+
+
+/* =========================================================
+   スマホ版：オワコン後の観戦手札表示
+   - 横スクロール中の敵パネル内に収まるように手札欄をコンパクト表示
+   ========================================================= */
+@media (max-width: 768px) {
+    body.battle-active.spectator-hand-view .enemy-panel {
+        height: auto !important;
+        min-height: 176px !important;
+        justify-content: flex-start !important;
+    }
+
+    body.battle-active.spectator-hand-view .enemy-panel .enemy-name {
+        padding-right: 54px !important;
+    }
+
+    body.battle-active.spectator-hand-view .enemy-spectator-hand {
+        margin-top: 7px !important;
+        padding: 6px !important;
+    }
+
+    body.battle-active.spectator-hand-view .enemy-spectator-hand-title {
+        font-size: 10px !important;
+    }
+
+    body.battle-active.spectator-hand-view .spectator-hand-card {
+        min-height: 34px !important;
+        padding: 3px !important;
+        font-size: 9px !important;
+    }
+
+    body.battle-active.spectator-hand-view .spectator-card-rarity {
+        font-size: 8px !important;
+    }
+
+    body.battle-active.spectator-hand-view .enemy-panel.selected-target::after {
+        right: 7px !important;
+        top: 7px !important;
+        padding: 2px 7px !important;
+        font-size: 10px !important;
+    }
+}
