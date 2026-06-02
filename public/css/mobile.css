@@ -4242,3 +4242,124 @@
         font-size: 11px !important;
     }
 }
+
+/* =========================================================
+   スマホ版：オワコン観戦中の自分プレイヤー情報 復旧
+   - 既存のコンパクト指定で .my-panel が 88〜94px 固定になり、
+     オワコンバッジ追加時に内容が見切れるため、観戦中だけ高さを戻す
+   - 他画面・通常プレイ中には影響させない
+   ========================================================= */
+@media (max-width: 768px) {
+    body.battle-active.spectator-hand-view .my-panel.owakon-viewer-panel {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 100% !important;
+        min-height: 128px !important;
+        height: auto !important;
+        max-height: none !important;
+        padding: 10px 12px !important;
+        overflow: visible !important;
+        gap: 4px !important;
+        text-align: center !important;
+        box-sizing: border-box !important;
+    }
+
+    body.battle-active.spectator-hand-view .my-panel.owakon-viewer-panel .owakon-viewer-badge {
+        display: inline-flex !important;
+        flex: 0 0 auto !important;
+        min-height: 22px !important;
+        height: auto !important;
+        max-height: none !important;
+        margin: 0 0 3px !important;
+        padding: 4px 10px !important;
+        font-size: 12px !important;
+        line-height: 1.2 !important;
+        white-space: nowrap !important;
+    }
+
+    body.battle-active.spectator-hand-view .my-panel.owakon-viewer-panel .my-name {
+        width: 100% !important;
+        min-height: 18px !important;
+        height: auto !important;
+        max-height: none !important;
+        line-height: 1.25 !important;
+        margin: 0 !important;
+        font-size: 14px !important;
+        text-align: center !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        flex: 0 0 auto !important;
+    }
+
+    body.battle-active.spectator-hand-view .my-panel.owakon-viewer-panel .follower-line {
+        min-height: 22px !important;
+        height: auto !important;
+        max-height: none !important;
+        line-height: 1.25 !important;
+        margin: 1px 0 0 !important;
+        font-size: 18px !important;
+        text-align: center !important;
+        flex: 0 0 auto !important;
+    }
+
+    body.battle-active.spectator-hand-view .my-panel.owakon-viewer-panel .panel-hate {
+        min-height: 17px !important;
+        height: auto !important;
+        max-height: none !important;
+        line-height: 1.2 !important;
+        margin: 1px 0 0 !important;
+        font-size: 13px !important;
+        letter-spacing: 2px !important;
+        text-align: center !important;
+        flex: 0 0 auto !important;
+    }
+
+    body.battle-active.spectator-hand-view .my-panel.owakon-viewer-panel .status-effect-row {
+        width: 100% !important;
+        min-height: 22px !important;
+        height: auto !important;
+        max-height: none !important;
+        margin: 3px 0 0 !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        gap: 4px !important;
+        flex-wrap: wrap !important;
+        overflow: visible !important;
+        flex: 0 0 auto !important;
+    }
+}
+
+@media (max-width: 380px), (max-height: 720px) {
+    body.battle-active.spectator-hand-view .my-panel.owakon-viewer-panel {
+        min-height: 122px !important;
+        height: auto !important;
+        max-height: none !important;
+        padding: 9px 10px !important;
+        overflow: visible !important;
+    }
+
+    body.battle-active.spectator-hand-view .my-panel.owakon-viewer-panel .my-name {
+        font-size: 13px !important;
+        min-height: 17px !important;
+        height: auto !important;
+        line-height: 1.25 !important;
+    }
+
+    body.battle-active.spectator-hand-view .my-panel.owakon-viewer-panel .follower-line {
+        font-size: 17px !important;
+        min-height: 21px !important;
+        height: auto !important;
+        line-height: 1.25 !important;
+    }
+
+    body.battle-active.spectator-hand-view .my-panel.owakon-viewer-panel .panel-hate {
+        font-size: 12px !important;
+        min-height: 16px !important;
+        height: auto !important;
+        line-height: 1.2 !important;
+    }
+}
