@@ -529,3 +529,25 @@
         top: 542px !important;
     }
 }
+
+/* =========================================================
+   PC版：オワコン観戦中の自分プレイヤー情報 表示位置修正
+   原因：観戦用の手札欄を自分の手札エリアに出すため、
+         自分プレイヤー情報と下部手札欄が重なりやすかった。
+   対応：オワコン観戦中だけ自分プレイヤー情報を手札欄より上に逃がす。
+   ========================================================= */
+@media (min-width: 769px) {
+    body.battle-active.spectator-hand-view .my-panel.owakon-viewer-panel {
+        display: block !important;
+        right: 28px !important;
+        bottom: 226px !important;
+        height: 160px !important;
+        min-height: 160px !important;
+        max-height: none !important;
+        overflow: visible !important;
+        z-index: 80 !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        filter: none !important;
+    }
+}
