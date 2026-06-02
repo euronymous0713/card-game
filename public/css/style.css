@@ -1876,156 +1876,16 @@ body.battle-active .mobile-trap-waiting-notice.show {
     pointer-events: none;
 }
 
-.enemy-spectator-hand {
-    margin-top: 8px;
-    padding: 7px;
-    border-radius: 12px;
-    background: rgba(0, 0, 0, 0.42);
-    border: 1px solid rgba(255, 242, 0, 0.34);
-}
 
-.enemy-spectator-hand-title {
-    margin-bottom: 5px;
-    color: #fff200;
-    font-size: 11px;
-    font-weight: 900;
-    line-height: 1.15;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.enemy-spectator-hand-list {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 5px;
-}
-
-.spectator-hand-card {
-    width: 100%;
-    min-width: 0;
-    min-height: 38px;
-    padding: 4px;
-    border-radius: 8px;
-    border: 1px solid rgba(0, 255, 225, 0.42);
-    background: rgba(255, 255, 255, 0.07);
-    color: white;
-    font-size: 10px;
-    line-height: 1.15;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 2px;
-    transform: none !important;
-}
-
-.spectator-hand-card:hover {
-    border-color: #fff200;
-    box-shadow: 0 0 10px rgba(255, 242, 0, 0.5);
-    opacity: 1;
-    transform: none !important;
-}
-
-.spectator-empty-hand-card {
-    opacity: 0.38;
+/* オワコン後：手札エリアの配置は変えず、中身だけ観戦用に差し替える */
+.hand-card.spectator-view-hand-card {
     cursor: default;
 }
 
-.spectator-card-rarity {
-    color: #ffb000;
-    font-size: 9px;
-    font-weight: 900;
+.hand-card.spectator-view-hand-card .card-type {
+    color: #fff200;
 }
 
-.spectator-card-name {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    font-weight: 800;
-}
-
-/* =========================================================
-   オワコン後：選択中プレイヤーの手札を自分の手札欄に表示
-   - 敵パネル内には手札を出さない
-   - 自分の手札欄を観戦用ビューとして使う
-   ========================================================= */
-.owakon-viewer-panel {
-    border-color: rgba(255, 48, 48, 0.95) !important;
-    background: rgba(90, 0, 0, 0.72) !important;
-    box-shadow:
-        0 0 24px rgba(255, 48, 48, 0.72),
-        inset 0 0 22px rgba(255, 0, 0, 0.22) !important;
-}
-
-.owakon-viewer-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 6px;
-    padding: 4px 10px;
-    border-radius: 999px;
-    color: #ffffff;
-    background: linear-gradient(135deg, #ff3030, #8b0000);
-    border: 1px solid rgba(255, 255, 255, 0.34);
-    font-size: 12px;
-    font-weight: 900;
-    letter-spacing: 1px;
-    text-shadow: 0 0 8px rgba(0, 0, 0, 0.8);
-    box-shadow: 0 0 14px rgba(255, 48, 48, 0.62);
-}
-
-.spectator-hand-area {
-    align-items: stretch;
-}
-
-.spectator-hand-notice {
-    width: 150px;
-    min-height: 190px;
-    padding: 14px;
-    border-radius: 16px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 10px;
-    text-align: center;
-    background: rgba(0, 0, 0, 0.76);
-    border: 2px solid rgba(255, 48, 48, 0.78);
-    box-shadow:
-        0 0 18px rgba(255, 48, 48, 0.42),
-        inset 0 0 16px rgba(255, 255, 255, 0.04);
-}
-
-.spectator-hand-notice strong {
-    color: #ff4d4d;
-    font-size: 15px;
-    line-height: 1.35;
-}
-
-.spectator-hand-notice span {
-    color: rgba(255, 255, 255, 0.82);
-    font-size: 12px;
-    line-height: 1.45;
-}
-
-.spectator-view-hand-card {
-    cursor: pointer;
-    border-color: rgba(255, 242, 0, 0.72) !important;
-    box-shadow:
-        0 0 18px rgba(255, 242, 0, 0.34),
-        0 0 22px rgba(0, 255, 225, 0.18) !important;
-}
-
-.spectator-view-hand-card:hover {
-    transform: translateY(-8px) scale(1.03);
-    border-color: #fff200 !important;
-    box-shadow:
-        0 0 24px rgba(255, 242, 0, 0.72),
-        0 0 34px rgba(0, 255, 225, 0.28) !important;
-}
-
-body.owakon-viewer-active .battle-message {
-    border-color: rgba(255, 48, 48, 0.45);
-    color: rgba(255, 230, 230, 0.94);
-    background: rgba(90, 0, 0, 0.32);
+.hand-card.spectator-view-hand-card.empty-hand-card {
+    opacity: 0.72;
 }

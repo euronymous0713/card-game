@@ -704,585 +704,18 @@ window.onload = () => {
         return Boolean(me && me.defeated);
     }
 
-    function getSelectedSpectatorEnemy() {
-        const me = getMeFromLatestGame();
+    function getSelectedSpectatorPlayer(me) {
+        if (!latestGame || !me || !me.defeated) return null;
 
-        if (!latestGame || !me || !me.defeated || !Array.isArray(latestGame.turnOrder)) {
-            return null;
-        }
-
-        const enemies = latestGame.turnOrder.filter(player => player.id !== socket.id);
-
-        return enemies.find(player => player.id === selectedTargetId) || enemies[0] || null;
-    }
-
-    function bindSpectatorHandCardEvents(cardElement, card) {
-        if (!cardElement || !card) return;
-
-        cardElement.onmouseenter = () => {
-            cardDetail.innerHTML = cardDetailHtml(card);
-        };
-
-        cardElement.onmouseleave = () => {
-            if (!isMobileLayout()) {
-                resetCardDetail();
-            }
-        };
-
-        cardElement.onclick = () => {
-            cardDetail.innerHTML = cardDetailHtml(card);
-        };
-    }
-
-
-    function cardKindLabel(kind) {
-        const labels = {
-            attack: "攻撃",
-            support: "防御/補助",
-            hate: "妨害",
-            trap: "罠",
-            special: "特殊"
-        };
-
-        return labels[kind] || kind || "不明";
-    }
-
-    function specialEffectLabel(card) {
-        if (!card.effectType && !card.ignoreTrap && !card.trapEffect) return "";
-
-        const labels = {
-            destroyTargetTraps: "伏せカード破壊",
-            destroyAllEnemyTraps: "全体伏せカード破壊",
-            skipTurn: "行動不能",
-            slipDamage: "スリップダメージ",
-            extraTurn: "追加ターン",
-            discardTargetHand: "手札破壊",
-            trapPierceDamage: "罠貫通",
-            pierceDamage: "罠貫通",
-            ignoreTrapDamage: "罠貫通",
-            reflectDamage: "ダメージ反射",
-            cancelHate: "ヘイト無効",
-            cancelTrap: "罠効果無効",
-            cancelTrapAndDestroyEnemyTraps: "罠無効＋伏せ破壊",
-            damageAndHate: "反撃＋ヘイト"
-        };
-
-        if (card.ignoreTrap || card.pierceTrap) return "罠貫通";
-        if (card.trapEffect) return labels[card.trapEffect] || card.trapEffect;
-        return labels[card.effectType] || card.effectType || "";
-    }
-
-    function cardListStatsText() {
-        const total = titleCardList.length;
-        const counts = titleCardList.reduce((result, card) => {
-            const rarity = normalizeRarity(card.rarity);
-            result[rarity] = (result[rarity] || 0) + 1;
-            return result;
-        }, {});
-
-        return `全${total}枚 / C:${counts.C || 0} UC:${counts.UC || 0} R:${counts.R || 0} SR:${counts.SR || 0} UR:${counts.UR || 0}`;
-    }
-
-    function normalizeCardKindFilterValue(card) {
-        if (!card) return "unknown";
-        if (card.kind) return card.kind;
-
-        const type = card.type || "";
-
-        if (type === "攻撃") return "attack";
-        if (type === "防御" || type === "補助") return "support";
-        if (type === "妨害") return "hate";
-        if (type === "罠") return "trap";
-        if (type === "特殊") return "special";
-
-        return "unknown";
-    }
-
-    function matchesCardListKindFilter(card) {
-        if (currentCardListKindFilter === "all") return true;
-
-        if (currentCardListKindFilter === "special") {
-            return card.kind === "special";
-        }
-
-        return normalizeCardKindFilterValue(card) === currentCardListKindFilter;
-    }
-
-    function matchesCardListSearch(card) {
-        if (!currentCardListSearchText) return true;
-
-        const searchSource = [
-            card.name,
-            card.type,
-            card.kind,
-            card.effect,
-            card.hateText,
-            specialEffectLabel(card)
-        ].join(" ").toLowerCase();
-
-        return searchSource.includes(currentCardListSearchText.toLowerCase());
-    }
-
-    function cardListFilterDescription() {
-        const rarityText = currentCardListRarityFilter === "all"
-            ? "全レアリティ"
-            : currentCardListRarityFilter;
-
-        const kindLabels = {
-            all: "全種類",
-            attack: "攻撃",
-            support: "防御/補助",
-            hate: "妨害",
-            trap: "罠",
-            special: "特殊"
-        };
-
-        const kindText = kindLabels[currentCardListKindFilter] || "全種類";
-        const searchText = currentCardListSearchText
-            ? ` / 検索：${currentCardListSearchText}`
-            : "";
-
-        return `${rarityText} / ${kindText}${searchText}`;
-    }
-
-    function updateCardListControlToggleText() {
-        if (!cardListControlToggleButton || !cardListControls) return;
-
-        const isOpen = cardListControls.classList.contains("open-card-list-controls");
-        const hasFilter = currentCardListRarityFilter !== "all" ||
-            currentCardListKindFilter !== "all" ||
-            Boolean(currentCardListSearchText);
-
-        cardListControlToggleButton.innerText = isOpen
-            ? "検索・絞り込みを閉じる"
-            : hasFilter
-                ? `検索・絞り込みを開く（${cardListFilterDescription()}）`
-                : "検索・絞り込みを開く";
-
-        cardListControlToggleButton.setAttribute("aria-expanded", isOpen ? "true" : "false");
-    }
-
-    function setCardListControlsOpen(open) {
-        if (!cardListControls) return;
-
-        cardListControls.classList.toggle("open-card-list-controls", open);
-        updateCardListControlToggleText();
-    }
-
-    function renderTitleCardList() {
-        updateCardListControlToggleText();
-
-        if (!cardListBody) return;
-
-        const filteredCards = titleCardList.filter(card => {
-            const rarityMatched = currentCardListRarityFilter === "all" ||
-                normalizeRarity(card.rarity) === currentCardListRarityFilter;
-
-            return rarityMatched &&
-                matchesCardListKindFilter(card) &&
-                matchesCardListSearch(card);
+        const candidates = latestGame.turnOrder.filter(player => {
+            return player.id !== socket.id && !player.defeated;
         });
 
-        if (titleCardList.length === 0) {
-            cardListBody.innerHTML = `
-                <div class="card-list-empty">
-                    カード情報を読み込み中です。
-                </div>
-            `;
-            return;
-        }
+        if (candidates.length === 0) return null;
 
-        if (filteredCards.length === 0) {
-            cardListBody.innerHTML = `
-                <div class="card-list-stats">${cardListStatsText()} / ${cardListFilterDescription()}</div>
-                <div class="card-list-empty">
-                    条件に合うカードがありません。
-                </div>
-            `;
-            return;
-        }
+        const selected = candidates.find(player => player.id === selectedTargetId);
 
-        const visibleCards = filteredCards.slice(0, cardListVisibleCount);
-        const hasMoreCards = visibleCards.length < filteredCards.length;
-
-        cardListBody.innerHTML = `
-            <div class="card-list-stats">
-                ${cardListStatsText()} / 表示:${visibleCards.length}/${filteredCards.length}枚 / ${cardListFilterDescription()}
-            </div>
-            <div class="card-list-grid">
-                ${visibleCards.map(card => {
-            const rarity = normalizeRarity(card.rarity);
-            const specialLabel = specialEffectLabel(card);
-
-            return `
-                        <div class="card-list-item ${rarityClass(rarity)}">
-                            <div class="card-list-item-head">
-                                <span class="card-list-rarity ${rarityClass(rarity)}">${rarity}</span>
-                                <strong>${card.name}</strong>
-                            </div>
-                            <div class="card-list-meta">
-                                ${card.type || cardKindLabel(card.kind)} / ${cardKindLabel(card.kind)}
-                                ${specialLabel ? ` / ${specialLabel}` : ""}
-                            </div>
-                            <p class="card-list-effect">${card.effect || "効果なし"}</p>
-                            <div class="card-list-footer">
-                                ${card.damage ? `<span>ダメージ：${Number(card.damage).toLocaleString()}</span>` : ""}
-                                ${card.heal ? `<span>回復：${Number(card.heal).toLocaleString()}</span>` : ""}
-                                ${card.hateText ? `<span>${card.hateText}</span>` : ""}
-                            </div>
-                        </div>
-                    `;
-        }).join("")}
-            </div>
-            ${hasMoreCards ? `
-                <button type="button" class="card-list-more-button" id="cardListMoreButton">
-                    さらに表示する（残り${filteredCards.length - visibleCards.length}枚）
-                </button>
-            ` : ""}
-        `;
-
-        const cardListMoreButton = document.getElementById("cardListMoreButton");
-
-        if (cardListMoreButton) {
-            cardListMoreButton.onclick = () => {
-                cardListVisibleCount += 24;
-                renderTitleCardList();
-            };
-        }
-    }
-
-    function openTitleCardList() {
-        if (!cardListOverlay) return;
-
-        if (isMobileLayout()) {
-            setCardListControlsOpen(false);
-        } else {
-            setCardListControlsOpen(true);
-        }
-
-        cardListVisibleCount = 24;
-        renderTitleCardList();
-        cardListOverlay.style.display = "flex";
-        cardListOverlay.setAttribute("aria-hidden", "false");
-    }
-
-    function closeTitleCardList() {
-        if (!cardListOverlay) return;
-
-        cardListOverlay.style.display = "none";
-        cardListOverlay.setAttribute("aria-hidden", "true");
-    }
-
-    function resetCardDetail() {
-        cardDetail.innerHTML = `
-            <h3>カード効果</h3>
-            <p>カードにカーソルを合わせると効果が表示されます。</p>
-        `;
-    }
-
-    function cloneGame(game) {
-        return game ? JSON.parse(JSON.stringify(game)) : null;
-    }
-
-    function getPlayerFromGame(game, playerId) {
-        if (!game) return null;
-        return game.turnOrder.find(player => player.id === playerId);
-    }
-
-    function getPlayerElement(playerId) {
-        const me = latestGame?.turnOrder.find(player => player.id === socket.id);
-
-        if (me && me.id === playerId) {
-            return myPanel;
-        }
-
-        const enemies = latestGame?.turnOrder.filter(player => player.id !== socket.id) || [];
-        const index = enemies.findIndex(player => player.id === playerId);
-
-        if (index >= 0) {
-            return enemySlots[index];
-        }
-
-        return battleField;
-    }
-
-    function showTrapChoiceModal(data) {
-        const oldOverlay = document.getElementById("trapChoiceOverlay");
-
-        if (oldOverlay) {
-            oldOverlay.remove();
-        }
-
-        const overlay = document.createElement("div");
-
-        overlay.id = "trapChoiceOverlay";
-        overlay.className = "trap-choice-overlay";
-
-        const sourceCardName = data.context?.cardName || "不明なカード";
-        const sourceCardType = data.context?.cardType || "";
-        const sourceResultText = data.context?.resultText || "";
-        const sourceCardRarity = normalizeRarity(data.context?.cardRarity);
-        const sourceActionText =
-            data.context?.sourceActionText ||
-            `${data.sourcePlayerName} のカードに反応できます。`;
-
-        overlay.innerHTML = `
-        <div class="trap-choice-box light-trap-choice-box">
-            <h2>罠カード発動確認</h2>
-
-            <div class="trap-source-box compact-source-box">
-                <div class="trap-section-title">反応元カード</div>
-                <div class="trap-source-card-name">
-                    ${sourceCardName}
-                    ${sourceCardType ? `<span>${sourceCardType}</span>` : ""}
-                </div>
-                <div class="trap-source-rarity ${rarityClass(sourceCardRarity)}">${rarityLabel(sourceCardRarity)}</div>
-                <p>${sourceActionText}</p>
-                ${sourceResultText ? `<p class="trap-danger-text">${sourceResultText}</p>` : ""}
-            </div>
-
-            <p class="trap-choice-message">
-                ${data.conditionText} に反応できる罠カードを選択してください。
-            </p>
-
-            <div class="trap-choice-list compact-trap-choice-list">
-                ${data.traps.map(trap => `
-                    <div
-                        class="trap-choice-card compact-trap-card ${trap.canActivate ? "" : "disabled-trap-choice"}"
-                        data-field-id="${trap.fieldId}"
-                        data-can-activate="${trap.canActivate}"
-                    >
-                        <strong>${trap.name}</strong>
-                        <em class="trap-choice-rarity ${rarityClass(trap.rarity)}">${rarityLabel(normalizeRarity(trap.rarity))}</em>
-                        <span>${trap.canActivate ? trap.effect : trap.disabledReason}</span>
-                        <small>発動条件：${trap.conditionText}</small>
-                    </div>
-                `).join("")}
-            </div>
-
-            <button class="trap-skip-button" id="trapSkipButton">
-                発動しない
-            </button>
-        </div>
-    `;
-
-        document.body.appendChild(overlay);
-
-        overlay.querySelectorAll(".trap-choice-card").forEach(cardElement => {
-            cardElement.onclick = () => {
-                const canActivate = cardElement.dataset.canActivate === "true";
-
-                if (!canActivate) return;
-
-                const fieldId = cardElement.dataset.fieldId;
-
-                socket.emit("chooseTrapResponse", {
-                    choiceId: data.choiceId,
-                    fieldId
-                });
-
-                overlay.remove();
-            };
-        });
-
-        document.getElementById("trapSkipButton").onclick = () => {
-            socket.emit("chooseTrapResponse", {
-                choiceId: data.choiceId,
-                fieldId: null
-            });
-
-            overlay.remove();
-        };
-    }
-
-    function showTurnAnnouncement(playerName, isMyTurn) {
-        turnAnnouncement.innerHTML = `
-            <div class="turn-announcement-text">
-                ${isMyTurn ? "あなたのターン" : `${playerName} のターン`}
-            </div>
-        `;
-
-        turnAnnouncement.classList.remove("show-turn-announcement");
-        void turnAnnouncement.offsetWidth;
-        turnAnnouncement.classList.add("show-turn-announcement");
-
-        setTimeout(() => {
-            turnAnnouncement.classList.remove("show-turn-announcement");
-        }, 1500);
-    }
-
-    function showFloatingText(targetElement, text, className) {
-        const targetRect = targetElement.getBoundingClientRect();
-        const fieldRect = battleField.getBoundingClientRect();
-
-        const popup = document.createElement("div");
-
-        popup.className = `floating-effect ${className}`;
-        popup.innerText = text;
-
-        popup.style.left = `${targetRect.left - fieldRect.left + targetRect.width / 2}px`;
-        popup.style.top = `${targetRect.top - fieldRect.top + targetRect.height / 2}px`;
-
-        effectLayer.appendChild(popup);
-
-        setTimeout(() => {
-            popup.remove();
-        }, 1200);
-    }
-
-    function showCardUseAnimation(text) {
-        const effect = document.createElement("div");
-
-        effect.className = "card-use-effect";
-        effect.innerText = text;
-
-        effectLayer.appendChild(effect);
-
-        setTimeout(() => {
-            effect.remove();
-        }, 900);
-    }
-
-    function showDiscardAnimation(cardName) {
-        const effect = document.createElement("div");
-
-        effect.className = "discard-effect";
-        effect.innerText = `捨て札：${cardName}`;
-
-        effectLayer.appendChild(effect);
-
-        setTimeout(() => {
-            effect.remove();
-        }, 900);
-    }
-
-    function showDrawAnimation(count) {
-        if (count <= 0) return;
-
-        const effect = document.createElement("div");
-
-        effect.className = "draw-effect";
-        effect.innerText = `+${count} Card`;
-
-        effectLayer.appendChild(effect);
-
-        setTimeout(() => {
-            effect.remove();
-        }, 1000);
-    }
-
-    function runAnimations(oldGame, newGame) {
-        if (!newGame) return;
-
-        const currentPlayer = newGame.turnOrder[newGame.currentTurnIndex];
-
-        if (!oldGame && currentPlayer) {
-            showTurnAnnouncement(currentPlayer.name, currentPlayer.id === socket.id);
-            playSound("turnStart");
-        }
-
-        if (!oldGame) return;
-
-        const oldTurnPlayer = oldGame.turnOrder[oldGame.currentTurnIndex];
-        const newTurnPlayer = newGame.turnOrder[newGame.currentTurnIndex];
-
-        if (oldTurnPlayer && newTurnPlayer && oldTurnPlayer.id !== newTurnPlayer.id) {
-            showTurnAnnouncement(newTurnPlayer.name, newTurnPlayer.id === socket.id);
-            playSound("turnStart");
-        }
-
-        newGame.turnOrder.forEach(newPlayer => {
-            const oldPlayer = getPlayerFromGame(oldGame, newPlayer.id);
-
-            if (!oldPlayer) return;
-
-            if (newPlayer.defeated && !oldPlayer.defeated) {
-                playSound("defeated");
-            }
-
-            if (newPlayer.followers < oldPlayer.followers) {
-                const damage = oldPlayer.followers - newPlayer.followers;
-                const targetElement = getPlayerElement(newPlayer.id);
-
-                if (!targetElement) return;
-
-                targetElement.classList.remove("damage-shake");
-                void targetElement.offsetWidth;
-                targetElement.classList.add("damage-shake");
-
-                showFloatingText(targetElement, `-${damage.toLocaleString()}`, "damage-popup");
-
-                setTimeout(() => {
-                    targetElement.classList.remove("damage-shake");
-                }, 500);
-            }
-        });
-
-        const oldMe = getPlayerFromGame(oldGame, socket.id);
-        const newMe = getPlayerFromGame(newGame, socket.id);
-
-        if (oldMe && newMe && newMe.hand.length > oldMe.hand.length) {
-            const currentTurnPlayer = newGame.turnOrder[newGame.currentTurnIndex];
-
-            if (currentTurnPlayer && currentTurnPlayer.id === socket.id) {
-                showDrawAnimation(newMe.hand.length - oldMe.hand.length);
-            }
-        }
-
-        if (newGame.playedCards.length > oldGame.playedCards.length) {
-            const latestLog = newGame.playedCards[newGame.playedCards.length - 1];
-
-            if (!latestLog) return;
-
-            const isMyAction = latestLog.playerId === socket.id;
-
-            playSoundForPlayedCardLog(latestLog);
-
-            if (latestLog.actionType === "discard") {
-                if (isMyAction) {
-                    showDiscardAnimation(latestLog.cardName || "カード");
-                }
-
-                return;
-            }
-
-            if (latestLog.actionType === "trap") {
-                if (isMyAction) {
-                    showCardUseAnimation(`${latestLog.cardName} を発動`);
-                } else {
-                    showCardUseAnimation(`${latestLog.playerName} の罠が発動`);
-                }
-
-                return;
-            }
-
-            showCardUseAnimation(`${latestLog.playerName}：${latestLog.cardName}`);
-        }
-    }
-
-    function isMobileLayout() {
-        return window.matchMedia("(max-width: 768px)").matches;
-    }
-
-    function getMe() {
-        if (!latestGame) return null;
-        return latestGame.turnOrder.find(player => player.id === socket.id);
-    }
-
-    function isMyTurnNow() {
-        if (!latestGame || latestGame.gameOver) return false;
-
-        const currentPlayer = latestGame.turnOrder[latestGame.currentTurnIndex];
-
-        return currentPlayer && currentPlayer.id === socket.id;
-    }
-
-    function getSelectedMobileCard() {
-        const me = getMe();
-
-        if (!me || !selectedMobileCardInstanceId) return null;
-
-        return me.hand.find(card => card.instanceId === selectedMobileCardInstanceId) || null;
+        return selected || candidates[0];
     }
 
     function showMobileEffect(card) {
@@ -1868,7 +1301,12 @@ window.onload = () => {
         endTurnRequestPending = false;
 
         document.body.classList.toggle("spectator-hand-view", isDefeatedViewer());
-        document.body.classList.toggle("owakon-viewer-active", isDefeatedViewer());
+
+        if (isDefeatedViewer()) {
+            selectedMobileCardInstanceId = "";
+            selectedMobileFieldCardKey = "";
+            hideMobileEffect();
+        }
 
         updateTrapWaitingNotice();
 
@@ -1878,26 +1316,21 @@ window.onload = () => {
             updateMobileActionPanel();
         }
 
-        const me = latestGame.turnOrder.find(player => player.id === socket.id);
-        const selectionCandidates = latestGame.turnOrder.filter(player => {
-            if (player.id === socket.id) return false;
-
-            if (me && me.defeated) {
-                return true;
-            }
-
-            return !player.defeated;
+        const enemies = latestGame.turnOrder.filter(player => {
+            return player.id !== socket.id && !player.defeated;
         });
 
-        if (!selectedTargetId && selectionCandidates.length > 0) {
-            selectedTargetId = selectionCandidates[0].id;
+        if (!selectedTargetId && enemies.length > 0) {
+            selectedTargetId = enemies[0].id;
         }
 
         if (
             selectedTargetId &&
-            !selectionCandidates.some(player => player.id === selectedTargetId)
+            !latestGame.turnOrder.some(player => {
+                return player.id === selectedTargetId && !player.defeated;
+            })
         ) {
-            selectedTargetId = selectionCandidates[0]?.id || "";
+            selectedTargetId = enemies[0]?.id || "";
         }
 
         renderBattlePlayers();
@@ -1925,10 +1358,8 @@ window.onload = () => {
         if (me) {
             myPanel.classList.toggle("max-hate-player", me.hate >= 3);
             myPanel.classList.toggle("defeated-player", me.defeated);
-            myPanel.classList.toggle("owakon-viewer-panel", me.defeated);
 
             myPanel.innerHTML = `
-                ${me.defeated ? `<div class="owakon-viewer-badge">あなたはオワコン</div>` : ""}
                 <div class="my-name">${me.defeated ? "💀 " : ""}${me.hate >= 3 ? "🔥 " : ""}${me.name}${disconnectedLabel(me)}</div>
                 <div class="follower-line ${me.defeated ? "owakon-text" : ""}">
                     ${followerText(me)}
@@ -1947,11 +1378,10 @@ window.onload = () => {
 
             if (enemy) {
                 slot.classList.remove("empty-enemy");
-                const isSelectedEnemy = selectedTargetId === enemy.id;
-
-                slot.classList.toggle("selected-target", isSelectedEnemy);
+                slot.classList.toggle("selected-target", selectedTargetId === enemy.id);
                 slot.classList.toggle("max-hate-player", enemy.hate >= 3);
                 slot.classList.toggle("defeated-player", enemy.defeated);
+
                 slot.innerHTML = `
                     <div class="enemy-name">${enemy.defeated ? "💀 " : ""}${enemy.hate >= 3 ? "🔥 " : ""}${enemy.name}${disconnectedLabel(enemy)}</div>
                     <div class="follower-line ${enemy.defeated ? "owakon-text" : ""}">
@@ -1967,13 +1397,13 @@ window.onload = () => {
                 `;
 
                 bindStatusEffectEvents(slot);
+
                 slot.onclick = () => {
-                    if (!me?.defeated && enemy.defeated) return;
+                    if (enemy.defeated) return;
 
                     selectedTargetId = enemy.id;
 
                     renderBattlePlayers();
-                    renderHand();
                     updateMobileActionPanel();
                 };
             } else {
@@ -2122,80 +1552,52 @@ window.onload = () => {
         const me = latestGame.turnOrder.find(player => player.id === socket.id);
 
         handArea.innerHTML = "";
-        handArea.classList.toggle("spectator-hand-area", Boolean(me && me.defeated));
 
         if (!me) return;
 
-        if (me.defeated) {
-            selectedMobileCardInstanceId = "";
-            draggedCard = null;
-
-            const selectedEnemy = getSelectedSpectatorEnemy();
-            const noticeElement = document.createElement("div");
-            noticeElement.className = "spectator-hand-notice";
-            noticeElement.innerHTML = selectedEnemy
-                ? `<strong>💀 オワコン観戦中</strong><span>${selectedEnemy.name} の手札を表示中</span>`
-                : `<strong>💀 オワコン</strong><span>自分の手札は空です</span>`;
-            handArea.appendChild(noticeElement);
-
-            for (let i = 0; i < 4; i++) {
-                const card = selectedEnemy?.hand?.[i] || null;
-                const cardElement = document.createElement("div");
-
-                if (!card) {
-                    cardElement.className = "hand-card empty-hand-card spectator-empty-hand-card";
-                    cardElement.innerHTML = `
-                        <div class="card-name">空</div>
-                        <div class="card-type">観戦中</div>
-                    `;
-                    handArea.appendChild(cardElement);
-                    continue;
-                }
-
-                cardElement.className = `hand-card spectator-view-hand-card ${rarityClass(card.rarity)}`;
-                cardElement.draggable = false;
-                cardElement.innerHTML = `
-                    <div class="card-rarity-badge ${rarityClass(card.rarity)}">${normalizeRarity(card.rarity)}</div>
-                    <div class="card-name">${card.name}</div>
-                    <div class="card-type">${card.type}</div>
-                    <div class="card-hate">${card.hateText || ""}</div>
-                `;
-
-                bindSpectatorHandCardEvents(cardElement, card);
-                handArea.appendChild(cardElement);
-            }
-
-            return;
-        }
+        const spectatorTarget = getSelectedSpectatorPlayer(me);
+        const displayHand = me.defeated
+            ? (spectatorTarget?.hand || [])
+            : me.hand;
 
         for (let i = 0; i < 4; i++) {
-            const card = me.hand[i];
-
+            const card = displayHand[i];
             const cardElement = document.createElement("div");
 
             if (!card) {
-                cardElement.className = "hand-card empty-hand-card";
-                cardElement.innerHTML = `
-                    <div class="card-name">空</div>
-                    <div class="card-type">次の自分のターンで補充</div>
-                `;
+                cardElement.className = `hand-card empty-hand-card ${me.defeated ? "spectator-view-hand-card" : ""}`;
+                cardElement.innerHTML = me.defeated
+                    ? `
+                        <div class="card-name">空</div>
+                        <div class="card-type">${spectatorTarget ? `${spectatorTarget.name} の手札` : "観戦中"}</div>
+                    `
+                    : `
+                        <div class="card-name">空</div>
+                        <div class="card-type">次の自分のターンで補充</div>
+                    `;
 
                 handArea.appendChild(cardElement);
-
                 continue;
             }
 
-            const isSelectedMobileCard = selectedMobileCardInstanceId === card.instanceId;
+            const isSelectedMobileCard = !me.defeated && selectedMobileCardInstanceId === card.instanceId;
 
-            cardElement.className = `hand-card ${rarityClass(card.rarity)} ${isSelectedMobileCard ? "selected-mobile-hand-card" : ""}`;
-            cardElement.draggable = !isMobileLayout();
+            cardElement.className = `hand-card ${rarityClass(card.rarity)} ${isSelectedMobileCard ? "selected-mobile-hand-card" : ""} ${me.defeated ? "spectator-view-hand-card" : ""}`;
+            cardElement.draggable = !me.defeated && !isMobileLayout();
 
-            cardElement.innerHTML = `
-                <div class="card-rarity-badge ${rarityClass(card.rarity)}">${normalizeRarity(card.rarity)}</div>
-                <div class="card-name">${card.name}</div>
-                <div class="card-type">${card.type}</div>
-                <div class="card-hate">${card.hateText}</div>
-            `;
+            cardElement.innerHTML = me.defeated
+                ? `
+                    <div class="card-rarity-badge ${rarityClass(card.rarity)}">${normalizeRarity(card.rarity)}</div>
+                    <div class="card-name">${card.name}</div>
+                    <div class="card-type">${spectatorTarget ? `${spectatorTarget.name} の手札` : "観戦中"}</div>
+                    <div class="card-hate">${card.hateText || ""}</div>
+                `
+                : `
+                    <div class="card-rarity-badge ${rarityClass(card.rarity)}">${normalizeRarity(card.rarity)}</div>
+                    <div class="card-name">${card.name}</div>
+                    <div class="card-type">${card.type}</div>
+                    <div class="card-hate">${card.hateText}</div>
+                `;
 
             cardElement.onmouseenter = () => {
                 cardDetail.innerHTML = cardDetailHtml(card);
@@ -2208,18 +1610,22 @@ window.onload = () => {
             };
 
             cardElement.onclick = () => {
+                if (me.defeated) {
+                    cardDetail.innerHTML = cardDetailHtml(card);
+                    return;
+                }
+
                 selectMobileCard(card);
             };
 
             cardElement.ondragstart = () => {
-                if (isMobileLayout()) return false;
+                if (me.defeated || isMobileLayout()) return false;
                 draggedCard = card;
             };
 
             handArea.appendChild(cardElement);
         }
     }
-
 
     dropZone.ondragover = event => {
         event.preventDefault();
@@ -2351,7 +1757,6 @@ window.onload = () => {
         draggedCard = null;
         document.body.classList.remove("mobile-card-action-open");
         document.body.classList.remove("spectator-hand-view");
-        document.body.classList.remove("owakon-viewer-active");
         closeMobileHistory();
         closeMobileSettings();
         hideTrapWaitingNotice();
