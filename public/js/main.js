@@ -719,6 +719,26 @@ window.onload = () => {
     function bindSpectatorHandCardEvents(cardElement, card) {
         if (!cardElement || !card) return;
 
+        function showSpectatorCardDetail(event) {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+
+            // スマホでは通常の手札タップと同じように、カード効果の拡大表示を出します。
+            // オワコン観戦中のカードは「使用」はできません。効果確認専用です。
+            if (isMobileLayout()) {
+                selectedMobileCardInstanceId = "";
+                selectedMobileFieldCardKey = "";
+                selectedMobileStatusKey = "";
+                updateMobileActionPanel();
+                showMobileEffect(card);
+                return;
+            }
+
+            cardDetail.innerHTML = cardDetailHtml(card);
+        }
+
         cardElement.onmouseenter = () => {
             cardDetail.innerHTML = cardDetailHtml(card);
         };
@@ -729,9 +749,8 @@ window.onload = () => {
             }
         };
 
-        cardElement.onclick = () => {
-            cardDetail.innerHTML = cardDetailHtml(card);
-        };
+        cardElement.onclick = showSpectatorCardDetail;
+        cardElement.ontouchstart = showSpectatorCardDetail;
     }
 
 

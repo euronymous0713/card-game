@@ -5405,3 +5405,100 @@
         max-height: 16px !important;
     }
 }
+
+/* =========================================================
+   スマホ版：オワコン観戦中の最終安定化
+   - オワコン後も自分プレイヤー情報(.my-panel)の配置を通常時から動かさない
+   - 観戦用手札カードをタップできるように pointer-events を明示
+   - オワコン表示バッジは枠内レイアウトに影響しない小さな固定表示にする
+   ========================================================= */
+@media (max-width: 768px) {
+    body.battle-active.spectator-hand-view .battle-field {
+        padding: 8px 8px 230px !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+    }
+
+    body.battle-active.spectator-hand-view .my-panel,
+    body.battle-active.spectator-hand-view .my-panel.owakon-viewer-panel {
+        position: static !important;
+        inset: auto !important;
+        left: auto !important;
+        right: auto !important;
+        top: auto !important;
+        bottom: auto !important;
+        transform: none !important;
+        order: 4 !important;
+        z-index: 1 !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        min-height: 94px !important;
+        height: 94px !important;
+        max-height: 94px !important;
+        margin: 0 !important;
+        padding: 6px 8px !important;
+        overflow: hidden !important;
+        box-sizing: border-box !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: flex-start !important;
+        align-items: center !important;
+        gap: 1px !important;
+        text-align: center !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+    }
+
+    body.battle-active.spectator-hand-view .my-panel.owakon-viewer-panel .owakon-viewer-badge {
+        position: absolute !important;
+        top: 4px !important;
+        right: 6px !important;
+        z-index: 2 !important;
+        width: auto !important;
+        min-width: 0 !important;
+        min-height: 0 !important;
+        height: auto !important;
+        max-height: none !important;
+        margin: 0 !important;
+        padding: 2px 6px !important;
+        border-radius: 999px !important;
+        font-size: 8px !important;
+        line-height: 1 !important;
+        white-space: nowrap !important;
+        pointer-events: none !important;
+        flex: none !important;
+    }
+
+    body.battle-active.spectator-hand-view .my-panel.owakon-viewer-panel .my-name {
+        padding-right: 42px !important;
+    }
+
+    body.battle-active.spectator-hand-view .hand-area.spectator-hand-area,
+    body.battle-active.spectator-hand-view .hand-area.spectator-hand-area .hand-card,
+    body.battle-active.spectator-hand-view .spectator-view-hand-card {
+        pointer-events: auto !important;
+        touch-action: manipulation !important;
+    }
+
+    body.battle-active.spectator-hand-view .spectator-view-hand-card {
+        cursor: pointer !important;
+        user-select: none !important;
+        -webkit-user-select: none !important;
+    }
+}
+
+@media (max-width: 380px), (max-height: 720px) {
+    body.battle-active.spectator-hand-view .my-panel,
+    body.battle-active.spectator-hand-view .my-panel.owakon-viewer-panel {
+        min-height: 88px !important;
+        height: 88px !important;
+        max-height: 88px !important;
+        padding: 5px 7px !important;
+    }
+
+    body.battle-active.spectator-hand-view .my-panel.owakon-viewer-panel .my-name {
+        padding-right: 38px !important;
+    }
+}
