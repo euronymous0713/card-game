@@ -1944,3 +1944,88 @@ body.battle-active .mobile-trap-waiting-notice.show {
     white-space: nowrap;
     font-weight: 800;
 }
+
+/* =========================================================
+   オワコン後：選択中プレイヤーの手札を自分の手札欄に表示
+   - 敵パネル内には手札を出さない
+   - 自分の手札欄を観戦用ビューとして使う
+   ========================================================= */
+.owakon-viewer-panel {
+    border-color: rgba(255, 48, 48, 0.95) !important;
+    background: rgba(90, 0, 0, 0.72) !important;
+    box-shadow:
+        0 0 24px rgba(255, 48, 48, 0.72),
+        inset 0 0 22px rgba(255, 0, 0, 0.22) !important;
+}
+
+.owakon-viewer-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    color: #ffffff;
+    background: linear-gradient(135deg, #ff3030, #8b0000);
+    border: 1px solid rgba(255, 255, 255, 0.34);
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    text-shadow: 0 0 8px rgba(0, 0, 0, 0.8);
+    box-shadow: 0 0 14px rgba(255, 48, 48, 0.62);
+}
+
+.spectator-hand-area {
+    align-items: stretch;
+}
+
+.spectator-hand-notice {
+    width: 150px;
+    min-height: 190px;
+    padding: 14px;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
+    text-align: center;
+    background: rgba(0, 0, 0, 0.76);
+    border: 2px solid rgba(255, 48, 48, 0.78);
+    box-shadow:
+        0 0 18px rgba(255, 48, 48, 0.42),
+        inset 0 0 16px rgba(255, 255, 255, 0.04);
+}
+
+.spectator-hand-notice strong {
+    color: #ff4d4d;
+    font-size: 15px;
+    line-height: 1.35;
+}
+
+.spectator-hand-notice span {
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+.spectator-view-hand-card {
+    cursor: pointer;
+    border-color: rgba(255, 242, 0, 0.72) !important;
+    box-shadow:
+        0 0 18px rgba(255, 242, 0, 0.34),
+        0 0 22px rgba(0, 255, 225, 0.18) !important;
+}
+
+.spectator-view-hand-card:hover {
+    transform: translateY(-8px) scale(1.03);
+    border-color: #fff200 !important;
+    box-shadow:
+        0 0 24px rgba(255, 242, 0, 0.72),
+        0 0 34px rgba(0, 255, 225, 0.28) !important;
+}
+
+body.owakon-viewer-active .battle-message {
+    border-color: rgba(255, 48, 48, 0.45);
+    color: rgba(255, 230, 230, 0.94);
+    background: rgba(90, 0, 0, 0.32);
+}

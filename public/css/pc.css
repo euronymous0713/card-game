@@ -474,3 +474,58 @@
         margin-top: 7px !important;
     }
 }
+
+/* =========================================================
+   PC版：オワコン観戦手札は自分の手札欄に表示
+   ========================================================= */
+@media (min-width: 769px) {
+    body.battle-active.spectator-hand-view .enemy-panel.spectator-hand-owner {
+        height: 192px !important;
+        min-height: 192px !important;
+        padding-bottom: 14px !important;
+    }
+
+    body.battle-active.spectator-hand-view .enemy-panel .enemy-name {
+        padding-right: 0 !important;
+        text-align: center !important;
+    }
+
+    body.battle-active.spectator-hand-view .hand-area.spectator-hand-area {
+        left: 50% !important;
+        bottom: 24px !important;
+        transform: translateX(-50%) !important;
+        gap: 14px !important;
+        align-items: stretch !important;
+    }
+
+    body.battle-active.spectator-hand-view .spectator-hand-notice {
+        width: 150px !important;
+        height: 190px !important;
+        min-height: 190px !important;
+    }
+
+    body.battle-active.spectator-hand-view .my-panel.owakon-viewer-panel {
+        display: block !important;
+        z-index: 18 !important;
+    }
+}
+
+/* PC版：敵パネル内表示を廃止したため、観戦中も通常の左パネル位置を維持 */
+@media (min-width: 769px) {
+    body.battle-active.spectator-hand-view .turn-panel {
+        top: 240px !important;
+    }
+
+    body.battle-active.spectator-hand-view .history-panel {
+        top: 352px !important;
+        max-height: 178px !important;
+    }
+
+    body.battle-active.spectator-hand-view .played-card-list {
+        max-height: 114px !important;
+    }
+
+    body.battle-active.spectator-hand-view .mobile-settings-button {
+        top: 542px !important;
+    }
+}

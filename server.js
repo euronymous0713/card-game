@@ -878,7 +878,12 @@ function createGameViewForPlayer(game, viewerId) {
     const canViewEnemyHands = Boolean(viewer && viewer.defeated);
 
     view.turnOrder = view.turnOrder.map(player => {
-        if (player.id === viewerId) return player;
+        if (player.id === viewerId) {
+            return {
+                ...player,
+                hand: player.defeated ? [] : player.hand
+            };
+        }
 
         return {
             ...player,
