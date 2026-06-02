@@ -752,3 +752,31 @@
         width: auto !important;
     }
 }
+
+/* =========================================================
+   PC版：ゲーム終了時の操作ブロック
+   - 勝利/敗北表示中は背景ぼかしを維持
+   - z-index が高い自分情報/手札/設定ボタンより前面にオーバーレイを出す
+   - 「次へ」ボタン以外を押せないようにする
+   ========================================================= */
+@media (min-width: 769px) {
+    body.battle-active.game-over-active .battle-field > *:not(.game-over-overlay) {
+        pointer-events: none !important;
+    }
+
+    body.battle-active.game-over-active .game-over-overlay {
+        position: absolute !important;
+        inset: 0 !important;
+        z-index: 30000 !important;
+        display: flex !important;
+        pointer-events: auto !important;
+        background: rgba(0, 0, 0, 0.72) !important;
+        backdrop-filter: blur(4px) !important;
+        -webkit-backdrop-filter: blur(4px) !important;
+    }
+
+    body.battle-active.game-over-active .game-over-box,
+    body.battle-active.game-over-active #nextButton {
+        pointer-events: auto !important;
+    }
+}
