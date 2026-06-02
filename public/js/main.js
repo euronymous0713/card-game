@@ -718,6 +718,276 @@ window.onload = () => {
         return selected || candidates[0];
     }
 
+    function cardKindLabel(kind) {
+        const labels = {
+            attack: "攻撃",
+            support: "防御/補助",
+            hate: "妨害",
+            trap: "罠",
+            special: "特殊"
+        };
+
+        return labels[kind] || kind || "不明";
+    }
+
+    function specialEffectLabel(card) {
+        if (!card.effectType && !card.ignoreTrap && !card.trapEffect) return "";
+
+        const labels = {
+            destroyTargetTraps: "伏せカード破壊",
+            destroyAllEnemyTraps: "全体伏せカード破壊",
+            skipTurn: "行動不能",
+            slipDamage: "スリップダメージ",
+            extraTurn: "追加ターン",
+            discardTargetHand: "手札破壊",
+            trapPierceDamage: "罠貫通",
+            pierceDamage: "罠貫通",
+            ignoreTrapDamage: "罠貫通",
+            reflectDamage: "ダメージ反射",
+            cancelHate: "ヘイト無効",
+            cancelTrap: "罠効果無効",
+            cancelTrapAndDestroyEnemyTraps: "罠無効＋伏せ破壊",
+            damageAndHate: "反撃＋ヘイト"
+        };
+
+        if (card.ignoreTrap || card.pierceTrap) return "罠貫通";
+        if (card.trapEffect) return labels[card.trapEffect] || card.trapEffect;
+        return labels[card.effectType] || card.effectType || "";
+    }
+
+    function cardListStatsText() {
+        const total = titleCardList.length;
+        const counts = titleCardList.reduce((result, card) => {
+            const rarity = normalizeRarity(card.rarity);
+            result[rarity] = (result[rarity] || 0) + 1;
+            return result;
+        }, {});
+
+        return `全${total}枚 / C:${counts.C || 0} UC:${counts.UC || 0} R:${counts.R || 0} SR:${counts.SR || 0} UR:${counts.UR || 0}`;
+    }
+
+    function normalizeCardKindFilterValue(card) {
+        if (!card) return "unknown";
+        if (card.kind) return card.kind;
+
+        const type = card.type || "";
+
+        if (type === "攻撃") return "attack";
+        if (type === "防御" || type === "補助" || type === "防御/補助") return "support";
+        if (type === "妨害") return "hate";
+        if (type === "罠") return "trap";
+        if (type === "特殊") return "special";
+
+        return "unknown";
+    }
+
+    function matchesCardListKindFilter(card) {
+        if (currentCardListKindFilter === "all") return true;
+
+        if (currentCardListKindFilter === "special") {
+            return card.kind === "special";
+        }
+
+        return normalizeCardKindFilterValue(card) === currentCardListKindFilter;
+    }
+
+    function matchesCardListSearch(card) {
+        if (!currentCardListSearchText) return true;
+
+        const searchSource = [
+            card.name,
+            card.type,
+            card.kind,
+            card.effect,
+            card.hateText,
+            specialEffectLabel(card)
+        ].join(" ").toLowerCase();
+
+        return searchSource.includes(currentCardListSearchText.toLowerCase());
+    }
+
+    function cardListFilterDescription() {
+        const rarityText = currentCardListRarityFilter === "all"
+            ? "全レアリティ"
+            : currentCardListRarityFilter;
+
+        const kindLabels = {
+            all: "全種類",
+            attack: "攻撃",
+            support: "防御/補助",
+            hate: "妨害",
+            trap: "罠",
+            special: "特殊"
+        };
+
+        const kindText = kindLabels[currentCardListKindFilter] || "全種類";
+        const searchText = currentCardListSearchText
+            ? ` / 検索：${currentCardListSearchText}`
+            : "";
+
+        return `${rarityText} / ${kindText}${searchText}`;
+    }
+
+    function updateCardListControlToggleText() {
+        if (!cardListControlToggleButton || !cardListControls) return;
+
+        const isOpen = cardListControls.classList.contains("open-card-list-controls");
+        const hasFilter = currentCardListRarityFilter !== "all" ||
+            currentCardListKindFilter !== "all" ||
+            Boolean(currentCardListSearchText);
+
+        cardListControlToggleButton.innerText = isOpen
+            ? "検索・絞り込みを閉じる"
+            : hasFilter
+                ? `検索・絞り込みを開く（${cardListFilterDescription()}）`
+                : "検索・絞り込みを開く";
+
+        cardListControlToggleButton.setAttribute("aria-expanded", isOpen ? "true" : "false");
+    }
+
+    function setCardListControlsOpen(open) {
+        if (!cardListControls) return;
+
+        cardListControls.classList.toggle("open-card-list-controls", open);
+        updateCardListControlToggleText();
+    }
+
+    function renderTitleCardList() {
+        updateCardListControlToggleText();
+
+        if (!cardListBody) return;
+
+        const filteredCards = titleCardList.filter(card => {
+            const rarityMatched = currentCardListRarityFilter === "all" ||
+                normalizeRarity(card.rarity) === currentCardListRarityFilter;
+
+            return rarityMatched &&
+                matchesCardListKindFilter(card) &&
+                matchesCardListSearch(card);
+        });
+
+        if (titleCardList.length === 0) {
+            cardListBody.innerHTML = `
+                <div class="card-list-empty">
+                    カード情報を読み込み中です。
+                </div>
+            `;
+            return;
+        }
+
+        if (filteredCards.length === 0) {
+            cardListBody.innerHTML = `
+                <div class="card-list-stats">${cardListStatsText()} / ${cardListFilterDescription()}</div>
+                <div class="card-list-empty">
+                    条件に合うカードがありません。
+                </div>
+            `;
+            return;
+        }
+
+        const visibleCards = filteredCards.slice(0, cardListVisibleCount);
+        const hasMoreCards = visibleCards.length < filteredCards.length;
+
+        cardListBody.innerHTML = `
+            <div class="card-list-stats">
+                ${cardListStatsText()} / 表示:${visibleCards.length}/${filteredCards.length}枚 / ${cardListFilterDescription()}
+            </div>
+            <div class="card-list-grid">
+                ${visibleCards.map(card => {
+            const rarity = normalizeRarity(card.rarity);
+            const specialLabel = specialEffectLabel(card);
+
+            return `
+                        <div class="card-list-item ${rarityClass(rarity)}">
+                            <div class="card-list-item-head">
+                                <span class="card-list-rarity ${rarityClass(rarity)}">${rarity}</span>
+                                <strong>${card.name}</strong>
+                            </div>
+                            <div class="card-list-meta">
+                                ${card.type || cardKindLabel(card.kind)} / ${cardKindLabel(card.kind)}
+                                ${specialLabel ? ` / ${specialLabel}` : ""}
+                            </div>
+                            <p class="card-list-effect">${card.effect || "効果なし"}</p>
+                            <div class="card-list-footer">
+                                ${card.damage ? `<span>ダメージ：${Number(card.damage).toLocaleString()}</span>` : ""}
+                                ${card.heal ? `<span>回復：${Number(card.heal).toLocaleString()}</span>` : ""}
+                                ${card.hateText ? `<span>${card.hateText}</span>` : ""}
+                            </div>
+                        </div>
+                    `;
+        }).join("")}
+            </div>
+            ${hasMoreCards ? `
+                <button type="button" class="card-list-more-button" id="cardListMoreButton">
+                    さらに表示する（残り${filteredCards.length - visibleCards.length}枚）
+                </button>
+            ` : ""}
+        `;
+
+        const cardListMoreButton = document.getElementById("cardListMoreButton");
+
+        if (cardListMoreButton) {
+            cardListMoreButton.onclick = () => {
+                cardListVisibleCount += 24;
+                renderTitleCardList();
+            };
+        }
+    }
+
+    function openTitleCardList() {
+        if (!cardListOverlay) return;
+
+        if (isMobileLayout()) {
+            setCardListControlsOpen(false);
+        } else {
+            setCardListControlsOpen(true);
+        }
+
+        cardListVisibleCount = 24;
+        renderTitleCardList();
+        cardListOverlay.style.display = "flex";
+        cardListOverlay.setAttribute("aria-hidden", "false");
+    }
+
+    function closeTitleCardList() {
+        if (!cardListOverlay) return;
+
+        cardListOverlay.style.display = "none";
+        cardListOverlay.setAttribute("aria-hidden", "true");
+    }
+
+    function resetCardDetail() {
+        cardDetail.innerHTML = `
+            <h3>カード効果</h3>
+            <p>カードにカーソルを合わせると効果が表示されます。</p>
+        `;
+    }
+
+    function isMobileLayout() {
+        return window.matchMedia("(max-width: 768px)").matches;
+    }
+
+    function getMe() {
+        if (!latestGame) return null;
+        return latestGame.turnOrder.find(player => player.id === socket.id);
+    }
+
+    function isMyTurnNow() {
+        if (!latestGame || latestGame.gameOver) return false;
+
+        const currentPlayer = latestGame.turnOrder[latestGame.currentTurnIndex];
+
+        return currentPlayer && currentPlayer.id === socket.id;
+    }
+
+    function getSelectedMobileCard() {
+        const me = getMe();
+
+        if (!me || !selectedMobileCardInstanceId) return null;
+
+        return me.hand.find(card => card.instanceId === selectedMobileCardInstanceId) || null;
+    }
+
     function showMobileEffect(card) {
         if (!isMobileLayout() || !mobileEffectOverlay || !card) return;
 
