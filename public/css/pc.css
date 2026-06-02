@@ -372,3 +372,53 @@
         bottom: 38px !important;
     }
 }
+
+/* =========================================================
+   PC版：カード効果欄拡張
+   スクロールバー対策
+   ========================================================= */
+@media (min-width: 769px) {
+
+    .card-detail {
+        width: 340px !important;
+        height: 255px !important;
+        max-height: 255px !important;
+
+        overflow: hidden !important;
+        overflow-y: hidden !important;
+        overflow-x: hidden !important;
+
+        padding: 14px !important;
+    }
+
+    .card-detail h3 {
+        font-size: 15px !important;
+        line-height: 1.15 !important;
+        margin-bottom: 6px !important;
+    }
+
+    .card-detail p {
+        font-size: 11px !important;
+        line-height: 1.35 !important;
+    }
+
+    .card-detail .detail-rarity {
+        font-size: 10px !important;
+        margin-bottom: 4px !important;
+    }
+
+    .card-detail .detail-type {
+        font-size: 11px !important;
+        margin-bottom: 4px !important;
+    }
+
+    .card-detail .detail-hate {
+        font-size: 11px !important;
+        line-height: 1.25 !important;
+        margin-top: 6px !important;
+    }
+
+    .card-detail::-webkit-scrollbar {
+        display: none !important;
+    }
+}
