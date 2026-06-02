@@ -551,3 +551,21 @@
         filter: none !important;
     }
 }
+
+/* =========================================================
+   PC版：オワコン観戦中も自分プレイヤー情報を確実に表示
+   - PCでは元々ターン終了ボタンより上側にあるため、消えないことを優先
+   ========================================================= */
+@media (min-width: 769px) {
+    body.battle-active.spectator-hand-view .my-panel.owakon-viewer-panel {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        z-index: 55 !important;
+        overflow: visible !important;
+        border-color: rgba(255, 48, 48, 0.82) !important;
+        box-shadow:
+            0 0 18px rgba(255, 48, 48, 0.42),
+            0 0 18px rgba(0, 255, 225, 0.12) !important;
+    }
+}
