@@ -422,3 +422,16 @@
         display: none !important;
     }
 }
+
+/* =========================================================
+   PC版：自分プレイヤー情報を少し下へ
+   ========================================================= */
+@media (min-width: 769px) {
+
+    .my-panel {
+        bottom: 160px !important;
+        height: 160px !important;
+        min-height: 160px !important;
+    }
+
+}
