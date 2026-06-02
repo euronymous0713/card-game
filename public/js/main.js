@@ -704,19 +704,36 @@ window.onload = () => {
         return Boolean(me && me.defeated);
     }
 
-    function getSelectedSpectatorPlayer(me) {
-        if (!latestGame || !me || !me.defeated) return null;
+    function getSelectedSpectatorEnemy() {
+        const me = getMeFromLatestGame();
 
-        const candidates = latestGame.turnOrder.filter(player => {
-            return player.id !== socket.id && !player.defeated;
-        });
+        if (!latestGame || !me || !me.defeated || !Array.isArray(latestGame.turnOrder)) {
+            return null;
+        }
 
-        if (candidates.length === 0) return null;
+        const enemies = latestGame.turnOrder.filter(player => player.id !== socket.id);
 
-        const selected = candidates.find(player => player.id === selectedTargetId);
-
-        return selected || candidates[0];
+        return enemies.find(player => player.id === selectedTargetId) || enemies[0] || null;
     }
+
+    function bindSpectatorHandCardEvents(cardElement, card) {
+        if (!cardElement || !card) return;
+
+        cardElement.onmouseenter = () => {
+            cardDetail.innerHTML = cardDetailHtml(card);
+        };
+
+        cardElement.onmouseleave = () => {
+            if (!isMobileLayout()) {
+                resetCardDetail();
+            }
+        };
+
+        cardElement.onclick = () => {
+            cardDetail.innerHTML = cardDetailHtml(card);
+        };
+    }
+
 
     function cardKindLabel(kind) {
         const labels = {
@@ -773,7 +790,7 @@ window.onload = () => {
         const type = card.type || "";
 
         if (type === "攻撃") return "attack";
-        if (type === "防御" || type === "補助" || type === "防御/補助") return "support";
+        if (type === "防御" || type === "補助") return "support";
         if (type === "妨害") return "hate";
         if (type === "罠") return "trap";
         if (type === "特殊") return "special";
@@ -961,6 +978,286 @@ window.onload = () => {
             <h3>カード効果</h3>
             <p>カードにカーソルを合わせると効果が表示されます。</p>
         `;
+    }
+
+    function cloneGame(game) {
+        return game ? JSON.parse(JSON.stringify(game)) : null;
+    }
+
+    function getPlayerFromGame(game, playerId) {
+        if (!game) return null;
+        return game.turnOrder.find(player => player.id === playerId);
+    }
+
+    function getPlayerElement(playerId) {
+        const me = latestGame?.turnOrder.find(player => player.id === socket.id);
+
+        if (me && me.id === playerId) {
+            return myPanel;
+        }
+
+        const enemies = latestGame?.turnOrder.filter(player => player.id !== socket.id) || [];
+        const index = enemies.findIndex(player => player.id === playerId);
+
+        if (index >= 0) {
+            return enemySlots[index];
+        }
+
+        return battleField;
+    }
+
+    function showTrapChoiceModal(data) {
+        const oldOverlay = document.getElementById("trapChoiceOverlay");
+
+        if (oldOverlay) {
+            oldOverlay.remove();
+        }
+
+        const overlay = document.createElement("div");
+
+        overlay.id = "trapChoiceOverlay";
+        overlay.className = "trap-choice-overlay";
+
+        const sourceCardName = data.context?.cardName || "不明なカード";
+        const sourceCardType = data.context?.cardType || "";
+        const sourceResultText = data.context?.resultText || "";
+        const sourceCardRarity = normalizeRarity(data.context?.cardRarity);
+        const sourceActionText =
+            data.context?.sourceActionText ||
+            `${data.sourcePlayerName} のカードに反応できます。`;
+
+        overlay.innerHTML = `
+        <div class="trap-choice-box light-trap-choice-box">
+            <h2>罠カード発動確認</h2>
+
+            <div class="trap-source-box compact-source-box">
+                <div class="trap-section-title">反応元カード</div>
+                <div class="trap-source-card-name">
+                    ${sourceCardName}
+                    ${sourceCardType ? `<span>${sourceCardType}</span>` : ""}
+                </div>
+                <div class="trap-source-rarity ${rarityClass(sourceCardRarity)}">${rarityLabel(sourceCardRarity)}</div>
+                <p>${sourceActionText}</p>
+                ${sourceResultText ? `<p class="trap-danger-text">${sourceResultText}</p>` : ""}
+            </div>
+
+            <p class="trap-choice-message">
+                ${data.conditionText} に反応できる罠カードを選択してください。
+            </p>
+
+            <div class="trap-choice-list compact-trap-choice-list">
+                ${data.traps.map(trap => `
+                    <div
+                        class="trap-choice-card compact-trap-card ${trap.canActivate ? "" : "disabled-trap-choice"}"
+                        data-field-id="${trap.fieldId}"
+                        data-can-activate="${trap.canActivate}"
+                    >
+                        <strong>${trap.name}</strong>
+                        <em class="trap-choice-rarity ${rarityClass(trap.rarity)}">${rarityLabel(normalizeRarity(trap.rarity))}</em>
+                        <span>${trap.canActivate ? trap.effect : trap.disabledReason}</span>
+                        <small>発動条件：${trap.conditionText}</small>
+                    </div>
+                `).join("")}
+            </div>
+
+            <button class="trap-skip-button" id="trapSkipButton">
+                発動しない
+            </button>
+        </div>
+    `;
+
+        document.body.appendChild(overlay);
+
+        overlay.querySelectorAll(".trap-choice-card").forEach(cardElement => {
+            cardElement.onclick = () => {
+                const canActivate = cardElement.dataset.canActivate === "true";
+
+                if (!canActivate) return;
+
+                const fieldId = cardElement.dataset.fieldId;
+
+                socket.emit("chooseTrapResponse", {
+                    choiceId: data.choiceId,
+                    fieldId
+                });
+
+                overlay.remove();
+            };
+        });
+
+        document.getElementById("trapSkipButton").onclick = () => {
+            socket.emit("chooseTrapResponse", {
+                choiceId: data.choiceId,
+                fieldId: null
+            });
+
+            overlay.remove();
+        };
+    }
+
+    function showTurnAnnouncement(playerName, isMyTurn) {
+        turnAnnouncement.innerHTML = `
+            <div class="turn-announcement-text">
+                ${isMyTurn ? "あなたのターン" : `${playerName} のターン`}
+            </div>
+        `;
+
+        turnAnnouncement.classList.remove("show-turn-announcement");
+        void turnAnnouncement.offsetWidth;
+        turnAnnouncement.classList.add("show-turn-announcement");
+
+        setTimeout(() => {
+            turnAnnouncement.classList.remove("show-turn-announcement");
+        }, 1500);
+    }
+
+    function showFloatingText(targetElement, text, className) {
+        const targetRect = targetElement.getBoundingClientRect();
+        const fieldRect = battleField.getBoundingClientRect();
+
+        const popup = document.createElement("div");
+
+        popup.className = `floating-effect ${className}`;
+        popup.innerText = text;
+
+        popup.style.left = `${targetRect.left - fieldRect.left + targetRect.width / 2}px`;
+        popup.style.top = `${targetRect.top - fieldRect.top + targetRect.height / 2}px`;
+
+        effectLayer.appendChild(popup);
+
+        setTimeout(() => {
+            popup.remove();
+        }, 1200);
+    }
+
+    function showCardUseAnimation(text) {
+        const effect = document.createElement("div");
+
+        effect.className = "card-use-effect";
+        effect.innerText = text;
+
+        effectLayer.appendChild(effect);
+
+        setTimeout(() => {
+            effect.remove();
+        }, 900);
+    }
+
+    function showDiscardAnimation(cardName) {
+        const effect = document.createElement("div");
+
+        effect.className = "discard-effect";
+        effect.innerText = `捨て札：${cardName}`;
+
+        effectLayer.appendChild(effect);
+
+        setTimeout(() => {
+            effect.remove();
+        }, 900);
+    }
+
+    function showDrawAnimation(count) {
+        if (count <= 0) return;
+
+        const effect = document.createElement("div");
+
+        effect.className = "draw-effect";
+        effect.innerText = `+${count} Card`;
+
+        effectLayer.appendChild(effect);
+
+        setTimeout(() => {
+            effect.remove();
+        }, 1000);
+    }
+
+    function runAnimations(oldGame, newGame) {
+        if (!newGame) return;
+
+        const currentPlayer = newGame.turnOrder[newGame.currentTurnIndex];
+
+        if (!oldGame && currentPlayer) {
+            showTurnAnnouncement(currentPlayer.name, currentPlayer.id === socket.id);
+            playSound("turnStart");
+        }
+
+        if (!oldGame) return;
+
+        const oldTurnPlayer = oldGame.turnOrder[oldGame.currentTurnIndex];
+        const newTurnPlayer = newGame.turnOrder[newGame.currentTurnIndex];
+
+        if (oldTurnPlayer && newTurnPlayer && oldTurnPlayer.id !== newTurnPlayer.id) {
+            showTurnAnnouncement(newTurnPlayer.name, newTurnPlayer.id === socket.id);
+            playSound("turnStart");
+        }
+
+        newGame.turnOrder.forEach(newPlayer => {
+            const oldPlayer = getPlayerFromGame(oldGame, newPlayer.id);
+
+            if (!oldPlayer) return;
+
+            if (newPlayer.defeated && !oldPlayer.defeated) {
+                playSound("defeated");
+            }
+
+            if (newPlayer.followers < oldPlayer.followers) {
+                const damage = oldPlayer.followers - newPlayer.followers;
+                const targetElement = getPlayerElement(newPlayer.id);
+
+                if (!targetElement) return;
+
+                targetElement.classList.remove("damage-shake");
+                void targetElement.offsetWidth;
+                targetElement.classList.add("damage-shake");
+
+                showFloatingText(targetElement, `-${damage.toLocaleString()}`, "damage-popup");
+
+                setTimeout(() => {
+                    targetElement.classList.remove("damage-shake");
+                }, 500);
+            }
+        });
+
+        const oldMe = getPlayerFromGame(oldGame, socket.id);
+        const newMe = getPlayerFromGame(newGame, socket.id);
+
+        if (oldMe && newMe && newMe.hand.length > oldMe.hand.length) {
+            const currentTurnPlayer = newGame.turnOrder[newGame.currentTurnIndex];
+
+            if (currentTurnPlayer && currentTurnPlayer.id === socket.id) {
+                showDrawAnimation(newMe.hand.length - oldMe.hand.length);
+            }
+        }
+
+        if (newGame.playedCards.length > oldGame.playedCards.length) {
+            const latestLog = newGame.playedCards[newGame.playedCards.length - 1];
+
+            if (!latestLog) return;
+
+            const isMyAction = latestLog.playerId === socket.id;
+
+            playSoundForPlayedCardLog(latestLog);
+
+            if (latestLog.actionType === "discard") {
+                if (isMyAction) {
+                    showDiscardAnimation(latestLog.cardName || "カード");
+                }
+
+                return;
+            }
+
+            if (latestLog.actionType === "trap") {
+                if (isMyAction) {
+                    showCardUseAnimation(`${latestLog.cardName} を発動`);
+                } else {
+                    showCardUseAnimation(`${latestLog.playerName} の罠が発動`);
+                }
+
+                return;
+            }
+
+            showCardUseAnimation(`${latestLog.playerName}：${latestLog.cardName}`);
+        }
     }
 
     function isMobileLayout() {
@@ -1571,12 +1868,7 @@ window.onload = () => {
         endTurnRequestPending = false;
 
         document.body.classList.toggle("spectator-hand-view", isDefeatedViewer());
-
-        if (isDefeatedViewer()) {
-            selectedMobileCardInstanceId = "";
-            selectedMobileFieldCardKey = "";
-            hideMobileEffect();
-        }
+        document.body.classList.toggle("owakon-viewer-active", isDefeatedViewer());
 
         updateTrapWaitingNotice();
 
@@ -1586,21 +1878,26 @@ window.onload = () => {
             updateMobileActionPanel();
         }
 
-        const enemies = latestGame.turnOrder.filter(player => {
-            return player.id !== socket.id && !player.defeated;
+        const me = latestGame.turnOrder.find(player => player.id === socket.id);
+        const selectionCandidates = latestGame.turnOrder.filter(player => {
+            if (player.id === socket.id) return false;
+
+            if (me && me.defeated) {
+                return true;
+            }
+
+            return !player.defeated;
         });
 
-        if (!selectedTargetId && enemies.length > 0) {
-            selectedTargetId = enemies[0].id;
+        if (!selectedTargetId && selectionCandidates.length > 0) {
+            selectedTargetId = selectionCandidates[0].id;
         }
 
         if (
             selectedTargetId &&
-            !latestGame.turnOrder.some(player => {
-                return player.id === selectedTargetId && !player.defeated;
-            })
+            !selectionCandidates.some(player => player.id === selectedTargetId)
         ) {
-            selectedTargetId = enemies[0]?.id || "";
+            selectedTargetId = selectionCandidates[0]?.id || "";
         }
 
         renderBattlePlayers();
@@ -1628,8 +1925,10 @@ window.onload = () => {
         if (me) {
             myPanel.classList.toggle("max-hate-player", me.hate >= 3);
             myPanel.classList.toggle("defeated-player", me.defeated);
+            myPanel.classList.toggle("owakon-viewer-panel", me.defeated);
 
             myPanel.innerHTML = `
+                ${me.defeated ? `<div class="owakon-viewer-badge">あなたはオワコン</div>` : ""}
                 <div class="my-name">${me.defeated ? "💀 " : ""}${me.hate >= 3 ? "🔥 " : ""}${me.name}${disconnectedLabel(me)}</div>
                 <div class="follower-line ${me.defeated ? "owakon-text" : ""}">
                     ${followerText(me)}
@@ -1648,10 +1947,11 @@ window.onload = () => {
 
             if (enemy) {
                 slot.classList.remove("empty-enemy");
-                slot.classList.toggle("selected-target", selectedTargetId === enemy.id);
+                const isSelectedEnemy = selectedTargetId === enemy.id;
+
+                slot.classList.toggle("selected-target", isSelectedEnemy);
                 slot.classList.toggle("max-hate-player", enemy.hate >= 3);
                 slot.classList.toggle("defeated-player", enemy.defeated);
-
                 slot.innerHTML = `
                     <div class="enemy-name">${enemy.defeated ? "💀 " : ""}${enemy.hate >= 3 ? "🔥 " : ""}${enemy.name}${disconnectedLabel(enemy)}</div>
                     <div class="follower-line ${enemy.defeated ? "owakon-text" : ""}">
@@ -1667,13 +1967,13 @@ window.onload = () => {
                 `;
 
                 bindStatusEffectEvents(slot);
-
                 slot.onclick = () => {
-                    if (enemy.defeated) return;
+                    if (!me?.defeated && enemy.defeated) return;
 
                     selectedTargetId = enemy.id;
 
                     renderBattlePlayers();
+                    renderHand();
                     updateMobileActionPanel();
                 };
             } else {
@@ -1822,52 +2122,80 @@ window.onload = () => {
         const me = latestGame.turnOrder.find(player => player.id === socket.id);
 
         handArea.innerHTML = "";
+        handArea.classList.toggle("spectator-hand-area", Boolean(me && me.defeated));
 
         if (!me) return;
 
-        const spectatorTarget = getSelectedSpectatorPlayer(me);
-        const displayHand = me.defeated
-            ? (spectatorTarget?.hand || [])
-            : me.hand;
+        if (me.defeated) {
+            selectedMobileCardInstanceId = "";
+            draggedCard = null;
 
-        for (let i = 0; i < 4; i++) {
-            const card = displayHand[i];
-            const cardElement = document.createElement("div");
+            const selectedEnemy = getSelectedSpectatorEnemy();
+            const noticeElement = document.createElement("div");
+            noticeElement.className = "spectator-hand-notice";
+            noticeElement.innerHTML = selectedEnemy
+                ? `<strong>💀 オワコン観戦中</strong><span>${selectedEnemy.name} の手札を表示中</span>`
+                : `<strong>💀 オワコン</strong><span>自分の手札は空です</span>`;
+            handArea.appendChild(noticeElement);
 
-            if (!card) {
-                cardElement.className = `hand-card empty-hand-card ${me.defeated ? "spectator-view-hand-card" : ""}`;
-                cardElement.innerHTML = me.defeated
-                    ? `
+            for (let i = 0; i < 4; i++) {
+                const card = selectedEnemy?.hand?.[i] || null;
+                const cardElement = document.createElement("div");
+
+                if (!card) {
+                    cardElement.className = "hand-card empty-hand-card spectator-empty-hand-card";
+                    cardElement.innerHTML = `
                         <div class="card-name">空</div>
-                        <div class="card-type">${spectatorTarget ? `${spectatorTarget.name} の手札` : "観戦中"}</div>
-                    `
-                    : `
-                        <div class="card-name">空</div>
-                        <div class="card-type">次の自分のターンで補充</div>
+                        <div class="card-type">観戦中</div>
                     `;
+                    handArea.appendChild(cardElement);
+                    continue;
+                }
 
-                handArea.appendChild(cardElement);
-                continue;
-            }
-
-            const isSelectedMobileCard = !me.defeated && selectedMobileCardInstanceId === card.instanceId;
-
-            cardElement.className = `hand-card ${rarityClass(card.rarity)} ${isSelectedMobileCard ? "selected-mobile-hand-card" : ""} ${me.defeated ? "spectator-view-hand-card" : ""}`;
-            cardElement.draggable = !me.defeated && !isMobileLayout();
-
-            cardElement.innerHTML = me.defeated
-                ? `
-                    <div class="card-rarity-badge ${rarityClass(card.rarity)}">${normalizeRarity(card.rarity)}</div>
-                    <div class="card-name">${card.name}</div>
-                    <div class="card-type">${spectatorTarget ? `${spectatorTarget.name} の手札` : "観戦中"}</div>
-                    <div class="card-hate">${card.hateText || ""}</div>
-                `
-                : `
+                cardElement.className = `hand-card spectator-view-hand-card ${rarityClass(card.rarity)}`;
+                cardElement.draggable = false;
+                cardElement.innerHTML = `
                     <div class="card-rarity-badge ${rarityClass(card.rarity)}">${normalizeRarity(card.rarity)}</div>
                     <div class="card-name">${card.name}</div>
                     <div class="card-type">${card.type}</div>
-                    <div class="card-hate">${card.hateText}</div>
+                    <div class="card-hate">${card.hateText || ""}</div>
                 `;
+
+                bindSpectatorHandCardEvents(cardElement, card);
+                handArea.appendChild(cardElement);
+            }
+
+            return;
+        }
+
+        for (let i = 0; i < 4; i++) {
+            const card = me.hand[i];
+
+            const cardElement = document.createElement("div");
+
+            if (!card) {
+                cardElement.className = "hand-card empty-hand-card";
+                cardElement.innerHTML = `
+                    <div class="card-name">空</div>
+                    <div class="card-type">次の自分のターンで補充</div>
+                `;
+
+                handArea.appendChild(cardElement);
+
+                continue;
+            }
+
+            const isSelectedMobileCard = selectedMobileCardInstanceId === card.instanceId;
+
+            cardElement.className = `hand-card ${rarityClass(card.rarity)} ${isSelectedMobileCard ? "selected-mobile-hand-card" : ""}`;
+            cardElement.draggable = !isMobileLayout();
+
+            cardElement.innerHTML = `
+                <div class="card-rarity-badge ${rarityClass(card.rarity)}">${normalizeRarity(card.rarity)}</div>
+                <div class="card-name">${card.name}</div>
+                <div class="card-type">${card.type}</div>
+                <div class="card-hate">${card.hateText}</div>
+            `;
 
             cardElement.onmouseenter = () => {
                 cardDetail.innerHTML = cardDetailHtml(card);
@@ -1880,22 +2208,18 @@ window.onload = () => {
             };
 
             cardElement.onclick = () => {
-                if (me.defeated) {
-                    cardDetail.innerHTML = cardDetailHtml(card);
-                    return;
-                }
-
                 selectMobileCard(card);
             };
 
             cardElement.ondragstart = () => {
-                if (me.defeated || isMobileLayout()) return false;
+                if (isMobileLayout()) return false;
                 draggedCard = card;
             };
 
             handArea.appendChild(cardElement);
         }
     }
+
 
     dropZone.ondragover = event => {
         event.preventDefault();
@@ -2027,6 +2351,7 @@ window.onload = () => {
         draggedCard = null;
         document.body.classList.remove("mobile-card-action-open");
         document.body.classList.remove("spectator-hand-view");
+        document.body.classList.remove("owakon-viewer-active");
         closeMobileHistory();
         closeMobileSettings();
         hideTrapWaitingNotice();
