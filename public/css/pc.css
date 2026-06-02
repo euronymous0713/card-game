@@ -443,7 +443,7 @@
    - 既存の通常バトル配置には影響させない
    ========================================================= */
 @media (min-width: 769px) {
-    body.battle-active.spectator-hand-view .enemy-panel {
+    body.battle-active.spectator-hand-view .enemy-panel.spectator-hand-owner {
         height: 238px !important;
         min-height: 238px !important;
         padding-bottom: 12px !important;
@@ -466,7 +466,7 @@
         top: 536px !important;
     }
 
-    body.battle-active.spectator-hand-view .enemy-panel .enemy-name {
+    body.battle-active.spectator-hand-view .enemy-panel.spectator-hand-owner .enemy-name {
         padding-right: 58px !important;
     }
 

@@ -1889,7 +1889,10 @@ body.battle-active .mobile-trap-waiting-notice.show {
     color: #fff200;
     font-size: 11px;
     font-weight: 900;
-    line-height: 1;
+    line-height: 1.15;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .enemy-spectator-hand-list {

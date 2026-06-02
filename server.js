@@ -874,13 +874,15 @@ function conditionText(condition) {
 
 function createGameViewForPlayer(game, viewerId) {
     const view = JSON.parse(JSON.stringify(game));
+    const viewer = view.turnOrder.find(player => player.id === viewerId);
+    const canViewEnemyHands = Boolean(viewer && viewer.defeated);
 
     view.turnOrder = view.turnOrder.map(player => {
         if (player.id === viewerId) return player;
 
         return {
             ...player,
-            hand: [],
+            hand: canViewEnemyHands ? player.hand : [],
             fieldCards: player.fieldCards.map(() => ({
                 hidden: true,
                 name: "伏せカード",

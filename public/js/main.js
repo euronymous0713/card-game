@@ -704,9 +704,10 @@ window.onload = () => {
         return Boolean(me && me.defeated);
     }
 
-    function spectatorEnemyHandHtml(me, enemy) {
+    function spectatorEnemyHandHtml(me, enemy, isSelectedEnemy) {
         if (!me || !me.defeated) return "";
         if (!enemy || !Array.isArray(enemy.hand)) return "";
+        if (!isSelectedEnemy) return "";
 
         const handCards = [];
 
@@ -732,7 +733,7 @@ window.onload = () => {
 
         return `
             <div class="enemy-spectator-hand">
-                <div class="enemy-spectator-hand-title">観戦：手札</div>
+                <div class="enemy-spectator-hand-title">観戦：${enemy.name} の手札</div>
                 <div class="enemy-spectator-hand-list">
                     ${handCards.join("")}
                 </div>
@@ -1909,21 +1910,26 @@ window.onload = () => {
             updateMobileActionPanel();
         }
 
-        const enemies = latestGame.turnOrder.filter(player => {
-            return player.id !== socket.id && !player.defeated;
+        const me = latestGame.turnOrder.find(player => player.id === socket.id);
+        const selectionCandidates = latestGame.turnOrder.filter(player => {
+            if (player.id === socket.id) return false;
+
+            if (me && me.defeated) {
+                return true;
+            }
+
+            return !player.defeated;
         });
 
-        if (!selectedTargetId && enemies.length > 0) {
-            selectedTargetId = enemies[0].id;
+        if (!selectedTargetId && selectionCandidates.length > 0) {
+            selectedTargetId = selectionCandidates[0].id;
         }
 
         if (
             selectedTargetId &&
-            !latestGame.turnOrder.some(player => {
-                return player.id === selectedTargetId && !player.defeated;
-            })
+            !selectionCandidates.some(player => player.id === selectedTargetId)
         ) {
-            selectedTargetId = enemies[0]?.id || "";
+            selectedTargetId = selectionCandidates[0]?.id || "";
         }
 
         renderBattlePlayers();
@@ -1971,10 +1977,12 @@ window.onload = () => {
 
             if (enemy) {
                 slot.classList.remove("empty-enemy");
-                slot.classList.toggle("selected-target", selectedTargetId === enemy.id);
+                const isSelectedEnemy = selectedTargetId === enemy.id;
+
+                slot.classList.toggle("selected-target", isSelectedEnemy);
                 slot.classList.toggle("max-hate-player", enemy.hate >= 3);
                 slot.classList.toggle("defeated-player", enemy.defeated);
-                slot.classList.toggle("spectator-hand-owner", Boolean(me && me.defeated && Array.isArray(enemy.hand) && enemy.hand.length > 0));
+                slot.classList.toggle("spectator-hand-owner", Boolean(me && me.defeated && isSelectedEnemy && Array.isArray(enemy.hand)));
 
                 slot.innerHTML = `
                     <div class="enemy-name">${enemy.defeated ? "💀 " : ""}${enemy.hate >= 3 ? "🔥 " : ""}${enemy.name}${disconnectedLabel(enemy)}</div>
@@ -1988,14 +1996,14 @@ window.onload = () => {
                     <div class="enemy-field-cards">
                         ${enemy.fieldCards.map(() => `<span class="mini-set-card">伏</span>`).join("")}
                     </div>
-                    ${spectatorEnemyHandHtml(me, enemy)}
+                    ${spectatorEnemyHandHtml(me, enemy, isSelectedEnemy)}
                 `;
 
                 bindStatusEffectEvents(slot);
                 bindSpectatorHandEvents(slot, enemy);
 
                 slot.onclick = () => {
-                    if (enemy.defeated) return;
+                    if (!me?.defeated && enemy.defeated) return;
 
                     selectedTargetId = enemy.id;
 

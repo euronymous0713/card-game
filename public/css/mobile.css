@@ -4145,13 +4145,13 @@
    - 横スクロール中の敵パネル内に収まるように手札欄をコンパクト表示
    ========================================================= */
 @media (max-width: 768px) {
-    body.battle-active.spectator-hand-view .enemy-panel {
+    body.battle-active.spectator-hand-view .enemy-panel.spectator-hand-owner {
         height: auto !important;
         min-height: 176px !important;
         justify-content: flex-start !important;
     }
 
-    body.battle-active.spectator-hand-view .enemy-panel .enemy-name {
+    body.battle-active.spectator-hand-view .enemy-panel.spectator-hand-owner .enemy-name {
         padding-right: 54px !important;
     }
 
