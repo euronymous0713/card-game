@@ -4280,7 +4280,7 @@
 
     body.battle-active:not(.spectating):not(.mobile-card-action-open) .mobile-effect-overlay.show {
         align-items: center !important;
-        padding-top: 280px !important;
+        padding-top: 350px !important;
         padding-bottom: 0 !important;
     }
 }
@@ -4288,7 +4288,7 @@
 @media (max-width: 380px),
 (max-height: 720px) {
     body.battle-active:not(.spectating):not(.mobile-card-action-open) .mobile-effect-overlay.show {
-        padding-top: 100px !important;
+        padding-top: 80px !important;
         padding-bottom: 0 !important;
     }
 }
