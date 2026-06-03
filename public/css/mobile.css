@@ -2661,7 +2661,7 @@
 
     body.battle-active .mobile-effect-card {
         pointer-events: auto !important;
-        transform: translateY(-18px) !important;
+        transform: none !important;
     }
 
     body.battle-active.mobile-card-action-open .mobile-effect-overlay.show {
@@ -4242,9 +4242,8 @@
 }
 
 /* =========================================================
-   スマホ版：通常対戦時のカード効果表示を下にずらして
-   他プレイヤー情報・カード選択パネルと被らないようにする
-   観戦時（body.spectating）は従来の中央配置を維持する
+   スマホ版：カード効果表示を中央に配置する
+   生存時・オワコン時ともに画面中央に表示する
    ========================================================= */
 @media (max-width: 768px) {
     body.battle-active:not(.spectating) .mobile-effect-card {
@@ -4252,13 +4251,13 @@
     }
 
     body.battle-active:not(.spectating):not(.mobile-card-action-open) .mobile-effect-overlay.show {
-        align-items: flex-start !important;
-        padding-top: 175px !important;
+        align-items: center !important;
+        padding-top: 0 !important;
     }
 }
 
 @media (max-width: 380px), (max-height: 720px) {
     body.battle-active:not(.spectating):not(.mobile-card-action-open) .mobile-effect-overlay.show {
-        padding-top: 160px !important;
+        padding-top: 0 !important;
     }
 }
