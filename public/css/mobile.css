@@ -2661,6 +2661,17 @@
         transform: translateY(-18px) !important;
     }
 
+    body.battle-active.mobile-card-action-open .mobile-effect-overlay.show {
+        align-items: flex-start !important;
+        padding-top: 56px !important;
+        padding-bottom: 270px !important;
+    }
+
+    body.battle-active.mobile-card-action-open .mobile-effect-card {
+        transform: none !important;
+        max-height: calc(100dvh - 336px) !important;
+    }
+
     body.battle-active .history-panel.show-mobile-history ~ .mobile-effect-overlay,
     body.battle-active .history-panel.show-mobile-history + .mobile-effect-overlay {
         display: none !important;

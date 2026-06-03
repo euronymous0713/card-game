@@ -793,6 +793,9 @@ window.onload = () => {
             cardButton.onclick = event => {
                 event.stopPropagation();
                 cardDetail.innerHTML = cardDetailHtml(card);
+                if (isMobileLayout()) {
+                    showMobileEffect(card);
+                }
             };
         });
     }
@@ -2397,8 +2400,12 @@ window.onload = () => {
             cardElement.onclick = () => {
                 if (isSpectatorHand) {
                     selectedMobileCardInstanceId = "";
-                    hideMobileEffect();
                     cardDetail.innerHTML = cardDetailHtml(card);
+                    if (isMobileLayout()) {
+                        showMobileEffect(card);
+                    } else {
+                        hideMobileEffect();
+                    }
                     updateMobileActionPanel();
                     return;
                 }
