@@ -2171,6 +2171,13 @@ window.onload = () => {
 
         handArea.classList.toggle("spectator-own-hand-area", isSpectatorHand);
 
+        if (isSpectatorHand) {
+            const notice = document.createElement("div");
+            notice.className = "spectator-own-hand-notice";
+            notice.innerText = `オワコン状態：${spectatorPlayer.name} の手札を観戦中`;
+            handArea.appendChild(notice);
+        }
+
         for (let i = 0; i < 4; i++) {
             const card = displayHand[i];
 
