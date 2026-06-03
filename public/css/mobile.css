@@ -386,6 +386,7 @@
         padding: 14px 18px;
         font-size: 20px;
         text-align: center;
+        top: 58%;
     }
 
     .draw-effect {
@@ -892,6 +893,7 @@
         padding: 14px 18px;
         font-size: 19px;
         text-align: center;
+        top: 58%;
     }
 
     .draw-effect,
@@ -1305,6 +1307,7 @@
         width: min(90vw, 300px);
         padding: 9px 12px;
         font-size: 14px;
+        top: 58%;
     }
 
     .draw-effect,
