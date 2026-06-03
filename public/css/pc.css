@@ -295,6 +295,17 @@
         letter-spacing: 1px !important;
     }
 
+    .mobile-card-list-button {
+        width: 100% !important;
+        min-height: 42px !important;
+        padding: 10px 12px !important;
+        border-radius: 12px !important;
+        font-size: 13px !important;
+        background: linear-gradient(135deg, #3a7bd5, #1a3a6e) !important;
+        box-shadow: 0 0 14px rgba(58, 123, 213, 0.28) !important;
+        margin-bottom: 8px !important;
+    }
+
     .mobile-battle-leave-button {
         width: 100% !important;
         min-height: 42px !important;

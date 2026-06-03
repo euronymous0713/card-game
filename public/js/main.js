@@ -1571,6 +1571,9 @@ window.onload = () => {
                     <span>ルームID</span>
                     <strong>${currentRoomId || "----"}</strong>
                 </div>
+                <button id="mobileCardListButton" class="mobile-card-list-button" type="button">
+                    カード一覧
+                </button>
                 <button id="mobileBattleLeaveButton" class="mobile-battle-leave-button" type="button">
                     退出してオワコンになる
                 </button>
@@ -1580,11 +1583,19 @@ window.onload = () => {
         mobileSettingsOverlay.classList.add("show-mobile-settings");
 
         const closeButton = document.getElementById("mobileSettingsCloseButton");
+        const cardListBtn = document.getElementById("mobileCardListButton");
         const leaveButton = document.getElementById("mobileBattleLeaveButton");
 
         if (closeButton) {
             closeButton.onclick = () => {
                 closeMobileSettings();
+            };
+        }
+
+        if (cardListBtn) {
+            cardListBtn.onclick = () => {
+                closeMobileSettings();
+                openTitleCardList();
             };
         }
 
