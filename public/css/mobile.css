@@ -471,6 +471,7 @@
 }
 
 @media (max-width: 768px) {
+
     html,
     body {
         width: 100%;
@@ -981,6 +982,7 @@
 }
 
 @media (max-width: 768px) {
+
     html,
     body {
         height: 100%;
@@ -1382,7 +1384,8 @@
     }
 }
 
-@media (max-width: 380px), (max-height: 720px) {
+@media (max-width: 380px),
+(max-height: 720px) {
     .battle-field {
         gap: 3px;
         padding: 4px 5px 126px;
@@ -1691,7 +1694,8 @@
     }
 }
 
-@media (max-width: 380px), (max-height: 720px) {
+@media (max-width: 380px),
+(max-height: 720px) {
     .battle-field {
         padding-bottom: 106px !important;
         gap: 3px !important;
@@ -1754,6 +1758,7 @@
 }
 
 @media (max-width: 768px) {
+
     html,
     body {
         width: 100% !important;
@@ -2227,7 +2232,8 @@
     }
 }
 
-@media (max-width: 380px), (max-height: 720px) {
+@media (max-width: 380px),
+(max-height: 720px) {
     .battle-field {
         padding: 4px 4px 94px !important;
         gap: 3px !important;
@@ -2635,7 +2641,8 @@
     }
 }
 
-@media (max-width: 380px), (max-height: 720px) {
+@media (max-width: 380px),
+(max-height: 720px) {
     body.battle-active .mobile-history-button {
         top: 118px !important;
     }
@@ -2675,19 +2682,21 @@
         max-height: calc(100dvh - 336px) !important;
     }
 
-    body.battle-active .history-panel.show-mobile-history ~ .mobile-effect-overlay,
-    body.battle-active .history-panel.show-mobile-history + .mobile-effect-overlay {
+    body.battle-active .history-panel.show-mobile-history~.mobile-effect-overlay,
+    body.battle-active .history-panel.show-mobile-history+.mobile-effect-overlay {
         display: none !important;
     }
 }
 
-@media (max-width: 380px), (max-height: 720px) {
+@media (max-width: 380px),
+(max-height: 720px) {
     body.battle-active .mobile-action-panel {
         bottom: 156px !important;
     }
 }
 
 @media (max-width: 768px) {
+
     body.battle-active .mobile-effect-close,
     .mobile-effect-close {
         display: none !important;
@@ -2983,7 +2992,8 @@
     }
 }
 
-@media (max-width: 380px), (max-height: 720px) {
+@media (max-width: 380px),
+(max-height: 720px) {
     .card-detail {
         min-height: 105px !important;
         height: 105px !important;
@@ -3044,7 +3054,8 @@
     }
 }
 
-@media (max-width: 380px), (max-height: 720px) {
+@media (max-width: 380px),
+(max-height: 720px) {
     .my-panel {
         min-height: 54px !important;
         height: auto !important;
@@ -3132,7 +3143,8 @@
     }
 }
 
-@media (max-width: 380px), (max-height: 720px) {
+@media (max-width: 380px),
+(max-height: 720px) {
     .enemy-panel {
         height: 76px !important;
         min-height: 76px !important;
@@ -3200,7 +3212,8 @@
     }
 }
 
-@media (max-width: 380px), (max-height: 720px) {
+@media (max-width: 380px),
+(max-height: 720px) {
     .battle-buttons {
         top: 126px !important;
         right: 6px !important;
@@ -3220,6 +3233,7 @@
 }
 
 @media (max-width: 768px) {
+
     /* 他プレイヤー情報と被らないよう、現在ターン表示を少し下げる */
     .turn-panel {
         margin-top: 8px !important;
@@ -3279,7 +3293,8 @@
     }
 }
 
-@media (max-width: 380px), (max-height: 720px) {
+@media (max-width: 380px),
+(max-height: 720px) {
     .turn-panel {
         margin-top: 6px !important;
     }
@@ -3467,7 +3482,8 @@
     }
 }
 
-@media (max-width: 380px), (max-height: 720px) {
+@media (max-width: 380px),
+(max-height: 720px) {
     .enemy-slots {
         min-height: 88px !important;
         height: 88px !important;
@@ -3503,6 +3519,7 @@
 }
 
 @media (max-width: 768px) {
+
     /* 自分プレイヤー情報と自分伏せカードの縦幅をさらに増やして揃える */
     .my-panel,
     .field-card-area {
@@ -3597,7 +3614,9 @@
     }
 }
 
-@media (max-width: 380px), (max-height: 720px) {
+@media (max-width: 380px),
+(max-height: 720px) {
+
     .my-panel,
     .field-card-area {
         min-height: 82px !important;
@@ -3634,6 +3653,7 @@
 }
 
 @media (max-width: 768px) {
+
     body.battle-active .my-panel,
     body.battle-active .field-card-area {
         min-height: 94px !important;
@@ -3814,7 +3834,9 @@
     }
 }
 
-@media (max-width: 380px), (max-height: 720px) {
+@media (max-width: 380px),
+(max-height: 720px) {
+
     body.battle-active .my-panel,
     body.battle-active .field-card-area {
         min-height: 88px !important;
@@ -3881,6 +3903,7 @@
    - JS/HTMLは触らず、スマホ版バトル画面だけに限定する
    ========================================================= */
 @media (max-width: 768px) {
+
     body.battle-active .mobile-history-button,
     body.battle-active .battle-buttons {
         top: 165px !important;
@@ -3941,7 +3964,9 @@
     }
 }
 
-@media (max-width: 380px), (max-height: 720px) {
+@media (max-width: 380px),
+(max-height: 720px) {
+
     body.battle-active .mobile-history-button,
     body.battle-active .battle-buttons {
         top: 150px !important;
@@ -3982,6 +4007,7 @@
    - 勝利/敗北表示中は「次へ」以外を押せないようにする
    ========================================================= */
 @media (max-width: 768px) {
+
     body.battle-active.game-over-active .mobile-history-button,
     body.battle-active.game-over-active .mobile-settings-button,
     body.battle-active.game-over-active .mobile-action-panel,
@@ -4142,7 +4168,8 @@
     }
 }
 
-@media (max-width: 380px), (max-height: 720px) {
+@media (max-width: 380px),
+(max-height: 720px) {
     body.battle-active:not(.game-over-active) .mobile-settings-button {
         left: 6px !important;
         top: 196px !important;
@@ -4219,7 +4246,8 @@
     }
 }
 
-@media (max-width: 380px), (max-height: 720px) {
+@media (max-width: 380px),
+(max-height: 720px) {
     body.battle-active .my-panel .follower-line.owakon-text {
         min-height: 13px !important;
         height: 13px !important;
@@ -4252,14 +4280,15 @@
 
     body.battle-active:not(.spectating):not(.mobile-card-action-open) .mobile-effect-overlay.show {
         align-items: center !important;
-        padding-top: 130px !important;
+        padding-top: 180px !important;
         padding-bottom: 0 !important;
     }
 }
 
-@media (max-width: 380px), (max-height: 720px) {
+@media (max-width: 380px),
+(max-height: 720px) {
     body.battle-active:not(.spectating):not(.mobile-card-action-open) .mobile-effect-overlay.show {
-        padding-top: 100px !important;
+        padding-top: 150px !important;
         padding-bottom: 0 !important;
     }
 }
