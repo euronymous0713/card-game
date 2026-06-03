@@ -3894,7 +3894,7 @@
     body.battle-active .mobile-action-panel {
         left: 8px !important;
         right: 8px !important;
-        bottom: 104px !important;
+        bottom: 205px !important;
         z-index: 9600 !important;
         padding: 7px !important;
         border-radius: 16px !important;
@@ -3923,7 +3923,7 @@
     }
 
     body.battle-active.mobile-card-action-open .battle-field {
-        padding-bottom: 214px !important;
+        padding-bottom: 295px !important;
     }
 }
 
@@ -3948,7 +3948,7 @@
     body.battle-active .mobile-action-panel {
         left: 6px !important;
         right: 6px !important;
-        bottom: 92px !important;
+        bottom: 189px !important;
         padding: 6px !important;
     }
 
@@ -3958,7 +3958,7 @@
     }
 
     body.battle-active.mobile-card-action-open .battle-field {
-        padding-bottom: 196px !important;
+        padding-bottom: 272px !important;
     }
 }
 
@@ -4212,5 +4212,17 @@
         max-height: 13px !important;
         line-height: 13px !important;
         font-size: 11px !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .enemy-panel.selected-target::after {
+        content: "✓" !important;
+        right: 3px !important;
+        top: 3px !important;
+        padding: 1px 5px !important;
+        font-size: 10px !important;
+        letter-spacing: 0 !important;
+        border-width: 1px !important;
     }
 }
