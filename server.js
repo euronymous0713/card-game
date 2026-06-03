@@ -2212,12 +2212,21 @@ io.on("connection", socket => {
         delete rooms[roomId];
     });
 
-    socket.on("returnTitle", roomId => {
+    socket.on("returnToRoom", roomId => {
         const room = rooms[roomId];
         if (!room) return;
+        if (!room.game || !room.game.gameOver) return;
 
-        socket.leave(roomId);
-        delete rooms[roomId];
+        room.game = null;
+
+        room.players.forEach(player => {
+            if (!player.spectator) {
+                player.ready = false;
+            }
+        });
+
+        io.to(roomId).emit("returnToRoom");
+        emitRoomUpdate(roomId);
     });
 
     socket.on("disconnect", () => {

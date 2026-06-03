@@ -2662,8 +2662,7 @@ window.onload = () => {
     }
 
     nextButton.onclick = () => {
-        socket.emit("returnTitle", currentRoomId);
-        resetToTitle();
+        socket.emit("returnToRoom", currentRoomId);
     };
 
     function resetToTitle() {
@@ -2709,6 +2708,39 @@ window.onload = () => {
         if (winner) {
             showGameOver(winner);
         }
+    });
+
+    socket.on("returnToRoom", () => {
+        latestGame = null;
+        previousGame = null;
+        gameOverSoundPlayed = false;
+        endTurnRequestPending = false;
+        selectedTargetId = "";
+        selectedMobileCardInstanceId = "";
+        selectedMobileStatusKey = "";
+        draggedCard = null;
+
+        document.body.classList.remove("mobile-card-action-open");
+        document.body.classList.remove("spectator-hand-view");
+        document.body.classList.remove("spectating");
+        document.body.classList.remove("player-owakon");
+        document.body.classList.remove("game-over-active");
+
+        closeMobileHistory();
+        closeMobileSettings();
+        hideTrapWaitingNotice();
+        hideMobileEffect();
+        updateMobileActionPanel();
+
+        const trapOverlay = document.getElementById("trapChoiceOverlay");
+        if (trapOverlay) trapOverlay.remove();
+
+        gameOverOverlay.style.display = "none";
+
+        setScreenMode("lobby");
+        titleScreen.style.display = "none";
+        battleScreen.style.display = "none";
+        lobbyScreen.style.display = "flex";
     });
 
     socket.on("roomDisbanded", () => {
