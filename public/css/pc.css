@@ -295,6 +295,34 @@
         letter-spacing: 1px !important;
     }
 
+    .settings-spectators-section {
+        width: 100% !important;
+        padding: 10px 12px !important;
+        border-radius: 12px !important;
+        background: rgba(0, 255, 225, 0.07) !important;
+        border: 1px solid rgba(0, 255, 225, 0.2) !important;
+        margin-bottom: 10px !important;
+    }
+
+    .settings-spectators-label {
+        font-size: 11px !important;
+        color: #00ffe1 !important;
+        font-weight: 800 !important;
+        letter-spacing: 0.5px !important;
+        margin-bottom: 6px !important;
+    }
+
+    .settings-spectator-item {
+        font-size: 13px !important;
+        color: rgba(255, 255, 255, 0.88) !important;
+        padding: 3px 0 !important;
+    }
+
+    .settings-spectator-empty {
+        font-size: 12px !important;
+        color: rgba(255, 255, 255, 0.38) !important;
+    }
+
     .mobile-card-list-button {
         width: 100% !important;
         min-height: 42px !important;

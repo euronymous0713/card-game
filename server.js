@@ -946,11 +946,16 @@ function emitGameUpdate(roomId) {
     const clients = io.sockets.adapter.rooms.get(roomId);
     if (!clients) return;
 
+    const spectators = room.players
+        .filter(p => p.spectator && !p.disconnected)
+        .map(p => ({ name: p.name }));
+
     clients.forEach(clientId => {
         const clientSocket = io.sockets.sockets.get(clientId);
         if (!clientSocket) return;
 
         const view = createGameViewForPlayer(room.game, clientId);
+        view.spectators = spectators;
 
         clientSocket.emit("updateGame", view);
 

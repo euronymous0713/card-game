@@ -1561,6 +1561,14 @@ window.onload = () => {
         clearMobileCardSelection();
         closeMobileHistory();
 
+        const spectators = (latestGame && Array.isArray(latestGame.spectators))
+            ? latestGame.spectators
+            : [];
+
+        const spectatorHtml = spectators.length === 0
+            ? `<div class="settings-spectator-empty">観戦者はいません</div>`
+            : spectators.map(s => `<div class="settings-spectator-item">👁 ${s.name}</div>`).join("");
+
         mobileSettingsOverlay.innerHTML = `
             <div class="mobile-settings-box">
                 <div class="mobile-settings-header">
@@ -1570,6 +1578,10 @@ window.onload = () => {
                 <div class="mobile-settings-room-id">
                     <span>ルームID</span>
                     <strong>${currentRoomId || "----"}</strong>
+                </div>
+                <div class="settings-spectators-section">
+                    <div class="settings-spectators-label">観戦者 (${spectators.length})</div>
+                    ${spectatorHtml}
                 </div>
                 <button id="mobileCardListButton" class="mobile-card-list-button" type="button">
                     カード一覧
@@ -2153,6 +2165,7 @@ window.onload = () => {
 
             myPanel.classList.toggle("max-hate-player", Boolean(selectedPlayer?.hate >= 3));
             myPanel.classList.toggle("defeated-player", Boolean(selectedPlayer?.defeated));
+            myPanel.classList.toggle("choosing-trap-player", Boolean(latestGame.waitingTrapChoice && selectedPlayer?.id === latestGame.waitingTrapPlayerId));
 
             if (selectedPlayer) {
                 myPanel.innerHTML = `
@@ -2181,6 +2194,7 @@ window.onload = () => {
                     slot.classList.toggle("max-hate-player", player.hate >= 3);
                     slot.classList.toggle("defeated-player", player.defeated);
                     slot.classList.remove("spectator-hand-owner");
+                    slot.classList.toggle("choosing-trap-player", Boolean(latestGame.waitingTrapChoice && player.id === latestGame.waitingTrapPlayerId));
 
                     slot.innerHTML = `
                         <div class="enemy-name">${player.defeated ? "💀 " : ""}${player.hate >= 3 ? "🔥 " : ""}${player.name}${disconnectedLabel(player)}</div>
@@ -2210,6 +2224,7 @@ window.onload = () => {
                     slot.classList.remove("max-hate-player");
                     slot.classList.remove("defeated-player");
                     slot.classList.remove("spectator-hand-owner");
+                    slot.classList.remove("choosing-trap-player");
                     slot.onclick = null;
 
                     slot.innerHTML = `
@@ -2226,6 +2241,7 @@ window.onload = () => {
         if (me) {
             myPanel.classList.toggle("max-hate-player", me.hate >= 3);
             myPanel.classList.toggle("defeated-player", me.defeated);
+            myPanel.classList.toggle("choosing-trap-player", Boolean(latestGame.waitingTrapChoice && me.id === latestGame.waitingTrapPlayerId));
 
             myPanel.innerHTML = `
                 <div class="my-name">${me.defeated ? "💀 " : ""}${me.hate >= 3 ? "🔥 " : ""}${me.name}${disconnectedLabel(me)}</div>
@@ -2252,6 +2268,7 @@ window.onload = () => {
                 slot.classList.toggle("max-hate-player", enemy.hate >= 3);
                 slot.classList.toggle("defeated-player", enemy.defeated);
                 slot.classList.remove("spectator-hand-owner");
+                slot.classList.toggle("choosing-trap-player", Boolean(latestGame.waitingTrapChoice && enemy.id === latestGame.waitingTrapPlayerId));
 
                 slot.innerHTML = `
                     <div class="enemy-name">${enemy.defeated ? "💀 " : ""}${enemy.hate >= 3 ? "🔥 " : ""}${enemy.name}${disconnectedLabel(enemy)}</div>
@@ -2292,6 +2309,7 @@ window.onload = () => {
                 slot.classList.remove("max-hate-player");
                 slot.classList.remove("defeated-player");
                 slot.classList.remove("spectator-hand-owner");
+                slot.classList.remove("choosing-trap-player");
                 slot.onclick = null;
 
                 slot.innerHTML = `
