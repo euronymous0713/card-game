@@ -1996,3 +1996,10 @@ body.battle-active .mobile-trap-waiting-notice.show {
         0 0 24px rgba(255, 48, 48, 0.14) !important;
 }
 
+@media (max-width: 768px) {
+    .history-detail-button,
+    .history-modal-overlay {
+        display: none !important;
+    }
+}
+

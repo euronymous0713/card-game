@@ -474,3 +474,131 @@
         margin-top: 7px !important;
     }
 }
+
+/* =========================================================
+   PC版：使用履歴 詳細ボタン & モーダル
+   ========================================================= */
+@media (min-width: 769px) {
+    .history-panel-header {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        margin-bottom: 8px !important;
+    }
+
+    .history-panel-header h3 {
+        margin-bottom: 0 !important;
+    }
+
+    .history-detail-button {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 24px !important;
+        height: 24px !important;
+        min-height: 24px !important;
+        padding: 0 !important;
+        border-radius: 6px !important;
+        font-size: 14px !important;
+        line-height: 1 !important;
+        color: #ff7bff !important;
+        background: rgba(255, 123, 255, 0.12) !important;
+        border: 1px solid rgba(255, 123, 255, 0.38) !important;
+        box-shadow: 0 0 8px rgba(255, 123, 255, 0.18) !important;
+        cursor: pointer !important;
+        transition: background 0.15s, box-shadow 0.15s !important;
+        flex-shrink: 0 !important;
+    }
+
+    .history-detail-button:hover {
+        background: rgba(255, 123, 255, 0.26) !important;
+        box-shadow: 0 0 14px rgba(255, 123, 255, 0.42) !important;
+    }
+
+    .history-modal-overlay {
+        position: fixed !important;
+        inset: 0 !important;
+        z-index: 9800 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        background: rgba(0, 0, 0, 0.55) !important;
+        backdrop-filter: blur(4px) !important;
+        -webkit-backdrop-filter: blur(4px) !important;
+    }
+
+    .history-modal {
+        width: 520px !important;
+        max-width: 90vw !important;
+        max-height: 72vh !important;
+        display: flex !important;
+        flex-direction: column !important;
+        border-radius: 18px !important;
+        background: rgba(8, 8, 20, 0.94) !important;
+        border: 1px solid rgba(255, 123, 255, 0.38) !important;
+        box-shadow:
+            0 0 28px rgba(255, 123, 255, 0.22),
+            0 0 48px rgba(0, 0, 0, 0.6) !important;
+        overflow: hidden !important;
+    }
+
+    .history-modal-header {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        padding: 16px 20px 14px !important;
+        border-bottom: 1px solid rgba(255, 123, 255, 0.18) !important;
+        flex-shrink: 0 !important;
+    }
+
+    .history-modal-header h3 {
+        color: #ff7bff !important;
+        font-size: 17px !important;
+        margin: 0 !important;
+    }
+
+    .history-modal-close {
+        width: 30px !important;
+        height: 30px !important;
+        min-height: 30px !important;
+        padding: 0 !important;
+        border-radius: 999px !important;
+        font-size: 16px !important;
+        line-height: 1 !important;
+        color: rgba(255, 255, 255, 0.7) !important;
+        background: rgba(255, 255, 255, 0.1) !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        cursor: pointer !important;
+        transition: background 0.15s !important;
+    }
+
+    .history-modal-close:hover {
+        background: rgba(255, 255, 255, 0.2) !important;
+    }
+
+    .history-modal-body {
+        flex: 1 !important;
+        overflow-y: auto !important;
+        padding: 14px 18px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 8px !important;
+    }
+
+    .history-modal-body .played-card {
+        font-size: 13px !important;
+        line-height: 1.5 !important;
+        padding: 10px 14px !important;
+    }
+
+    .history-modal-body .played-card-extra {
+        font-size: 12px !important;
+    }
+
+    .history-modal-empty {
+        color: rgba(255, 255, 255, 0.38) !important;
+        font-size: 13px !important;
+        text-align: center !important;
+        padding: 32px 0 !important;
+    }
+}

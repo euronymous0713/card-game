@@ -33,6 +33,10 @@ window.onload = () => {
     const battleMessage = document.getElementById("battleMessage");
     const playedCardList = document.getElementById("playedCardList");
     const historyPanel = document.querySelector(".history-panel");
+    const historyDetailButton = document.getElementById("historyDetailButton");
+    const historyModalOverlay = document.getElementById("historyModalOverlay");
+    const historyModalBody = document.getElementById("historyModalBody");
+    const historyModalCloseButton = document.getElementById("historyModalCloseButton");
     const endTurnButton = document.getElementById("endTurnButton");
     const myFieldCards = document.getElementById("myFieldCards");
 
@@ -1593,6 +1597,50 @@ window.onload = () => {
                 closeMobileHistory();
             };
         }
+    }
+
+    function openHistoryModal() {
+        if (!historyModalOverlay || !historyModalBody) return;
+
+        historyModalBody.innerHTML = "";
+
+        if (!latestGame || !latestGame.playedCards || latestGame.playedCards.length === 0) {
+            historyModalBody.innerHTML = `<div class="history-modal-empty">まだ使用されたカードはありません。</div>`;
+        } else {
+            [...latestGame.playedCards].reverse().forEach(card => {
+                historyModalBody.innerHTML += `
+                    <div class="played-card">
+                        <strong>${card.log || `${card.playerName} → ${card.targetName}`}</strong><br>
+                        ${card.hateText || ""}
+                        ${playedCardExtraText(card)}
+                    </div>
+                `;
+            });
+        }
+
+        historyModalOverlay.style.display = "flex";
+    }
+
+    function closeHistoryModal() {
+        if (!historyModalOverlay) return;
+        historyModalOverlay.style.display = "none";
+    }
+
+    if (historyDetailButton) {
+        historyDetailButton.onclick = event => {
+            event.stopPropagation();
+            openHistoryModal();
+        };
+    }
+
+    if (historyModalCloseButton) {
+        historyModalCloseButton.onclick = () => closeHistoryModal();
+    }
+
+    if (historyModalOverlay) {
+        historyModalOverlay.onclick = event => {
+            if (event.target === historyModalOverlay) closeHistoryModal();
+        };
     }
 
     function updateMobileActionPanel() {
