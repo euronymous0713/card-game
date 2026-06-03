@@ -2665,7 +2665,7 @@
     }
 
     body.battle-active.mobile-card-action-open .mobile-effect-overlay.show {
-        align-items: flex-start !important;
+        align-items: center !important;
         padding-top: 56px !important;
         padding-bottom: 270px !important;
     }
