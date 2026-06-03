@@ -174,7 +174,7 @@ module.exports = [
     {
         id: "card-13",
         name: "ミュート通告",
-        rarity: "C",
+        rarity: "R",
         type: "特殊",
         kind: "special",
         targetType: "self",
@@ -184,9 +184,9 @@ module.exports = [
         hateTarget: "self",
         hateChange: 0,
         hateText: "ヘイト変動なし",
-        effect: "自身を2ターン、ミュート状態にする。ミュート中はヘイト上昇を受けない。",
+        effect: "自身を1ターン、ミュート状態にする。ミュート中はヘイト上昇を受けない。",
         statusType: "mute",
-        durationTurns: 2
+        durationTurns: 1
     },
     {
         id: "card-14",
