@@ -142,11 +142,11 @@
 
     .history-panel {
         top: 390px !important;
-        max-height: 178px !important;
+        max-height: 267px !important;
     }
 
     .played-card-list {
-        max-height: 114px !important;
+        max-height: 171px !important;
     }
 
     .center-zone {
@@ -466,11 +466,11 @@
 
     body.battle-active.spectator-hand-view .history-panel {
         top: 430px !important;
-        max-height: 138px !important;
+        max-height: 207px !important;
     }
 
     body.battle-active.spectator-hand-view .played-card-list {
-        max-height: 78px !important;
+        max-height: 117px !important;
     }
 
     body.battle-active.spectator-hand-view .enemy-panel .enemy-name {
