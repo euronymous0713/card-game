@@ -329,6 +329,16 @@ button:disabled {
     justify-content: center;
 }
 
+.spectator-trap-card {
+    cursor: pointer;
+}
+
+.spectator-trap-card:hover {
+    background: rgba(255, 176, 0, 0.38);
+    border-color: #ffd055;
+    color: #ffd055;
+}
+
 .center-zone {
     position: absolute;
     top: 47%;

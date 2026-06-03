@@ -689,6 +689,60 @@ window.onload = () => {
         resetCardDetail();
     });
 
+    document.addEventListener("mouseover", event => {
+        const span = event.target.closest?.(".spectator-trap-card");
+        if (!span || isMobileLayout()) return;
+
+        const fieldId = span.dataset.fieldId;
+        if (!fieldId || !latestGame) return;
+
+        const card = latestGame.turnOrder
+            .flatMap(p => p.fieldCards || [])
+            .find(c => c.fieldId === fieldId);
+        if (!card) return;
+
+        cardDetail.innerHTML = cardDetailHtml(card);
+    });
+
+    document.addEventListener("mouseout", event => {
+        const span = event.target.closest?.(".spectator-trap-card");
+        if (!span || isMobileLayout()) return;
+        if (span.contains(event.relatedTarget)) return;
+
+        resetCardDetail();
+    });
+
+    document.addEventListener("click", event => {
+        const span = event.target.closest?.(".spectator-trap-card");
+        if (!span || !isMobileLayout()) return;
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        const fieldId = span.dataset.fieldId;
+        if (!fieldId || !latestGame) return;
+
+        const card = latestGame.turnOrder
+            .flatMap(p => p.fieldCards || [])
+            .find(c => c.fieldId === fieldId);
+        if (!card) return;
+
+        const fieldKey = `spectator-trap-${fieldId}`;
+
+        if (selectedMobileFieldCardKey === fieldKey && mobileEffectOverlay.classList.contains("show")) {
+            selectedMobileFieldCardKey = "";
+            hideMobileEffect();
+            return;
+        }
+
+        selectedMobileCardInstanceId = "";
+        selectedMobileStatusKey = "";
+        selectedMobileFieldCardKey = fieldKey;
+        document.body.classList.remove("mobile-card-action-open");
+        updateMobileActionPanel();
+        showMobileEffect(card);
+    });
+
     function rarityLabel(rarity) {
         const labels = {
             C: "C / コモン",
@@ -2069,6 +2123,9 @@ window.onload = () => {
         const shortName = card.name && card.name.length > 4
             ? card.name.substring(0, 3) + "…"
             : (card.name || "罠");
+        if (card.fieldId) {
+            return `<span class="mini-set-card revealed-set-card spectator-trap-card" title="${card.name}" data-field-id="${card.fieldId}">${shortName}</span>`;
+        }
         return `<span class="mini-set-card revealed-set-card" title="${card.name}">${shortName}</span>`;
     }
 
