@@ -1929,6 +1929,37 @@ body.battle-active .mobile-trap-waiting-notice.show {
     pointer-events: none;
 }
 
+.my-panel.selected-target {
+    border-width: 4px !important;
+    border-color: #fff200 !important;
+    outline: 3px solid rgba(0, 255, 225, 0.95) !important;
+    outline-offset: -8px !important;
+    box-shadow:
+        0 0 0 4px rgba(0, 0, 0, 0.74),
+        0 0 28px rgba(255, 242, 0, 0.95),
+        0 0 42px rgba(0, 255, 225, 0.64) !important;
+}
+
+.my-panel.selected-target::after {
+    content: "選択中";
+    position: absolute;
+    right: 10px;
+    top: 8px;
+    z-index: 20;
+    padding: 3px 9px;
+    border-radius: 999px;
+    color: #080814;
+    background: #fff200;
+    border: 2px solid #00ffe1;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    box-shadow:
+        0 0 10px rgba(255, 242, 0, 0.9),
+        0 0 16px rgba(0, 255, 225, 0.55);
+    pointer-events: none;
+}
+
 .enemy-spectator-hand {
     margin-top: 8px;
     padding: 7px;

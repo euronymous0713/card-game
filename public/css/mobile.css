@@ -4254,7 +4254,8 @@
         font-size: 8px !important;
     }
 
-    body.battle-active.spectator-hand-view .enemy-panel.selected-target::after {
+    body.battle-active.spectator-hand-view .enemy-panel.selected-target::after,
+    body.battle-active.spectator-hand-view .my-panel.selected-target::after {
         right: 7px !important;
         top: 7px !important;
         padding: 2px 7px !important;
@@ -4297,7 +4298,8 @@
 }
 
 @media (max-width: 768px) {
-    .enemy-panel.selected-target::after {
+    .enemy-panel.selected-target::after,
+    .my-panel.selected-target::after {
         content: "✓" !important;
         right: 3px !important;
         top: 3px !important;

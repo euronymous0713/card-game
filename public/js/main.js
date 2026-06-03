@@ -2163,6 +2163,7 @@ window.onload = () => {
             const selectedPlayer = allPlayers.find(p => p.id === selectedTargetId) || allPlayers[0];
             const otherPlayers = allPlayers.filter(p => p.id !== selectedPlayer?.id);
 
+            myPanel.classList.add("selected-target");
             myPanel.classList.toggle("max-hate-player", Boolean(selectedPlayer?.hate >= 3));
             myPanel.classList.toggle("defeated-player", Boolean(selectedPlayer?.defeated));
             myPanel.classList.toggle("choosing-trap-player", Boolean(latestGame.waitingTrapChoice && selectedPlayer?.id === latestGame.waitingTrapPlayerId));
@@ -2239,6 +2240,7 @@ window.onload = () => {
         }
 
         if (me) {
+            myPanel.classList.remove("selected-target");
             myPanel.classList.toggle("max-hate-player", me.hate >= 3);
             myPanel.classList.toggle("defeated-player", me.defeated);
             myPanel.classList.toggle("choosing-trap-player", Boolean(latestGame.waitingTrapChoice && me.id === latestGame.waitingTrapPlayerId));
