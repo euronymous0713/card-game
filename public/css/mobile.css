@@ -4302,3 +4302,29 @@
         padding-top: 5px !important;
     }
 }
+
+/* =========================================================
+   スマホ版：生存時のカード効果をカード使用ボタンのすぐ上に配置
+   ========================================================= */
+@media (max-width: 768px) {
+    body.battle-active:not(.spectating).mobile-card-action-open .mobile-effect-overlay.show {
+        align-items: flex-end !important;
+        padding-top: 0 !important;
+        padding-bottom: 285px !important;
+    }
+
+    body.battle-active:not(.spectating).mobile-card-action-open .mobile-effect-card {
+        max-height: calc(100dvh - 295px) !important;
+    }
+}
+
+@media (max-width: 380px),
+(max-height: 720px) {
+    body.battle-active:not(.spectating).mobile-card-action-open .mobile-effect-overlay.show {
+        padding-bottom: 265px !important;
+    }
+
+    body.battle-active:not(.spectating).mobile-card-action-open .mobile-effect-card {
+        max-height: calc(100dvh - 275px) !important;
+    }
+}
