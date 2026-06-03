@@ -4328,3 +4328,29 @@
         max-height: calc(100dvh - 275px) !important;
     }
 }
+
+/* =========================================================
+   スマホ版：オワコン時のカード効果位置を生存時と同じにする
+   ========================================================= */
+@media (max-width: 768px) {
+    body.battle-active.player-owakon:not(.mobile-card-action-open) .mobile-effect-overlay.show {
+        align-items: flex-end !important;
+        padding-top: 0 !important;
+        padding-bottom: 285px !important;
+    }
+
+    body.battle-active.player-owakon:not(.mobile-card-action-open) .mobile-effect-card {
+        max-height: calc(100dvh - 295px) !important;
+    }
+}
+
+@media (max-width: 380px),
+(max-height: 720px) {
+    body.battle-active.player-owakon:not(.mobile-card-action-open) .mobile-effect-overlay.show {
+        padding-bottom: 265px !important;
+    }
+
+    body.battle-active.player-owakon:not(.mobile-card-action-open) .mobile-effect-card {
+        max-height: calc(100dvh - 275px) !important;
+    }
+}

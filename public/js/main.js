@@ -1968,6 +1968,7 @@ window.onload = () => {
 
         latestGame = game;
         document.body.classList.toggle("spectating", isSpectatorMode());
+        document.body.classList.toggle("player-owakon", !isSpectatorMode() && Boolean(getMeFromLatestGame()?.defeated));
         endTurnRequestPending = false;
 
         document.body.classList.remove("spectator-hand-view");
@@ -2564,6 +2565,7 @@ window.onload = () => {
         document.body.classList.remove("mobile-card-action-open");
         document.body.classList.remove("spectator-hand-view");
         document.body.classList.remove("spectating");
+        document.body.classList.remove("player-owakon");
         closeMobileHistory();
         closeMobileSettings();
         hideTrapWaitingNotice();
