@@ -1480,7 +1480,7 @@ io.on("connection", socket => {
         }
 
         const activePlayers = room.players.filter(p => !p.spectator);
-        const isSpectator = activePlayers.length >= 4;
+        const isSpectator = activePlayers.length >= 4 || Boolean(room.game);
 
         const reconnectToken = generateReconnectToken();
 
