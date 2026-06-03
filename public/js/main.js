@@ -704,53 +704,66 @@ window.onload = () => {
         return Boolean(me && me.defeated);
     }
 
-    function getSelectedSpectatorEnemy() {
-        const me = getMeFromLatestGame();
+    function spectatorEnemyHandHtml(me, enemy) {
+        if (!me || !me.defeated) return "";
+        if (!enemy || !Array.isArray(enemy.hand)) return "";
 
-        if (!latestGame || !me || !me.defeated || !Array.isArray(latestGame.turnOrder)) {
-            return null;
+        const handCards = [];
+
+        for (let i = 0; i < 4; i++) {
+            const card = enemy.hand[i];
+
+            if (!card) {
+                handCards.push(`
+                    <button class="spectator-hand-card spectator-empty-hand-card" type="button" disabled>
+                        空
+                    </button>
+                `);
+                continue;
+            }
+
+            handCards.push(`
+                <button class="spectator-hand-card ${rarityClass(card.rarity)}" type="button" data-hand-index="${i}">
+                    <span class="spectator-card-rarity">${normalizeRarity(card.rarity)}</span>
+                    <span class="spectator-card-name">${card.name}</span>
+                </button>
+            `);
         }
 
-        const enemies = latestGame.turnOrder.filter(player => player.id !== socket.id);
-
-        return enemies.find(player => player.id === selectedTargetId) || enemies[0] || null;
+        return `
+            <div class="enemy-spectator-hand">
+                <div class="enemy-spectator-hand-title">観戦：手札</div>
+                <div class="enemy-spectator-hand-list">
+                    ${handCards.join("")}
+                </div>
+            </div>
+        `;
     }
 
-    function bindSpectatorHandCardEvents(cardElement, card) {
-        if (!cardElement || !card) return;
+    function bindSpectatorHandEvents(container, enemy) {
+        if (!container || !enemy || !isDefeatedViewer()) return;
 
-        function showSpectatorCardDetail(event) {
-            if (event) {
-                event.preventDefault();
+        container.querySelectorAll(".spectator-hand-card[data-hand-index]").forEach(cardButton => {
+            const handIndex = Number(cardButton.dataset.handIndex);
+            const card = enemy.hand?.[handIndex];
+
+            if (!card) return;
+
+            cardButton.onmouseenter = () => {
+                cardDetail.innerHTML = cardDetailHtml(card);
+            };
+
+            cardButton.onmouseleave = () => {
+                if (!isMobileLayout()) {
+                    resetCardDetail();
+                }
+            };
+
+            cardButton.onclick = event => {
                 event.stopPropagation();
-            }
-
-            // スマホでは通常の手札タップと同じように、カード効果の拡大表示を出します。
-            // オワコン観戦中のカードは「使用」はできません。効果確認専用です。
-            if (isMobileLayout()) {
-                selectedMobileCardInstanceId = "";
-                selectedMobileFieldCardKey = "";
-                selectedMobileStatusKey = "";
-                updateMobileActionPanel();
-                showMobileEffect(card);
-                return;
-            }
-
-            cardDetail.innerHTML = cardDetailHtml(card);
-        }
-
-        cardElement.onmouseenter = () => {
-            cardDetail.innerHTML = cardDetailHtml(card);
-        };
-
-        cardElement.onmouseleave = () => {
-            if (!isMobileLayout()) {
-                resetCardDetail();
-            }
-        };
-
-        cardElement.onclick = showSpectatorCardDetail;
-        cardElement.ontouchstart = showSpectatorCardDetail;
+                cardDetail.innerHTML = cardDetailHtml(card);
+            };
+        });
     }
 
 
@@ -1887,7 +1900,6 @@ window.onload = () => {
         endTurnRequestPending = false;
 
         document.body.classList.toggle("spectator-hand-view", isDefeatedViewer());
-        document.body.classList.toggle("owakon-viewer-active", isDefeatedViewer());
 
         updateTrapWaitingNotice();
 
@@ -1897,26 +1909,21 @@ window.onload = () => {
             updateMobileActionPanel();
         }
 
-        const me = latestGame.turnOrder.find(player => player.id === socket.id);
-        const selectionCandidates = latestGame.turnOrder.filter(player => {
-            if (player.id === socket.id) return false;
-
-            if (me && me.defeated) {
-                return true;
-            }
-
-            return !player.defeated;
+        const enemies = latestGame.turnOrder.filter(player => {
+            return player.id !== socket.id && !player.defeated;
         });
 
-        if (!selectedTargetId && selectionCandidates.length > 0) {
-            selectedTargetId = selectionCandidates[0].id;
+        if (!selectedTargetId && enemies.length > 0) {
+            selectedTargetId = enemies[0].id;
         }
 
         if (
             selectedTargetId &&
-            !selectionCandidates.some(player => player.id === selectedTargetId)
+            !latestGame.turnOrder.some(player => {
+                return player.id === selectedTargetId && !player.defeated;
+            })
         ) {
-            selectedTargetId = selectionCandidates[0]?.id || "";
+            selectedTargetId = enemies[0]?.id || "";
         }
 
         renderBattlePlayers();
@@ -1944,10 +1951,8 @@ window.onload = () => {
         if (me) {
             myPanel.classList.toggle("max-hate-player", me.hate >= 3);
             myPanel.classList.toggle("defeated-player", me.defeated);
-            myPanel.classList.toggle("owakon-viewer-panel", me.defeated);
 
             myPanel.innerHTML = `
-                ${me.defeated ? `<div class="owakon-viewer-badge">あなたはオワコン</div>` : ""}
                 <div class="my-name">${me.defeated ? "💀 " : ""}${me.hate >= 3 ? "🔥 " : ""}${me.name}${disconnectedLabel(me)}</div>
                 <div class="follower-line ${me.defeated ? "owakon-text" : ""}">
                     ${followerText(me)}
@@ -1966,11 +1971,11 @@ window.onload = () => {
 
             if (enemy) {
                 slot.classList.remove("empty-enemy");
-                const isSelectedEnemy = selectedTargetId === enemy.id;
-
-                slot.classList.toggle("selected-target", isSelectedEnemy);
+                slot.classList.toggle("selected-target", selectedTargetId === enemy.id);
                 slot.classList.toggle("max-hate-player", enemy.hate >= 3);
                 slot.classList.toggle("defeated-player", enemy.defeated);
+                slot.classList.toggle("spectator-hand-owner", Boolean(me && me.defeated && Array.isArray(enemy.hand) && enemy.hand.length > 0));
+
                 slot.innerHTML = `
                     <div class="enemy-name">${enemy.defeated ? "💀 " : ""}${enemy.hate >= 3 ? "🔥 " : ""}${enemy.name}${disconnectedLabel(enemy)}</div>
                     <div class="follower-line ${enemy.defeated ? "owakon-text" : ""}">
@@ -1983,16 +1988,18 @@ window.onload = () => {
                     <div class="enemy-field-cards">
                         ${enemy.fieldCards.map(() => `<span class="mini-set-card">伏</span>`).join("")}
                     </div>
+                    ${spectatorEnemyHandHtml(me, enemy)}
                 `;
 
                 bindStatusEffectEvents(slot);
+                bindSpectatorHandEvents(slot, enemy);
+
                 slot.onclick = () => {
-                    if (!me?.defeated && enemy.defeated) return;
+                    if (enemy.defeated) return;
 
                     selectedTargetId = enemy.id;
 
                     renderBattlePlayers();
-                    renderHand();
                     updateMobileActionPanel();
                 };
             } else {
@@ -2000,6 +2007,7 @@ window.onload = () => {
                 slot.classList.remove("selected-target");
                 slot.classList.remove("max-hate-player");
                 slot.classList.remove("defeated-player");
+                slot.classList.remove("spectator-hand-owner");
                 slot.onclick = null;
 
                 slot.innerHTML = `
@@ -2141,51 +2149,8 @@ window.onload = () => {
         const me = latestGame.turnOrder.find(player => player.id === socket.id);
 
         handArea.innerHTML = "";
-        handArea.classList.toggle("spectator-hand-area", Boolean(me && me.defeated));
 
         if (!me) return;
-
-        if (me.defeated) {
-            selectedMobileCardInstanceId = "";
-            draggedCard = null;
-
-            const selectedEnemy = getSelectedSpectatorEnemy();
-            const noticeElement = document.createElement("div");
-            noticeElement.className = "spectator-hand-notice";
-            noticeElement.innerHTML = selectedEnemy
-                ? `<strong>💀 オワコン観戦中</strong><span>${selectedEnemy.name} の手札を表示中</span>`
-                : `<strong>💀 オワコン</strong><span>自分の手札は空です</span>`;
-            handArea.appendChild(noticeElement);
-
-            for (let i = 0; i < 4; i++) {
-                const card = selectedEnemy?.hand?.[i] || null;
-                const cardElement = document.createElement("div");
-
-                if (!card) {
-                    cardElement.className = "hand-card empty-hand-card spectator-empty-hand-card";
-                    cardElement.innerHTML = `
-                        <div class="card-name">空</div>
-                        <div class="card-type">観戦中</div>
-                    `;
-                    handArea.appendChild(cardElement);
-                    continue;
-                }
-
-                cardElement.className = `hand-card spectator-view-hand-card ${rarityClass(card.rarity)}`;
-                cardElement.draggable = false;
-                cardElement.innerHTML = `
-                    <div class="card-rarity-badge ${rarityClass(card.rarity)}">${normalizeRarity(card.rarity)}</div>
-                    <div class="card-name">${card.name}</div>
-                    <div class="card-type">${card.type}</div>
-                    <div class="card-hate">${card.hateText || ""}</div>
-                `;
-
-                bindSpectatorHandCardEvents(cardElement, card);
-                handArea.appendChild(cardElement);
-            }
-
-            return;
-        }
 
         for (let i = 0; i < 4; i++) {
             const card = me.hand[i];
@@ -2238,7 +2203,6 @@ window.onload = () => {
             handArea.appendChild(cardElement);
         }
     }
-
 
     dropZone.ondragover = event => {
         event.preventDefault();
@@ -2370,7 +2334,6 @@ window.onload = () => {
         draggedCard = null;
         document.body.classList.remove("mobile-card-action-open");
         document.body.classList.remove("spectator-hand-view");
-        document.body.classList.remove("owakon-viewer-active");
         closeMobileHistory();
         closeMobileSettings();
         hideTrapWaitingNotice();
