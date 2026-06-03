@@ -1548,6 +1548,7 @@ io.on("connection", socket => {
         }
 
         room.game = createGameState(activePlayers);
+        room.returnedToLobby = null;
 
         io.to(roomId).emit("gameStarted");
         emitGameUpdate(roomId);
@@ -2217,15 +2218,23 @@ io.on("connection", socket => {
         if (!room) return;
         if (!room.game || !room.game.gameOver) return;
 
-        room.game = null;
+        if (!room.returnedToLobby) room.returnedToLobby = new Set();
+        room.returnedToLobby.add(socket.id);
 
-        room.players.forEach(player => {
-            if (!player.spectator) {
-                player.ready = false;
-            }
-        });
+        const player = room.players.find(p => p.id === socket.id);
+        if (player && !player.spectator) {
+            player.ready = false;
+        }
 
-        io.to(roomId).emit("returnToRoom");
+        socket.emit("returnToRoom");
+
+        const activePlayers = room.players.filter(p => !p.spectator && !p.disconnected);
+        const allReturned = activePlayers.every(p => room.returnedToLobby.has(p.id));
+        if (allReturned) {
+            room.game = null;
+            room.returnedToLobby = null;
+        }
+
         emitRoomUpdate(roomId);
     });
 
