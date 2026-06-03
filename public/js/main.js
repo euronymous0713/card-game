@@ -317,6 +317,31 @@ window.onload = () => {
 
 
     createTrapChoiceModalStyle();
+    createSpectatorStyles();
+
+    function createSpectatorStyles() {
+        const style = document.createElement("style");
+        style.innerHTML = `
+            .spectator-watching-label {
+                font-size: 11px;
+                color: #00ffe1;
+                margin-bottom: 2px;
+                opacity: 0.85;
+                letter-spacing: 0.5px;
+            }
+            .revealed-set-card {
+                background: rgba(0, 255, 225, 0.12) !important;
+                border-color: rgba(0, 255, 225, 0.45) !important;
+                color: #00ffe1 !important;
+                font-size: 10px !important;
+            }
+            .spectator-player-card {
+                opacity: 0.75;
+                border-style: dashed !important;
+            }
+        `;
+        document.head.appendChild(style);
+    }
 
     function createTrapChoiceModalStyle() {
         const style = document.createElement("style");
@@ -698,7 +723,13 @@ window.onload = () => {
         return latestGame.turnOrder.find(player => player.id === socket.id) || null;
     }
 
+    function isSpectatorMode() {
+        if (!latestGame) return false;
+        return !latestGame.turnOrder.some(player => player.id === socket.id);
+    }
+
     function isDefeatedViewer() {
+        if (isSpectatorMode()) return true;
         const me = getMeFromLatestGame();
 
         return Boolean(me && me.defeated);
@@ -1813,40 +1844,76 @@ window.onload = () => {
         roomIdText.innerText = `ルームID : ${roomId}`;
 
         leaveRoomButton.innerText = "退出";
+        readyButton.style.display = "";
         readyButton.innerText = "準備完了";
         readyButton.classList.remove("cancel-ready");
 
         startGameButton.style.display = "none";
     });
 
+    socket.on("spectatorJoinSuccess", ({ roomId, phase }) => {
+        currentRoomId = roomId;
+        isHost = false;
+        isReady = true;
+        endTurnRequestPending = false;
+        previousGame = null;
+        gameOverSoundPlayed = false;
+
+        roomIdText.innerText = `ルームID : ${roomId}`;
+        leaveRoomButton.innerText = "退出";
+        readyButton.style.display = "none";
+        startGameButton.style.display = "none";
+
+        titleScreen.style.display = "none";
+
+        if (phase === "battle") {
+            setScreenMode("battle");
+            lobbyScreen.style.display = "none";
+            battleScreen.style.display = "block";
+            gameOverOverlay.style.display = "none";
+        } else {
+            setScreenMode("lobby");
+            lobbyScreen.style.display = "flex";
+            battleScreen.style.display = "none";
+        }
+    });
+
     socket.on("updateRoom", players => {
         playerList.innerHTML = "";
 
         const me = players.find(player => player.id === socket.id);
+        const amSpectator = Boolean(me && me.spectator);
 
-        if (me) {
+        if (me && !amSpectator) {
             isReady = me.ready;
+            readyButton.style.display = "";
             readyButton.innerText = isReady ? "準備解除" : "準備完了";
             readyButton.classList.toggle("cancel-ready", isReady);
+        } else if (amSpectator) {
+            readyButton.style.display = "none";
         }
 
         players.forEach(player => {
+            const isSpectatorPlayer = Boolean(player.spectator);
             const statusText = player.disconnected
                 ? "再接続待ち"
-                : player.ready
-                    ? "準備完了"
-                    : "待機中";
+                : isSpectatorPlayer
+                    ? "観戦"
+                    : player.ready
+                        ? "準備完了"
+                        : "待機中";
 
             playerList.innerHTML += `
-                <div class="player-card ${player.ready ? "ready" : "not-ready"} ${player.disconnected ? "disconnected-player-card" : ""}">
-                    <span class="player-name">${player.host ? "👑 " : ""}${player.name}${disconnectedLabel(player)}</span>
+                <div class="player-card ${!isSpectatorPlayer && player.ready ? "ready" : "not-ready"} ${player.disconnected ? "disconnected-player-card" : ""} ${isSpectatorPlayer ? "spectator-player-card" : ""}">
+                    <span class="player-name">${player.host ? "👑 " : ""}${isSpectatorPlayer ? "👁 " : ""}${player.name}${disconnectedLabel(player)}</span>
                     <span class="player-status">${statusText}</span>
                 </div>
             `;
         });
 
-        const allReady = players.every(player => player.ready && !player.disconnected);
-        const canStart = players.length >= 2 && allReady;
+        const activePlayers = players.filter(p => !p.spectator && !p.disconnected);
+        const allReady = activePlayers.every(player => player.ready);
+        const canStart = activePlayers.length >= 2 && allReady;
 
         if (isHost) {
             startGameButton.style.display = "block";
@@ -1942,11 +2009,98 @@ window.onload = () => {
         }
     });
 
+    function fieldCardMiniHtml(card) {
+        if (card.hidden) {
+            return `<span class="mini-set-card">伏</span>`;
+        }
+        const shortName = card.name && card.name.length > 4
+            ? card.name.substring(0, 3) + "…"
+            : (card.name || "罠");
+        return `<span class="mini-set-card revealed-set-card" title="${card.name}">${shortName}</span>`;
+    }
+
     function renderBattlePlayers() {
         if (!latestGame) return;
 
         const me = latestGame.turnOrder.find(player => player.id === socket.id);
-        const enemies = latestGame.turnOrder.filter(player => player.id !== socket.id);
+        const spectator = isSpectatorMode();
+
+        if (spectator) {
+            const allPlayers = latestGame.turnOrder;
+            const selectedPlayer = allPlayers.find(p => p.id === selectedTargetId) || allPlayers[0];
+            const otherPlayers = allPlayers.filter(p => p.id !== selectedPlayer?.id);
+
+            myPanel.classList.toggle("max-hate-player", Boolean(selectedPlayer?.hate >= 3));
+            myPanel.classList.toggle("defeated-player", Boolean(selectedPlayer?.defeated));
+
+            if (selectedPlayer) {
+                myPanel.innerHTML = `
+                    <div class="spectator-watching-label">👁 観戦中</div>
+                    <div class="my-name">${selectedPlayer.defeated ? "💀 " : ""}${selectedPlayer.hate >= 3 ? "🔥 " : ""}${selectedPlayer.name}${disconnectedLabel(selectedPlayer)}</div>
+                    <div class="follower-line ${selectedPlayer.defeated ? "owakon-text" : ""}">
+                        ${followerText(selectedPlayer)}
+                    </div>
+                    <div class="panel-hate ${selectedPlayer.hate >= 3 ? "max-hate-text" : ""}">
+                        ${hateIcons(selectedPlayer.hate)}
+                    </div>
+                    ${statusEffectsHtml(selectedPlayer)}
+                    <div class="enemy-field-cards">
+                        ${selectedPlayer.fieldCards.map(card => fieldCardMiniHtml(card)).join("")}
+                    </div>
+                `;
+                bindStatusEffectEvents(myPanel);
+            }
+
+            enemySlots.forEach((slot, index) => {
+                const player = otherPlayers[index];
+
+                if (player) {
+                    slot.classList.remove("empty-enemy");
+                    slot.classList.toggle("selected-target", false);
+                    slot.classList.toggle("max-hate-player", player.hate >= 3);
+                    slot.classList.toggle("defeated-player", player.defeated);
+                    slot.classList.remove("spectator-hand-owner");
+
+                    slot.innerHTML = `
+                        <div class="enemy-name">${player.defeated ? "💀 " : ""}${player.hate >= 3 ? "🔥 " : ""}${player.name}${disconnectedLabel(player)}</div>
+                        <div class="follower-line ${player.defeated ? "owakon-text" : ""}">
+                            ${followerText(player)}
+                        </div>
+                        <div class="panel-hate ${player.hate >= 3 ? "max-hate-text" : ""}">
+                            ${hateIcons(player.hate)}
+                        </div>
+                        ${statusEffectsHtml(player)}
+                        <div class="enemy-field-cards">
+                            ${player.fieldCards.map(card => fieldCardMiniHtml(card)).join("")}
+                        </div>
+                    `;
+
+                    bindStatusEffectEvents(slot);
+
+                    slot.onclick = () => {
+                        selectedTargetId = player.id;
+                        renderBattlePlayers();
+                        renderHand();
+                        updateMobileActionPanel();
+                    };
+                } else {
+                    slot.classList.add("empty-enemy");
+                    slot.classList.remove("selected-target");
+                    slot.classList.remove("max-hate-player");
+                    slot.classList.remove("defeated-player");
+                    slot.classList.remove("spectator-hand-owner");
+                    slot.onclick = null;
+
+                    slot.innerHTML = `
+                        <div class="enemy-name">空席</div>
+                        <div class="follower-line">-</div>
+                        <div class="panel-hate">◇◇◇</div>
+                    `;
+                }
+            });
+
+            return;
+        }
 
         if (me) {
             myPanel.classList.toggle("max-hate-player", me.hate >= 3);
@@ -1965,6 +2119,8 @@ window.onload = () => {
 
             bindStatusEffectEvents(myPanel);
         }
+
+        const enemies = latestGame.turnOrder.filter(player => player.id !== socket.id);
 
         enemySlots.forEach((slot, index) => {
             const enemy = enemies[index];
@@ -1986,13 +2142,21 @@ window.onload = () => {
                     </div>
                     ${statusEffectsHtml(enemy)}
                     <div class="enemy-field-cards">
-                        ${enemy.fieldCards.map(() => `<span class="mini-set-card">伏</span>`).join("")}
+                        ${enemy.fieldCards.map(card => fieldCardMiniHtml(card)).join("")}
                     </div>
                 `;
 
                 bindStatusEffectEvents(slot);
 
                 slot.onclick = () => {
+                    if (me && me.defeated) {
+                        selectedTargetId = enemy.id;
+                        renderBattlePlayers();
+                        renderHand();
+                        updateMobileActionPanel();
+                        return;
+                    }
+
                     if (enemy.defeated) return;
 
                     selectedTargetId = enemy.id;
@@ -2104,9 +2268,11 @@ window.onload = () => {
     function renderMyFieldCards() {
         if (!latestGame) return;
 
-        const me = latestGame.turnOrder.find(player => player.id === socket.id);
-
         myFieldCards.innerHTML = "";
+
+        if (isSpectatorMode()) return;
+
+        const me = latestGame.turnOrder.find(player => player.id === socket.id);
 
         if (!me) return;
 
@@ -2143,17 +2309,26 @@ window.onload = () => {
     }
 
     function getSelectedSpectatorPlayer(me) {
-        if (!latestGame || !me || !me.defeated) return null;
+        if (!latestGame) return null;
 
-        const aliveEnemies = latestGame.turnOrder.filter(player => {
-            return player.id !== socket.id && !player.defeated;
-        });
+        const spectator = isSpectatorMode();
 
-        if (aliveEnemies.length === 0) return null;
+        if (!spectator && (!me || !me.defeated)) return null;
 
-        const selectedEnemy = aliveEnemies.find(player => player.id === selectedTargetId);
+        const candidates = spectator
+            ? latestGame.turnOrder.filter(p => !p.defeated)
+            : latestGame.turnOrder.filter(p => p.id !== socket.id && !p.defeated);
 
-        return selectedEnemy || aliveEnemies[0];
+        if (candidates.length === 0) {
+            const allCandidates = spectator
+                ? latestGame.turnOrder
+                : latestGame.turnOrder.filter(p => p.id !== socket.id);
+            const sel = allCandidates.find(p => p.id === selectedTargetId);
+            return sel || allCandidates[0] || null;
+        }
+
+        const selected = candidates.find(p => p.id === selectedTargetId);
+        return selected || candidates[0];
     }
 
     function renderHand() {
@@ -2163,18 +2338,20 @@ window.onload = () => {
 
         handArea.innerHTML = "";
 
-        if (!me) return;
+        if (!me && !isSpectatorMode()) return;
 
         const spectatorPlayer = getSelectedSpectatorPlayer(me);
         const isSpectatorHand = Boolean(spectatorPlayer);
-        const displayHand = isSpectatorHand ? (spectatorPlayer.hand || []) : (me.hand || []);
+        const displayHand = isSpectatorHand ? (spectatorPlayer.hand || []) : (me ? me.hand || [] : []);
 
         handArea.classList.toggle("spectator-own-hand-area", isSpectatorHand);
 
         if (isSpectatorHand) {
             const notice = document.createElement("div");
             notice.className = "spectator-own-hand-notice";
-            notice.innerText = `オワコン状態：${spectatorPlayer.name} の手札を観戦中`;
+            notice.innerText = isSpectatorMode()
+                ? `観戦中：${spectatorPlayer.name} の手札`
+                : `オワコン状態：${spectatorPlayer.name} の手札を観戦中`;
             handArea.appendChild(notice);
         }
 

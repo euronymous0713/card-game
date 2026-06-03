@@ -875,26 +875,31 @@ function conditionText(condition) {
 function createGameViewForPlayer(game, viewerId) {
     const view = JSON.parse(JSON.stringify(game));
     const viewer = view.turnOrder.find(player => player.id === viewerId);
-    const canViewEnemyHands = Boolean(viewer && viewer.defeated);
+    const isSpectator = !viewer;
+    const canViewAll = Boolean(isSpectator || (viewer && viewer.defeated));
 
     view.turnOrder = view.turnOrder.map(player => {
         if (player.id === viewerId) return player;
 
         return {
             ...player,
-            hand: canViewEnemyHands ? player.hand : [],
-            fieldCards: player.fieldCards.map(() => ({
-                hidden: true,
-                name: "伏せカード",
-                type: "罠",
-                rarity: "C",
-                effect: "",
-                hateText: ""
-            }))
+            hand: canViewAll ? player.hand : [],
+            fieldCards: canViewAll
+                ? player.fieldCards
+                : player.fieldCards.map(() => ({
+                    hidden: true,
+                    name: "伏せカード",
+                    type: "罠",
+                    rarity: "C",
+                    effect: "",
+                    hateText: ""
+                }))
         };
     });
 
     view.playedCards = view.playedCards.map(log => {
+        if (canViewAll) return log;
+
         if (log.actionType === "setTrap" && log.playerId !== viewerId) {
             return {
                 ...log,
@@ -1474,11 +1479,8 @@ io.on("connection", socket => {
             return;
         }
 
-        if (room.players.length >= 4) {
-            socket.emit("roomFull");
-            socket.emit("errorMessage", "このルームは満員です（最大4人）");
-            return;
-        }
+        const activePlayers = room.players.filter(p => !p.spectator);
+        const isSpectator = activePlayers.length >= 4;
 
         const reconnectToken = generateReconnectToken();
 
@@ -1486,8 +1488,9 @@ io.on("connection", socket => {
             id: socket.id,
             reconnectToken,
             name: playerName,
-            ready: false,
+            ready: isSpectator ? true : false,
             host: false,
+            spectator: isSpectator,
             disconnected: false,
             disconnectedAt: null
         });
@@ -1495,9 +1498,19 @@ io.on("connection", socket => {
         socket.join(roomId);
         socket.data.roomId = roomId;
         socket.data.reconnectToken = reconnectToken;
-        socket.emit("joinSuccess", roomId);
         socket.emit("reconnectInfo", { roomId, reconnectToken });
+
+        if (isSpectator) {
+            socket.emit("spectatorJoinSuccess", { roomId, phase: room.game ? "battle" : "lobby" });
+        } else {
+            socket.emit("joinSuccess", roomId);
+        }
+
         emitRoomUpdate(roomId);
+
+        if (isSpectator && room.game) {
+            emitGameUpdate(roomId);
+        }
     });
 
     socket.on("toggleReady", ({ roomId }) => {
@@ -1522,17 +1535,19 @@ io.on("connection", socket => {
             return;
         }
 
-        if (room.players.length < 2) {
+        const activePlayers = room.players.filter(p => !p.spectator);
+
+        if (activePlayers.length < 2) {
             socket.emit("errorMessage", "ゲーム開始には2人以上必要です");
             return;
         }
 
-        if (!room.players.every(player => player.ready)) {
+        if (!activePlayers.every(player => player.ready)) {
             socket.emit("errorMessage", "全員が準備完了していません");
             return;
         }
 
-        room.game = createGameState(room.players);
+        room.game = createGameState(activePlayers);
 
         io.to(roomId).emit("gameStarted");
         emitGameUpdate(roomId);
@@ -2121,6 +2136,17 @@ io.on("connection", socket => {
         }
 
         clearReconnectCleanupTimer(room, player.reconnectToken);
+
+        if (player.spectator) {
+            room.players = room.players.filter(p => p.id !== socket.id);
+            socket.leave(roomId);
+            socket.data.roomId = null;
+            socket.data.reconnectToken = null;
+            emitRoomUpdate(roomId);
+            socket.emit("battleLeaveSuccess");
+            return;
+        }
+
         const changed = makePlayerOwakonBySocket(roomId, socket.id);
 
         socket.leave(roomId);
