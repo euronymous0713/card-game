@@ -4181,36 +4181,3 @@
         font-size: 10px !important;
     }
 }
-
-/* =========================================================
-   スマホ版：オワコン時も自分プレイヤー情報の位置を変えない
-   - オワコン時の大きい文字指定が自分情報枠の中身を押し上げないようにする
-   - 配置・bottom・order・position は変更しない
-   ========================================================= */
-@media (max-width: 768px) {
-    body.battle-active .my-panel .follower-line.owakon-text {
-        min-height: 14px !important;
-        height: 14px !important;
-        max-height: 14px !important;
-        line-height: 14px !important;
-        margin: 1px 0 0 !important;
-        font-size: 12px !important;
-        white-space: nowrap !important;
-        transform: none !important;
-    }
-
-    body.battle-active .my-panel.defeated-player,
-    body.battle-active .my-panel.defeated-player * {
-        transform: none !important;
-    }
-}
-
-@media (max-width: 380px), (max-height: 720px) {
-    body.battle-active .my-panel .follower-line.owakon-text {
-        min-height: 13px !important;
-        height: 13px !important;
-        max-height: 13px !important;
-        line-height: 13px !important;
-        font-size: 11px !important;
-    }
-}

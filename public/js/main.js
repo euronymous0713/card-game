@@ -1899,7 +1899,7 @@ window.onload = () => {
         latestGame = game;
         endTurnRequestPending = false;
 
-        document.body.classList.toggle("spectator-hand-view", isDefeatedViewer());
+        document.body.classList.remove("spectator-hand-view");
 
         updateTrapWaitingNotice();
 
@@ -1988,11 +1988,9 @@ window.onload = () => {
                     <div class="enemy-field-cards">
                         ${enemy.fieldCards.map(() => `<span class="mini-set-card">伏</span>`).join("")}
                     </div>
-                    ${spectatorEnemyHandHtml(me, enemy)}
                 `;
 
                 bindStatusEffectEvents(slot);
-                bindSpectatorHandEvents(slot, enemy);
 
                 slot.onclick = () => {
                     if (enemy.defeated) return;
@@ -2143,6 +2141,68 @@ window.onload = () => {
         }
     }
 
+    function getSpectatorHandOwner(me) {
+        if (!latestGame || !me || !me.defeated) return null;
+
+        const enemies = latestGame.turnOrder.filter(player => player.id !== socket.id && !player.defeated);
+
+        if (enemies.length === 0) return null;
+
+        const selectedEnemy = enemies.find(player => player.id === selectedTargetId);
+
+        return selectedEnemy || enemies[0];
+    }
+
+    function renderSpectatorHand(owner) {
+        handArea.innerHTML = "";
+
+        for (let i = 0; i < 4; i++) {
+            const card = owner?.hand?.[i];
+            const cardElement = document.createElement("div");
+
+            if (!card) {
+                cardElement.className = "hand-card empty-hand-card spectator-hand-empty-slot";
+                cardElement.innerHTML = `
+                    <div class="card-name">空</div>
+                    <div class="card-type">観戦中</div>
+                `;
+                handArea.appendChild(cardElement);
+                continue;
+            }
+
+            cardElement.className = `hand-card spectator-view-hand-card ${rarityClass(card.rarity)}`;
+            cardElement.draggable = false;
+
+            cardElement.innerHTML = `
+                <div class="card-rarity-badge ${rarityClass(card.rarity)}">${normalizeRarity(card.rarity)}</div>
+                <div class="card-name">${card.name}</div>
+                <div class="card-type">${card.type}</div>
+                <div class="card-hate">${card.hateText || "観戦中"}</div>
+            `;
+
+            cardElement.onmouseenter = () => {
+                cardDetail.innerHTML = cardDetailHtml(card);
+            };
+
+            cardElement.onmouseleave = () => {
+                if (!isMobileLayout()) {
+                    resetCardDetail();
+                }
+            };
+
+            cardElement.onclick = () => {
+                selectedMobileCardInstanceId = "";
+                selectedMobileFieldCardKey = "";
+                selectedMobileStatusKey = "";
+                mobileActionPanel.classList.remove("show");
+                document.body.classList.remove("mobile-card-action-open");
+                cardDetail.innerHTML = cardDetailHtml(card);
+            };
+
+            handArea.appendChild(cardElement);
+        }
+    }
+
     function renderHand() {
         if (!latestGame) return;
 
@@ -2151,6 +2211,13 @@ window.onload = () => {
         handArea.innerHTML = "";
 
         if (!me) return;
+
+        const spectatorHandOwner = getSpectatorHandOwner(me);
+
+        if (spectatorHandOwner) {
+            renderSpectatorHand(spectatorHandOwner);
+            return;
+        }
 
         for (let i = 0; i < 4; i++) {
             const card = me.hand[i];

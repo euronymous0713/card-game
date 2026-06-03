@@ -1830,9 +1830,8 @@ body.battle-active .mobile-trap-waiting-notice.show {
    - オワコンになったプレイヤーだけ、他プレイヤーの手札を小さく確認できる
    ========================================================= */
 
-/* 選択中ラベルの基準位置は敵パネルだけに限定します。
-   自分プレイヤー情報(.my-panel)は absolute 配置なので、ここで relative にしません。 */
-.enemy-panel {
+.enemy-panel,
+.my-panel {
     position: relative;
 }
 
