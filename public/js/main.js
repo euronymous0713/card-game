@@ -1967,6 +1967,7 @@ window.onload = () => {
         const oldGame = previousGame;
 
         latestGame = game;
+        document.body.classList.toggle("spectating", isSpectatorMode());
         endTurnRequestPending = false;
 
         document.body.classList.remove("spectator-hand-view");
@@ -2399,11 +2400,21 @@ window.onload = () => {
 
             cardElement.onclick = () => {
                 if (isSpectatorHand) {
-                    selectedMobileCardInstanceId = "";
-                    cardDetail.innerHTML = cardDetailHtml(card);
                     if (isMobileLayout()) {
-                        showMobileEffect(card);
+                        const spectatorKey = `spectator-${i}`;
+                        if (selectedMobileFieldCardKey === spectatorKey && mobileEffectOverlay.classList.contains("show")) {
+                            selectedMobileFieldCardKey = "";
+                            hideMobileEffect();
+                        } else {
+                            selectedMobileCardInstanceId = "";
+                            selectedMobileStatusKey = "";
+                            selectedMobileFieldCardKey = spectatorKey;
+                            cardDetail.innerHTML = cardDetailHtml(card);
+                            showMobileEffect(card);
+                        }
                     } else {
+                        selectedMobileCardInstanceId = "";
+                        cardDetail.innerHTML = cardDetailHtml(card);
                         hideMobileEffect();
                     }
                     updateMobileActionPanel();
@@ -2552,6 +2563,7 @@ window.onload = () => {
         draggedCard = null;
         document.body.classList.remove("mobile-card-action-open");
         document.body.classList.remove("spectator-hand-view");
+        document.body.classList.remove("spectating");
         closeMobileHistory();
         closeMobileSettings();
         hideTrapWaitingNotice();

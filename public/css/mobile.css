@@ -4237,3 +4237,25 @@
         border-width: 1px !important;
     }
 }
+
+/* =========================================================
+   スマホ版：通常対戦時のカード効果表示を下にずらして
+   他プレイヤー情報・カード選択パネルと被らないようにする
+   観戦時（body.spectating）は従来の中央配置を維持する
+   ========================================================= */
+@media (max-width: 768px) {
+    body.battle-active:not(.spectating) .mobile-effect-card {
+        transform: none !important;
+    }
+
+    body.battle-active:not(.spectating):not(.mobile-card-action-open) .mobile-effect-overlay.show {
+        align-items: flex-start !important;
+        padding-top: 175px !important;
+    }
+}
+
+@media (max-width: 380px), (max-height: 720px) {
+    body.battle-active:not(.spectating):not(.mobile-card-action-open) .mobile-effect-overlay.show {
+        padding-top: 160px !important;
+    }
+}
