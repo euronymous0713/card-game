@@ -1494,6 +1494,23 @@ function resolveTrapEffect(game, roomId, trapOwner, sourcePlayer, trap, context,
         return { canceled: false };
     }
 
+    if (trap.trapEffect === "cancelDamage") {
+        addLog(game, {
+            actionType: "trapEffect",
+            playerId: trapOwner.id,
+            playerName: trapOwner.name,
+            targetName: sourcePlayer.name,
+            cardName: trap.name,
+            cardType: trap.type,
+            cardRarity: normalizeRarity(trap.rarity),
+            hateText: "ダメージを無効化した",
+            log: `${trapOwner.name} はダメージを無効化した`,
+            trapDetailText: "ダメージ無効化"
+        });
+
+        return { canceled: true };
+    }
+
     if (trap.trapEffect === "damageAndMute") {
         const damage = trap.trapDamage || 0;
         const muteTurns = Math.max(1, Number(trap.trapMuteTurns || 1));
@@ -2175,6 +2192,11 @@ io.on("connection", socket => {
             caster.followers =
                 Math.min(10000, caster.followers + usedCard.heal);
             const healAmount = Math.max(0, caster.followers - beforeFollowers);
+
+            if (usedCard.clearStatus) {
+                caster.statusEffects = [];
+                caster.skipTurns = 0;
+            }
 
             if (usedCard.hateTarget === "self") {
                 changeHate(caster, usedCard.hateChange);
