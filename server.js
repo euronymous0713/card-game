@@ -89,10 +89,14 @@ function generateCardInstance(cardId = null) {
     };
 }
 
-function drawCards(player) {
-    while (player.hand.length < 4) {
+function drawCards(player, maxDraw = 4) {
+    let drawn = 0;
+    while (player.hand.length < 4 && drawn < maxDraw) {
         const card = generateCardInstance();
-        if (card) player.hand.push(card);
+        if (card) {
+            player.hand.push(card);
+            drawn++;
+        }
     }
 }
 
@@ -172,6 +176,11 @@ const STATUS_INFO = {
         label: "晒し中",
         icon: "👁",
         description: "受ける攻撃ダメージが300増える"
+    },
+    digitalDetox: {
+        label: "電波障害",
+        icon: "📵",
+        description: "ターン開始時のドローが1枚になる"
     }
 };
 
@@ -350,7 +359,8 @@ function moveToNextAliveTurn(game) {
         Number(currentPlayer.extraTurns || 0) > 0
     ) {
         currentPlayer.extraTurns -= 1;
-        drawCards(currentPlayer);
+        const extraDrawLimit = hasStatusEffect(currentPlayer, "digitalDetox") ? 1 : 4;
+        drawCards(currentPlayer, extraDrawLimit);
 
         addLog(game, {
             actionType: "extraTurn",
@@ -407,7 +417,8 @@ function moveToNextAliveTurn(game) {
             continue;
         }
 
-        drawCards(nextPlayer);
+        const drawLimit = hasStatusEffect(nextPlayer, "digitalDetox") ? 1 : 4;
+        drawCards(nextPlayer, drawLimit);
         return;
     } while (guard < game.turnOrder.length * 3);
 }
