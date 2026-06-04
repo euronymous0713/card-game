@@ -390,6 +390,8 @@ function moveToNextAliveTurn(game) {
             continue;
         }
 
+        const drawLimit = hasStatusEffect(nextPlayer, "digitalDetox") ? 1 : 4;
+
         applyTurnStartEffects(game, nextPlayer);
         checkGameOver(game);
 
@@ -417,7 +419,6 @@ function moveToNextAliveTurn(game) {
             continue;
         }
 
-        const drawLimit = hasStatusEffect(nextPlayer, "digitalDetox") ? 1 : 4;
         drawCards(nextPlayer, drawLimit);
         return;
     } while (guard < game.turnOrder.length * 3);
