@@ -153,11 +153,6 @@ const STATUS_INFO = {
         icon: "🔥",
         description: "ターン開始時にスリップダメージを受ける"
     },
-    burn: {
-        label: "炎上",
-        icon: "🔥",
-        description: "ターン開始時にスリップダメージを受ける"
-    },
     freeze: {
         label: "凍結",
         icon: "🧊",
@@ -207,6 +202,12 @@ function addStatusEffect(player, effect) {
 
     const info = statusInfo(effect.type);
     const remainingTurns = Math.max(1, Number(effect.remainingTurns || effect.durationTurns || 1));
+
+    const existing = player.statusEffects.find(e => e && e.type === effect.type);
+    if (existing) {
+        existing.remainingTurns = Number(existing.remainingTurns || 0) + remainingTurns;
+        return;
+    }
 
     player.statusEffects.push({
         type: effect.type,
@@ -585,9 +586,25 @@ function applySpecialEffect(game, card, caster, target) {
     }
 
     if (effectType === "skipTurn") {
-        if (!target) return details;
-
         const skipTurns = Math.max(1, Number(card.skipTurns || 1));
+
+        if (!target) {
+            const enemies = game.turnOrder.filter(p => p.id !== caster.id && !p.defeated);
+            enemies.forEach(enemy => {
+                enemy.skipTurns = Number(enemy.skipTurns || 0) + skipTurns;
+                addStatusEffect(enemy, {
+                    type: "freeze",
+                    remainingTurns: skipTurns,
+                    sourcePlayerId: caster.id,
+                    sourcePlayerName: caster.name,
+                    cardName: card.name,
+                    cardRarity: card.rarity
+                });
+            });
+            details.push(`全体凍結：${skipTurns}ターン（${enemies.length}人）`);
+            return details;
+        }
+
         target.skipTurns = Number(target.skipTurns || 0) + skipTurns;
         addStatusEffect(target, {
             type: "freeze",
@@ -602,10 +619,25 @@ function applySpecialEffect(game, card, caster, target) {
     }
 
     if (effectType === "slipDamage") {
-        if (!target) return details;
-
         const slipDamage = Math.max(0, Number(card.slipDamage || 0));
         const durationTurns = Math.max(1, Number(card.durationTurns || 1));
+
+        if (!target) {
+            const enemies = game.turnOrder.filter(p => p.id !== caster.id && !p.defeated);
+            enemies.forEach(enemy => {
+                addStatusEffect(enemy, {
+                    type: "slipDamage",
+                    amount: slipDamage,
+                    remainingTurns: durationTurns,
+                    sourcePlayerId: caster.id,
+                    sourcePlayerName: caster.name,
+                    cardName: card.name,
+                    cardRarity: card.rarity
+                });
+            });
+            details.push(`全体炎上：${formatNumber(slipDamage)} × ${durationTurns}ターン（${enemies.length}人）`);
+            return details;
+        }
 
         addStatusEffect(target, {
             type: "slipDamage",
@@ -617,7 +649,7 @@ function applySpecialEffect(game, card, caster, target) {
             cardRarity: card.rarity
         });
 
-        details.push(`スリップダメージ：${formatNumber(slipDamage)} × ${durationTurns}ターン`);
+        details.push(`炎上：${formatNumber(slipDamage)} × ${durationTurns}ターン`);
         return details;
     }
 
@@ -642,12 +674,30 @@ function applySpecialEffect(game, card, caster, target) {
     }
 
     if (effectType === "applyStatus") {
-        if (!target) return details;
-
         const statusType = card.statusType || "burn";
         const durationTurns = Math.max(1, Number(card.durationTurns || 1));
         const amount = Number(card.statusAmount || card.slipDamage || 0);
         const info = statusInfo(statusType);
+
+        if (!target) {
+            const enemies = game.turnOrder.filter(p => p.id !== caster.id && !p.defeated);
+            enemies.forEach(enemy => {
+                addStatusEffect(enemy, {
+                    type: statusType,
+                    amount,
+                    remainingTurns: durationTurns,
+                    sourcePlayerId: caster.id,
+                    sourcePlayerName: caster.name,
+                    cardName: card.name,
+                    cardRarity: card.rarity
+                });
+                if (statusType === "freeze") {
+                    enemy.skipTurns = Number(enemy.skipTurns || 0) + durationTurns;
+                }
+            });
+            details.push(`全体${info.label}：${durationTurns}ターン（${enemies.length}人）`);
+            return details;
+        }
 
         addStatusEffect(target, {
             type: statusType,
@@ -664,6 +714,17 @@ function applySpecialEffect(game, card, caster, target) {
         }
 
         details.push(`${info.label}：${durationTurns}ターン${amount > 0 ? ` / ${formatNumber(amount)}ダメージ` : ""}`);
+        return details;
+    }
+
+    if (effectType === "discardAllEnemiesHand") {
+        let total = 0;
+        game.turnOrder.forEach(player => {
+            if (player.id === caster.id || player.defeated) return;
+            total += player.hand.length;
+            player.hand = [];
+        });
+        details.push(`敵全員の手札破壊：${total}枚`);
         return details;
     }
 
@@ -1321,6 +1382,176 @@ function resolveTrapEffect(game, roomId, trapOwner, sourcePlayer, trap, context,
         return { canceled: false };
     }
 
+    if (trap.trapEffect === "freezeAttacker") {
+        const freezeTurns = Math.max(1, Number(trap.trapFreezeTurns || 1));
+
+        addLog(game, {
+            actionType: "trapEffect",
+            playerId: trapOwner.id,
+            playerName: trapOwner.name,
+            targetName: sourcePlayer.name,
+            cardName: trap.name,
+            cardType: trap.type,
+            cardRarity: normalizeRarity(trap.rarity),
+            hateText: `${sourcePlayer.name} を ${freezeTurns}ターン凍結`,
+            log: `${trapOwner.name} の罠が ${sourcePlayer.name} を凍結した`,
+            trapDetailText: `凍結：${sourcePlayer.name} ${freezeTurns}ターン行動不能`
+        });
+
+        sourcePlayer.skipTurns = Number(sourcePlayer.skipTurns || 0) + freezeTurns;
+        addStatusEffect(sourcePlayer, {
+            type: "freeze",
+            remainingTurns: freezeTurns,
+            sourcePlayerId: trapOwner.id,
+            sourcePlayerName: trapOwner.name,
+            cardName: trap.name,
+            cardRarity: trap.rarity
+        });
+
+        return { canceled: false };
+    }
+
+    if (trap.trapEffect === "shadowbanAttacker") {
+        const shadowbanTurns = Math.max(1, Number(trap.trapShadowbanTurns || 1));
+
+        addLog(game, {
+            actionType: "trapEffect",
+            playerId: trapOwner.id,
+            playerName: trapOwner.name,
+            targetName: sourcePlayer.name,
+            cardName: trap.name,
+            cardType: trap.type,
+            cardRarity: normalizeRarity(trap.rarity),
+            hateText: `${sourcePlayer.name} を ${shadowbanTurns}ターンシャドウバン`,
+            log: `${trapOwner.name} の罠が ${sourcePlayer.name} をシャドウバンした`,
+            trapDetailText: `シャドウバン：${sourcePlayer.name} ${shadowbanTurns}ターン`
+        });
+
+        addStatusEffect(sourcePlayer, {
+            type: "shadowban",
+            remainingTurns: shadowbanTurns,
+            sourcePlayerId: trapOwner.id,
+            sourcePlayerName: trapOwner.name,
+            cardName: trap.name,
+            cardRarity: trap.rarity
+        });
+
+        return { canceled: false };
+    }
+
+    if (trap.trapEffect === "damageAndFreeze") {
+        const damage = trap.trapDamage || 0;
+        const freezeTurns = Math.max(1, Number(trap.trapFreezeTurns || 1));
+        const hateChange = trap.trapHateChange || 0;
+
+        addLog(game, {
+            actionType: "trapEffect",
+            playerId: trapOwner.id,
+            playerName: trapOwner.name,
+            targetName: sourcePlayer.name,
+            cardName: trap.name,
+            cardType: trap.type,
+            cardRarity: normalizeRarity(trap.rarity),
+            hateText: `${sourcePlayer.name} に ${damage.toLocaleString()}ダメージ / 凍結 ${freezeTurns}ターン`,
+            log: `${trapOwner.name} の罠が ${sourcePlayer.name} に反撃・凍結した`,
+            damageText: damage > 0 ? `罠ダメージ：${damage.toLocaleString()}` : "ダメージなし",
+            damageAmount: damage,
+            trapDetailText: `反撃：${sourcePlayer.name} に ${damage.toLocaleString()}ダメージ / 凍結 ${freezeTurns}ターン`
+        });
+
+        sourcePlayer.skipTurns = Number(sourcePlayer.skipTurns || 0) + freezeTurns;
+        addStatusEffect(sourcePlayer, {
+            type: "freeze",
+            remainingTurns: freezeTurns,
+            sourcePlayerId: trapOwner.id,
+            sourcePlayerName: trapOwner.name,
+            cardName: trap.name,
+            cardRarity: trap.rarity
+        });
+
+        if (hateChange !== 0) changeHate(sourcePlayer, hateChange);
+
+        if (damage > 0) {
+            const pending = requestTrapEffectThenDamage({
+                roomId,
+                game,
+                targetPlayer: sourcePlayer,
+                sourcePlayer: trapOwner,
+                damage,
+                trapName: trap.name,
+                trapType: trap.type,
+                trapRarity: trap.rarity,
+                trapEffectText: trap.effect,
+                trapHateText: trap.hateText,
+                onComplete: () => {
+                    afterPendingComplete({ canceled: false });
+                }
+            });
+
+            if (pending) return { canceled: false, pending: true };
+        }
+
+        return { canceled: false };
+    }
+
+    if (trap.trapEffect === "damageAndMute") {
+        const damage = trap.trapDamage || 0;
+        const muteTurns = Math.max(1, Number(trap.trapMuteTurns || 1));
+        const hateChange = trap.trapHateChange || 0;
+
+        addLog(game, {
+            actionType: "trapEffect",
+            playerId: trapOwner.id,
+            playerName: trapOwner.name,
+            targetName: sourcePlayer.name,
+            cardName: trap.name,
+            cardType: trap.type,
+            cardRarity: normalizeRarity(trap.rarity),
+            hateText: `${sourcePlayer.name} に ${damage.toLocaleString()}ダメージ / ミュート ${muteTurns}ターン`,
+            log: `${trapOwner.name} の罠が ${sourcePlayer.name} を反撃・ミュートした`,
+            damageText: damage > 0 ? `罠ダメージ：${damage.toLocaleString()}` : "ダメージなし",
+            damageAmount: damage,
+            trapDetailText: `反撃：${sourcePlayer.name} に ${damage.toLocaleString()}ダメージ / ミュート ${muteTurns}ターン`
+        });
+
+        addStatusEffect(sourcePlayer, {
+            type: "mute",
+            remainingTurns: muteTurns,
+            sourcePlayerId: trapOwner.id,
+            sourcePlayerName: trapOwner.name,
+            cardName: trap.name,
+            cardRarity: trap.rarity
+        });
+
+        if (hateChange !== 0) {
+            changeHate(sourcePlayer, hateChange);
+        }
+
+        if (damage > 0) {
+            const pending = requestTrapEffectThenDamage({
+                roomId,
+                game,
+                targetPlayer: sourcePlayer,
+                sourcePlayer: trapOwner,
+                damage,
+                trapName: trap.name,
+                trapType: trap.type,
+                trapRarity: trap.rarity,
+                trapEffectText: trap.effect,
+                trapHateText: trap.hateText,
+                onComplete: () => {
+                    afterPendingComplete({ canceled: false });
+                }
+            });
+
+            if (pending) {
+                return { canceled: false, pending: true };
+            }
+        }
+
+        return { canceled: false };
+    }
+
     return { canceled: false };
 }
 
@@ -1680,7 +1911,10 @@ io.on("connection", socket => {
                 trapCondition: usedCard.trapCondition,
                 trapEffect: usedCard.trapEffect,
                 trapDamage: usedCard.trapDamage || 0,
-                trapHateChange: usedCard.trapHateChange || 0
+                trapHateChange: usedCard.trapHateChange || 0,
+                trapMuteTurns: usedCard.trapMuteTurns || 0,
+                trapFreezeTurns: usedCard.trapFreezeTurns || 0,
+                trapShadowbanTurns: usedCard.trapShadowbanTurns || 0
             });
 
             if (usedCard.hateChange) {
@@ -1783,6 +2017,34 @@ io.on("connection", socket => {
                     }
 
                     applyDamage(game, enemy, damage);
+
+                    if (usedCard.attackSlipDamage > 0) {
+                        addStatusEffect(enemy, {
+                            type: "slipDamage",
+                            amount: Number(usedCard.attackSlipDamage),
+                            remainingTurns: Number(usedCard.attackSlipDurationTurns || 1),
+                            sourcePlayerId: caster.id,
+                            sourcePlayerName: caster.name,
+                            cardName: usedCard.name,
+                            cardRarity: usedCard.rarity
+                        });
+                    }
+
+                    if (usedCard.attackStatusType) {
+                        const dur = Number(usedCard.attackStatusDuration || 1);
+                        addStatusEffect(enemy, {
+                            type: usedCard.attackStatusType,
+                            remainingTurns: dur,
+                            sourcePlayerId: caster.id,
+                            sourcePlayerName: caster.name,
+                            cardName: usedCard.name,
+                            cardRarity: usedCard.rarity
+                        });
+                        if (usedCard.attackStatusType === "freeze") {
+                            enemy.skipTurns = Number(enemy.skipTurns || 0) + dur;
+                        }
+                    }
+
                     totalDamage += damage;
                     damageDetails.push(`${enemy.name}:${formatNumber(damage)}`);
                 });
@@ -1824,6 +2086,33 @@ io.on("connection", socket => {
             const afterDamage = result => {
                 if (!result.canceled) {
                     applyDamage(game, finalTarget, damage);
+
+                    if (usedCard.attackSlipDamage > 0) {
+                        addStatusEffect(finalTarget, {
+                            type: "slipDamage",
+                            amount: Number(usedCard.attackSlipDamage),
+                            remainingTurns: Number(usedCard.attackSlipDurationTurns || 1),
+                            sourcePlayerId: caster.id,
+                            sourcePlayerName: caster.name,
+                            cardName: usedCard.name,
+                            cardRarity: usedCard.rarity
+                        });
+                    }
+
+                    if (usedCard.attackStatusType) {
+                        const dur = Number(usedCard.attackStatusDuration || 1);
+                        addStatusEffect(finalTarget, {
+                            type: usedCard.attackStatusType,
+                            remainingTurns: dur,
+                            sourcePlayerId: caster.id,
+                            sourcePlayerName: caster.name,
+                            cardName: usedCard.name,
+                            cardRarity: usedCard.rarity
+                        });
+                        if (usedCard.attackStatusType === "freeze") {
+                            finalTarget.skipTurns = Number(finalTarget.skipTurns || 0) + dur;
+                        }
+                    }
                 }
 
                 if (usedCard.hateTarget === "self") {
