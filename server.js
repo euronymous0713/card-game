@@ -212,10 +212,20 @@ function addStatusEffect(player, effect) {
     const info = statusInfo(effect.type);
     const remainingTurns = Math.max(1, Number(effect.remainingTurns || effect.durationTurns || 1));
 
-    const existing = player.statusEffects.find(e => e && e.type === effect.type);
-    if (existing) {
-        existing.remainingTurns = Number(existing.remainingTurns || 0) + remainingTurns;
-        return;
+    if (effect.type === "slipDamage") {
+        const existing = player.statusEffects.find(
+            e => e && e.type === "slipDamage" && Number(e.amount) === Number(effect.amount || 0)
+        );
+        if (existing) {
+            existing.remainingTurns = Number(existing.remainingTurns || 0) + remainingTurns;
+            return;
+        }
+    } else {
+        const existing = player.statusEffects.find(e => e && e.type === effect.type);
+        if (existing) {
+            existing.remainingTurns = Number(existing.remainingTurns || 0) + remainingTurns;
+            return;
+        }
     }
 
     player.statusEffects.push({
@@ -2082,12 +2092,19 @@ io.on("connection", socket => {
                     changeHate(caster, usedCard.hateChange);
                 }
 
-                finishCardPlay({
+                const allEnemiesExtra = {
                     log: `${caster.name} → 敵全体：${usedCard.name}`,
                     damageText: `全体ダメージ：${damageDetails.join(" / ")}`,
                     damageAmount: totalDamage,
                     damageDetailText: damageDetails.join(" / ")
-                });
+                };
+
+                if (usedCard.attackStatusType) {
+                    const dur = Number(usedCard.attackStatusDuration || 1);
+                    allEnemiesExtra.specialText = `${statusInfo(usedCard.attackStatusType).label}：${dur}ターン付与（全体）`;
+                }
+
+                finishCardPlay(allEnemiesExtra);
 
                 return;
             }
@@ -2141,6 +2158,7 @@ io.on("connection", socket => {
                         if (usedCard.attackStatusType === "freeze") {
                             finalTarget.skipTurns = Number(finalTarget.skipTurns || 0) + dur;
                         }
+                        bonusDetails.push(`${statusInfo(usedCard.attackStatusType).label}：${dur}ターン付与`);
                     }
                 }
 
@@ -2221,7 +2239,8 @@ io.on("connection", socket => {
 
             finishCardPlay({
                 healText: `回復：${healAmount.toLocaleString()}`,
-                healAmount
+                healAmount,
+                ...(usedCard.clearStatus ? { specialText: "状態異常解除" } : {})
             });
             return;
         }

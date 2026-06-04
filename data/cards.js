@@ -296,23 +296,6 @@ module.exports = [
         effect: "自分の状態異常をすべて解除する。"
     },
     {
-        id: "card-63",
-        name: "ミュート申請",
-        rarity: "C",
-        type: "特殊",
-        kind: "special",
-        targetType: "enemy",
-        effectType: "applyStatus",
-        damage: 0,
-        heal: 0,
-        hateTarget: "self",
-        hateChange: 0,
-        hateText: "ヘイト変動なし",
-        effect: "対象を1ターン、ミュート状態にする。ミュート中はヘイト変動を受けない。",
-        statusType: "mute",
-        durationTurns: 1
-    },
-    {
         id: "card-64",
         name: "プロフ晒し",
         rarity: "C",
