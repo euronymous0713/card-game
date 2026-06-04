@@ -102,32 +102,18 @@ module.exports = [
         hateBonus: [{ targetHateAtLeast: 2, extraDamage: 200 }]
     },
     {
-        id: "card-55",
-        name: "パクツイ",
-        rarity: "C",
-        type: "攻撃",
-        kind: "attack",
-        targetType: "enemy",
-        damage: 750,
-        heal: 0,
-        hateTarget: "target",
-        hateChange: 1,
-        hateText: "対象のヘイト +1",
-        effect: "対象に750フォロワーダメージ。対象のヘイトが3ならダメージ2倍。対象のヘイトが1上がる。"
-    },
-    {
         id: "card-56",
         name: "懐古厨",
         rarity: "C",
         type: "攻撃",
         kind: "attack",
         targetType: "enemy",
-        damage: 750,
+        damage: 800,
         heal: 0,
         hateTarget: "self",
         hateChange: 0,
         hateText: "ヘイト変動なし",
-        effect: "対象に750フォロワーダメージ。対象のヘイトが3ならダメージ2倍。対象が現在フォロワー1位（同率含む）なら、追加で300ダメージ。",
+        effect: "対象に800フォロワーダメージ。対象のヘイトが3ならダメージ2倍。対象が現在フォロワー1位（同率含む）なら、追加で300ダメージ。",
         rankBonus: [{ condition: "leader", extraDamage: 300 }]
     },
     {
@@ -1026,20 +1012,6 @@ module.exports = [
         effect: "自分のフォロワーを2,000回復。"
     },
     {
-        id: "card-39",
-        name: "祭り開催",
-        rarity: "R",
-        type: "妨害",
-        kind: "hate",
-        targetType: "enemy",
-        damage: 0,
-        heal: 0,
-        hateTarget: "target",
-        hateChange: 3,
-        hateText: "対象のヘイト +3",
-        effect: "対象プレイヤーのヘイトを3上げる。"
-    },
-    {
         id: "card-31",
         name: "ミュート通告",
         rarity: "R",
@@ -1190,6 +1162,20 @@ module.exports = [
         trapCondition: "onTrapEffect",
         trapEffect: "cancelTrapAndDestroyEnemyTraps"
     },
+    {
+        id: "card-106",
+        name: "喧嘩凸",
+        rarity: "R",
+        type: "ヘイト",
+        kind: "hate",
+        targetType: "enemy",
+        damage: 0,
+        heal: 0,
+        hateTarget: "both",
+        hateChange: 3,
+        hateText: "自分・対象のヘイトを3にする",
+        effect: "自分と対象のヘイトが3になる。"
+    },
     // ===== SR =====
     {
         id: "card-42",
@@ -1302,13 +1288,27 @@ module.exports = [
         type: "攻撃",
         kind: "attack",
         targetType: "enemy",
-        damage: 2200,
+        damage: 1800,
+        heal: 0,
+        hateTarget: "target",
+        hateChange: 2,
+        hateText: "対象のヘイト +2",
+        effect: "対象に1,800フォロワーダメージ。対象のヘイトが3ならダメージ2倍。対象のヘイトが3以上なら500追加ダメージ。対象のヘイトが2上がる。",
+        hateBonus: [{ targetHateAtLeast: 3, extraDamage: 500 }]
+    },
+    {
+        id: "card-39",
+        name: "祭り開催",
+        rarity: "SR",
+        type: "妨害",
+        kind: "hate",
+        targetType: "enemy",
+        damage: 0,
         heal: 0,
         hateTarget: "target",
         hateChange: 3,
         hateText: "対象のヘイト +3",
-        effect: "対象に2,200フォロワーダメージ。対象のヘイトが3ならダメージ2倍。対象のヘイトが3以上なら800追加ダメージ。対象のヘイトが3上がる。",
-        hateBonus: [{ targetHateAtLeast: 3, extraDamage: 800 }]
+        effect: "対象プレイヤーのヘイトを3上げる。"
     },
     {
         id: "card-46",

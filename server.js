@@ -2152,6 +2152,11 @@ io.on("connection", socket => {
                     changeHate(finalTarget, usedCard.hateChange);
                 }
 
+                if (usedCard.hateTarget === "both") {
+                    changeHate(caster, usedCard.hateChange);
+                    changeHate(finalTarget, usedCard.hateChange);
+                }
+
                 finishCardPlay({
                     log: `${caster.name} → ${finalTarget.name}：${usedCard.name}`,
                     damageText: result.canceled
@@ -2244,12 +2249,19 @@ io.on("connection", socket => {
                         changeHate(finalTarget, usedCard.hateChange);
                     }
 
+                    if (usedCard.hateTarget === "both") {
+                        changeHate(caster, usedCard.hateChange);
+                    }
+
                     finishCardPlay();
                 }
             });
 
             if (!requested) {
                 changeHate(finalTarget, usedCard.hateChange);
+                if (usedCard.hateTarget === "both") {
+                    changeHate(caster, usedCard.hateChange);
+                }
                 finishCardPlay();
             }
 
