@@ -1073,7 +1073,7 @@ module.exports = [
     {
         id: "card-76",
         name: "連投",
-        rarity: "UC",
+        rarity: "SR",
         type: "特殊",
         kind: "special",
         targetType: "self",
@@ -1420,22 +1420,6 @@ module.exports = [
         hateChange: 0,
         hateText: "ヘイト変動なし",
         effect: "敵全体の手札をすべて捨てさせる。"
-    },
-    {
-        id: "card-98",
-        name: "全体凍結令",
-        rarity: "SR",
-        type: "特殊",
-        kind: "special",
-        targetType: "allEnemies",
-        effectType: "skipTurn",
-        damage: 0,
-        heal: 0,
-        hateTarget: "self",
-        hateChange: 0,
-        hateText: "ヘイト変動なし",
-        effect: "敵全体を1ターン凍結し、行動不能にする。",
-        skipTurns: 1
     },
     {
         id: "card-99",
