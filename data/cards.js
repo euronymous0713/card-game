@@ -1,4 +1,5 @@
 module.exports = [
+    // ===== C =====
     {
         id: "card-1",
         name: "草",
@@ -6,16 +7,30 @@ module.exports = [
         type: "攻撃",
         kind: "attack",
         targetType: "enemy",
-        damage: 700,
+        damage: 600,
         heal: 0,
         hateTarget: "self",
         hateChange: 0,
         hateText: "ヘイト変動なし",
-        effect: "対象に700フォロワーダメージ。対象のヘイトが3ならダメージ2倍。"
+        effect: "対象に600フォロワーダメージ。対象のヘイトが3ならダメージ2倍。"
     },
     {
         id: "card-2",
         name: "長文乙",
+        rarity: "C",
+        type: "攻撃",
+        kind: "attack",
+        targetType: "enemy",
+        damage: 800,
+        heal: 0,
+        hateTarget: "self",
+        hateChange: 0,
+        hateText: "ヘイト変動なし",
+        effect: "対象に800フォロワーダメージ。対象のヘイトが3ならダメージ2倍。"
+    },
+    {
+        id: "card-3",
+        name: "ブーメラン",
         rarity: "C",
         type: "攻撃",
         kind: "attack",
@@ -28,33 +43,19 @@ module.exports = [
         effect: "対象に900フォロワーダメージ。対象のヘイトが3ならダメージ2倍。"
     },
     {
-        id: "card-3",
-        name: "ブーメラン",
-        rarity: "C",
-        type: "攻撃",
-        kind: "attack",
-        targetType: "enemy",
-        damage: 1000,
-        heal: 0,
-        hateTarget: "self",
-        hateChange: 0,
-        hateText: "ヘイト変動なし",
-        effect: "対象に1,000フォロワーダメージ。対象のヘイトが3ならダメージ2倍。"
-    },
-    {
         id: "card-4",
         name: "晒し",
         rarity: "C",
         type: "攻撃",
         kind: "attack",
         targetType: "enemy",
-        damage: 900,
+        damage: 800,
         heal: 0,
         hateTarget: "self",
         hateChange: 0,
         hateText: "ヘイト変動なし",
-        effect: "対象に900フォロワーダメージ。対象のヘイトが3ならダメージ2倍。ヘイト条件で追加効果。",
-        hateBonus: [{ targetHateAtLeast: 1, extraDamage: 300 }]
+        effect: "対象に800フォロワーダメージ。対象のヘイトが3ならダメージ2倍。ヘイト条件で追加効果。",
+        hateBonus: [{ targetHateAtLeast: 1, extraDamage: 200 }]
     },
     {
         id: "card-5",
@@ -63,12 +64,12 @@ module.exports = [
         type: "攻撃",
         kind: "attack",
         targetType: "enemy",
-        damage: 1000,
+        damage: 900,
         heal: 0,
         hateTarget: "self",
         hateChange: 1,
         hateText: "自分のヘイト +1",
-        effect: "対象に1,000フォロワーダメージ。対象のヘイトが3ならダメージ2倍。自分のヘイトが1上がる。"
+        effect: "対象に900フォロワーダメージ。対象のヘイトが3ならダメージ2倍。自分のヘイトが1上がる。"
     },
     {
         id: "card-6",
@@ -78,43 +79,15 @@ module.exports = [
         kind: "support",
         targetType: "self",
         damage: 0,
-        heal: 500,
+        heal: 400,
         hateTarget: "self",
         hateChange: -1,
         hateText: "自分のヘイト -1",
-        effect: "自分のフォロワーを500回復。自分のヘイトが1下がる。"
+        effect: "自分のフォロワーを400回復。自分のヘイトが1下がる。"
     },
     {
         id: "card-7",
         name: "お気持ち表明",
-        rarity: "C",
-        type: "防御",
-        kind: "support",
-        targetType: "self",
-        damage: 0,
-        heal: 800,
-        hateTarget: "self",
-        hateChange: -1,
-        hateText: "自分のヘイト -1",
-        effect: "自分のフォロワーを800回復。自分のヘイトが1下がる。"
-    },
-    {
-        id: "card-8",
-        name: "ブロック",
-        rarity: "C",
-        type: "防御",
-        kind: "support",
-        targetType: "self",
-        damage: 0,
-        heal: 900,
-        hateTarget: "self",
-        hateChange: 0,
-        hateText: "ヘイト変動なし",
-        effect: "自分のフォロワーを900回復。"
-    },
-    {
-        id: "card-9",
-        name: "スルースキル",
         rarity: "C",
         type: "防御",
         kind: "support",
@@ -125,6 +98,34 @@ module.exports = [
         hateChange: -1,
         hateText: "自分のヘイト -1",
         effect: "自分のフォロワーを700回復。自分のヘイトが1下がる。"
+    },
+    {
+        id: "card-8",
+        name: "ブロック",
+        rarity: "C",
+        type: "防御",
+        kind: "support",
+        targetType: "self",
+        damage: 0,
+        heal: 800,
+        hateTarget: "self",
+        hateChange: 0,
+        hateText: "ヘイト変動なし",
+        effect: "自分のフォロワーを800回復。"
+    },
+    {
+        id: "card-9",
+        name: "スルースキル",
+        rarity: "C",
+        type: "防御",
+        kind: "support",
+        targetType: "self",
+        damage: 0,
+        heal: 600,
+        hateTarget: "self",
+        hateChange: -1,
+        hateText: "自分のヘイト -1",
+        effect: "自分のフォロワーを600回復。自分のヘイトが1下がる。"
     },
     {
         id: "card-10",
@@ -167,29 +168,12 @@ module.exports = [
         hateTarget: "self",
         hateChange: 0,
         hateText: "ヘイト変動なし",
-        effect: "対象に400スリップダメージを2ターン与える。",
+        effect: "対象に300スリップダメージを2ターン与える。",
         durationTurns: 2,
-        slipDamage: 400
+        slipDamage: 300
     },
     {
         id: "card-13",
-        name: "ミュート通告",
-        rarity: "R",
-        type: "特殊",
-        kind: "special",
-        targetType: "self",
-        effectType: "applyStatus",
-        damage: 0,
-        heal: 0,
-        hateTarget: "self",
-        hateChange: 0,
-        hateText: "ヘイト変動なし",
-        effect: "自身を1ターン、ミュート状態にする。ミュート中はヘイト上昇を受けない。",
-        statusType: "mute",
-        durationTurns: 1
-    },
-    {
-        id: "card-14",
         name: "伏せカード確認班",
         rarity: "C",
         type: "特殊",
@@ -205,7 +189,7 @@ module.exports = [
         destroyTrapCount: 1
     },
     {
-        id: "card-15",
+        id: "card-14",
         name: "通報準備",
         rarity: "C",
         type: "特殊",
@@ -221,7 +205,7 @@ module.exports = [
         discardCount: 1
     },
     {
-        id: "card-16",
+        id: "card-15",
         name: "火消し",
         rarity: "C",
         type: "罠",
@@ -237,7 +221,7 @@ module.exports = [
         trapEffect: "cancelHate"
     },
     {
-        id: "card-17",
+        id: "card-16",
         name: "釣り針スルー",
         rarity: "C",
         type: "罠",
@@ -247,60 +231,32 @@ module.exports = [
         heal: 0,
         hateTarget: "self",
         hateChange: 0,
-        hateText: "相手に700ダメージ / 相手のヘイト +1",
-        effect: "伏せカード。ダメージを受けた時、相手に700ダメージを与え、ヘイトを1上げる。",
+        hateText: "相手に600ダメージ / 相手のヘイト +1",
+        effect: "伏せカード。ダメージを受けた時、相手に600ダメージを与え、ヘイトを1上げる。",
         trapCondition: "onDamage",
         trapEffect: "damageAndHate",
-        trapDamage: 700,
+        trapDamage: 600,
         trapHateChange: 1
     },
     {
-        id: "card-18",
+        id: "card-17",
         name: "漁夫の一撃",
         rarity: "C",
         type: "攻撃",
         kind: "attack",
         targetType: "enemy",
-        damage: 800,
+        damage: 700,
         heal: 0,
         hateTarget: "self",
         hateChange: 0,
         hateText: "ヘイト変動なし",
-        effect: "対象に800フォロワーダメージ。対象のヘイトが3ならダメージ2倍。対象が現在フォロワー最下位（同率含む）なら、追加で500ダメージ。",
-        rankBonus: [{ condition: "lowestFollowers", extraDamage: 500 }]
+        effect: "対象に700フォロワーダメージ。対象のヘイトが3ならダメージ2倍。対象が現在フォロワー最下位（同率含む）なら、追加で400ダメージ。",
+        rankBonus: [{ condition: "lowestFollowers", extraDamage: 400 }]
     },
+    // ===== UC =====
     {
-        id: "card-19",
+        id: "card-18",
         name: "黒歴史発掘",
-        rarity: "UC",
-        type: "攻撃",
-        kind: "attack",
-        targetType: "enemy",
-        damage: 1400,
-        heal: 0,
-        hateTarget: "self",
-        hateChange: 1,
-        hateText: "自分のヘイト +1",
-        effect: "対象に1,400フォロワーダメージ。対象のヘイトが3ならダメージ2倍。自分のヘイトが1上がる。"
-    },
-    {
-        id: "card-20",
-        name: "ミュート貫通リプ",
-        rarity: "UC",
-        type: "攻撃",
-        kind: "attack",
-        targetType: "enemy",
-        damage: 1100,
-        heal: 0,
-        hateTarget: "self",
-        hateChange: 1,
-        hateText: "自分のヘイト +1",
-        effect: "対象に1,100フォロワーダメージ。対象のヘイトが3ならダメージ2倍。罠カードを無視してダメージを与える。自分のヘイトが1上がる。",
-        ignoreTrap: true
-    },
-    {
-        id: "card-21",
-        name: "逆張り民",
         rarity: "UC",
         type: "攻撃",
         kind: "attack",
@@ -308,14 +264,28 @@ module.exports = [
         damage: 1200,
         heal: 0,
         hateTarget: "self",
-        hateChange: 0,
-        hateText: "ヘイト変動なし",
-        effect: "対象に1,200フォロワーダメージ。対象のヘイトが3ならダメージ2倍。対象が現在フォロワー1位（同率含む）なら、追加で600ダメージし、自分のヘイトが1上がる。",
-        rankBonus: [{ condition: "leader", extraDamage: 600, selfHateChange: 1 }]
+        hateChange: 1,
+        hateText: "自分のヘイト +1",
+        effect: "対象に1,200フォロワーダメージ。対象のヘイトが3ならダメージ2倍。自分のヘイトが1上がる。"
     },
     {
-        id: "card-22",
-        name: "弱者狙い",
+        id: "card-19",
+        name: "ミュート貫通リプ",
+        rarity: "UC",
+        type: "攻撃",
+        kind: "attack",
+        targetType: "enemy",
+        damage: 1000,
+        heal: 0,
+        hateTarget: "self",
+        hateChange: 1,
+        hateText: "自分のヘイト +1",
+        effect: "対象に1,000フォロワーダメージ。対象のヘイトが3ならダメージ2倍。罠カードを無視してダメージを与える。自分のヘイトが1上がる。",
+        ignoreTrap: true
+    },
+    {
+        id: "card-20",
+        name: "逆張り民",
         rarity: "UC",
         type: "攻撃",
         kind: "attack",
@@ -325,53 +295,68 @@ module.exports = [
         hateTarget: "self",
         hateChange: 0,
         hateText: "ヘイト変動なし",
-        effect: "対象に1,000フォロワーダメージ。対象のヘイトが3ならダメージ2倍。対象が現在フォロワー最下位（同率含む）なら、追加で700ダメージし、自分のヘイトが1上がる。",
-        rankBonus: [{ condition: "lowestFollowers", extraDamage: 700, selfHateChange: 1 }]
+        effect: "対象に1,000フォロワーダメージ。対象のヘイトが3ならダメージ2倍。対象が現在フォロワー1位（同率含む）なら、追加で500ダメージし、自分のヘイトが1上がる。",
+        rankBonus: [{ condition: "leader", extraDamage: 500, selfHateChange: 1 }]
     },
     {
-        id: "card-23",
+        id: "card-21",
+        name: "弱者狙い",
+        rarity: "UC",
+        type: "攻撃",
+        kind: "attack",
+        targetType: "enemy",
+        damage: 900,
+        heal: 0,
+        hateTarget: "self",
+        hateChange: 0,
+        hateText: "ヘイト変動なし",
+        effect: "対象に900フォロワーダメージ。対象のヘイトが3ならダメージ2倍。対象が現在フォロワー最下位（同率含む）なら、追加で600ダメージし、自分のヘイトが1上がる。",
+        rankBonus: [{ condition: "lowestFollowers", extraDamage: 600, selfHateChange: 1 }]
+    },
+    {
+        id: "card-22",
         name: "全レス爆撃",
         rarity: "UC",
         type: "攻撃",
         kind: "attack",
         targetType: "allEnemies",
-        damage: 600,
+        damage: 500,
         heal: 0,
         hateTarget: "self",
         hateChange: 1,
         hateText: "自分のヘイト +1",
-        effect: "敵全体に600フォロワーダメージ。対象のヘイトが3ならその対象へのダメージは2倍。自分のヘイトが1上がる。"
+        effect: "敵全体に500フォロワーダメージ。対象のヘイトが3ならその対象へのダメージは2倍。自分のヘイトが1上がる。"
     },
     {
-        id: "card-24",
+        id: "card-23",
         name: "鍵垢避難",
         rarity: "UC",
         type: "防御",
         kind: "support",
         targetType: "self",
         damage: 0,
-        heal: 1300,
+        heal: 1100,
         hateTarget: "self",
         hateChange: -2,
         hateText: "自分のヘイト -2",
-        effect: "自分のフォロワーを1,300回復。自分のヘイトが2下がる。"
+        effect: "自分のフォロワーを1,100回復。自分のヘイトが2下がる。"
     },
     {
-        id: "card-25",
+        id: "card-24",
         name: "デマ訂正",
         rarity: "UC",
         type: "防御",
         kind: "support",
         targetType: "self",
         damage: 0,
-        heal: 1200,
+        heal: 1000,
         hateTarget: "self",
         hateChange: -2,
         hateText: "自分のヘイト -2",
-        effect: "自分のフォロワーを1,200回復。自分のヘイトが2下がる。"
+        effect: "自分のフォロワーを1,000回復。自分のヘイトが2下がる。"
     },
     {
-        id: "card-26",
+        id: "card-25",
         name: "アンチ召喚",
         rarity: "UC",
         type: "妨害",
@@ -385,7 +370,7 @@ module.exports = [
         effect: "対象プレイヤーのヘイトを2上げる。"
     },
     {
-        id: "card-27",
+        id: "card-26",
         name: "一時凍結申請",
         rarity: "UC",
         type: "特殊",
@@ -401,7 +386,7 @@ module.exports = [
         skipTurns: 1
     },
     {
-        id: "card-28",
+        id: "card-27",
         name: "炎上継続",
         rarity: "UC",
         type: "特殊",
@@ -413,12 +398,12 @@ module.exports = [
         hateTarget: "self",
         hateChange: 0,
         hateText: "ヘイト変動なし",
-        effect: "対象に600スリップダメージを3ターン与える。",
+        effect: "対象に500スリップダメージを3ターン与える。",
         durationTurns: 3,
-        slipDamage: 600
+        slipDamage: 500
     },
     {
-        id: "card-29",
+        id: "card-28",
         name: "シャドウバン申請",
         rarity: "UC",
         type: "特殊",
@@ -435,7 +420,7 @@ module.exports = [
         durationTurns: 2
     },
     {
-        id: "card-30",
+        id: "card-29",
         name: "晒し固定",
         rarity: "UC",
         type: "特殊",
@@ -452,7 +437,7 @@ module.exports = [
         durationTurns: 2
     },
     {
-        id: "card-31",
+        id: "card-30",
         name: "晒し返し",
         rarity: "UC",
         type: "罠",
@@ -462,12 +447,30 @@ module.exports = [
         heal: 0,
         hateTarget: "self",
         hateChange: 0,
-        hateText: "相手に1,000ダメージ / 相手のヘイト +1",
-        effect: "伏せカード。ダメージを受けた時、相手に1,000ダメージを与え、ヘイトを1上げる。",
+        hateText: "相手に800ダメージ / 相手のヘイト +1",
+        effect: "伏せカード。ダメージを受けた時、相手に800ダメージを与え、ヘイトを1上げる。",
         trapCondition: "onDamage",
         trapEffect: "damageAndHate",
-        trapDamage: 1000,
+        trapDamage: 800,
         trapHateChange: 1
+    },
+    // ===== R =====
+    {
+        id: "card-31",
+        name: "ミュート通告",
+        rarity: "R",
+        type: "特殊",
+        kind: "special",
+        targetType: "self",
+        effectType: "applyStatus",
+        damage: 0,
+        heal: 0,
+        hateTarget: "self",
+        hateChange: 0,
+        hateText: "ヘイト変動なし",
+        effect: "自身を1ターン、ミュート状態にする。ミュート中はヘイト変動を受けない。",
+        statusType: "mute",
+        durationTurns: 1
     },
     {
         id: "card-32",
@@ -476,12 +479,12 @@ module.exports = [
         type: "攻撃",
         kind: "attack",
         targetType: "enemy",
-        damage: 1800,
+        damage: 1500,
         heal: 0,
         hateTarget: "self",
         hateChange: 2,
         hateText: "自分のヘイト +2",
-        effect: "対象に1,800フォロワーダメージ。対象のヘイトが3ならダメージ2倍。自分のヘイトが2上がる。"
+        effect: "対象に1,500フォロワーダメージ。対象のヘイトが3ならダメージ2倍。自分のヘイトが2上がる。"
     },
     {
         id: "card-33",
@@ -490,12 +493,12 @@ module.exports = [
         type: "攻撃",
         kind: "attack",
         targetType: "enemy",
-        damage: 1500,
+        damage: 1300,
         heal: 0,
         hateTarget: "self",
         hateChange: 1,
         hateText: "自分のヘイト +1",
-        effect: "対象に1,500フォロワーダメージ。対象のヘイトが3ならダメージ2倍。罠カードを無視してダメージを与える。自分のヘイトが1上がる。",
+        effect: "対象に1,300フォロワーダメージ。対象のヘイトが3ならダメージ2倍。罠カードを無視してダメージを与える。自分のヘイトが1上がる。",
         ignoreTrap: true
     },
     {
@@ -505,13 +508,13 @@ module.exports = [
         type: "攻撃",
         kind: "attack",
         targetType: "enemy",
-        damage: 1500,
+        damage: 1300,
         heal: 0,
         hateTarget: "target",
         hateChange: 2,
         hateText: "対象のヘイト +2",
-        effect: "対象に1,500フォロワーダメージ。対象のヘイトが3ならダメージ2倍。ヘイト条件で追加効果。対象のヘイトが2上がる。",
-        hateBonus: [{ targetHateAtLeast: 2, extraDamage: 500 }]
+        effect: "対象に1,300フォロワーダメージ。対象のヘイトが3ならダメージ2倍。ヘイト条件で追加効果。対象のヘイトが2上がる。",
+        hateBonus: [{ targetHateAtLeast: 2, extraDamage: 400 }]
     },
     {
         id: "card-35",
@@ -520,13 +523,13 @@ module.exports = [
         type: "攻撃",
         kind: "attack",
         targetType: "enemy",
-        damage: 1500,
+        damage: 1300,
         heal: 0,
         hateTarget: "self",
         hateChange: 0,
         hateText: "ヘイト変動なし",
-        effect: "対象に1,500フォロワーダメージ。対象のヘイトが3ならダメージ2倍。対象が現在フォロワー1位（同率含む）なら、追加で900ダメージし、対象のヘイトを1上げる。",
-        rankBonus: [{ condition: "leader", extraDamage: 900, targetHateChange: 1 }]
+        effect: "対象に1,300フォロワーダメージ。対象のヘイトが3ならダメージ2倍。対象が現在フォロワー1位（同率含む）なら、追加で700ダメージし、対象のヘイトを1上げる。",
+        rankBonus: [{ condition: "leader", extraDamage: 700, targetHateChange: 1 }]
     },
     {
         id: "card-36",
@@ -535,13 +538,13 @@ module.exports = [
         type: "攻撃",
         kind: "attack",
         targetType: "enemy",
-        damage: 1200,
+        damage: 1000,
         heal: 0,
         hateTarget: "self",
         hateChange: 0,
         hateText: "ヘイト変動なし",
-        effect: "対象に1,200フォロワーダメージ。対象のヘイトが3ならダメージ2倍。対象が現在フォロワー最下位（同率含む）なら、追加で1,000ダメージ。",
-        rankBonus: [{ condition: "lowestFollowers", extraDamage: 1000 }]
+        effect: "対象に1,000フォロワーダメージ。対象のヘイトが3ならダメージ2倍。対象が現在フォロワー最下位（同率含む）なら、追加で800ダメージ。",
+        rankBonus: [{ condition: "lowestFollowers", extraDamage: 800 }]
     },
     {
         id: "card-37",
@@ -550,12 +553,12 @@ module.exports = [
         type: "攻撃",
         kind: "attack",
         targetType: "allEnemies",
-        damage: 1000,
+        damage: 900,
         heal: 0,
         hateTarget: "self",
         hateChange: 2,
         hateText: "自分のヘイト +2",
-        effect: "敵全体に1,000フォロワーダメージ。対象のヘイトが3ならその対象へのダメージは2倍。自分のヘイトが2上がる。"
+        effect: "敵全体に900フォロワーダメージ。対象のヘイトが3ならその対象へのダメージは2倍。自分のヘイトが2上がる。"
     },
     {
         id: "card-38",
@@ -565,11 +568,11 @@ module.exports = [
         kind: "support",
         targetType: "self",
         damage: 0,
-        heal: 1800,
+        heal: 1500,
         hateTarget: "self",
         hateChange: -2,
         hateText: "自分のヘイト -2",
-        effect: "自分のフォロワーを1,800回復。自分のヘイトが2下がる。"
+        effect: "自分のフォロワーを1,500回復。自分のヘイトが2下がる。"
     },
     {
         id: "card-39",
@@ -617,6 +620,7 @@ module.exports = [
         trapCondition: "onDamage",
         trapEffect: "reflectDamage"
     },
+    // ===== SR =====
     {
         id: "card-42",
         name: "ネットリンチ",
@@ -624,12 +628,12 @@ module.exports = [
         type: "攻撃",
         kind: "attack",
         targetType: "enemy",
-        damage: 2400,
+        damage: 2000,
         heal: 0,
         hateTarget: "self",
         hateChange: 3,
         hateText: "自分のヘイト +3",
-        effect: "対象に2,400フォロワーダメージ。対象のヘイトが3ならダメージ2倍。自分のヘイトが3上がる。"
+        effect: "対象に2,000フォロワーダメージ。対象のヘイトが3ならダメージ2倍。自分のヘイトが3上がる。"
     },
     {
         id: "card-43",
@@ -638,12 +642,12 @@ module.exports = [
         type: "攻撃",
         kind: "attack",
         targetType: "enemy",
-        damage: 1900,
+        damage: 1600,
         heal: 0,
         hateTarget: "self",
         hateChange: 3,
         hateText: "自分のヘイト +3",
-        effect: "対象に1,900フォロワーダメージ。対象のヘイトが3ならダメージ2倍。罠カードを無視してダメージを与える。自分のヘイトが3上がる。",
+        effect: "対象に1,600フォロワーダメージ。対象のヘイトが3ならダメージ2倍。罠カードを無視してダメージを与える。自分のヘイトが3上がる。",
         ignoreTrap: true
     },
     {
@@ -653,13 +657,13 @@ module.exports = [
         type: "攻撃",
         kind: "attack",
         targetType: "enemy",
-        damage: 1800,
+        damage: 1500,
         heal: 0,
         hateTarget: "self",
         hateChange: 0,
         hateText: "ヘイト変動なし",
-        effect: "対象に1,800フォロワーダメージ。対象のヘイトが3ならダメージ2倍。対象が現在フォロワー1位（同率含む）なら、追加で1,200ダメージし、対象のヘイトを1上げる。",
-        rankBonus: [{ condition: "leader", extraDamage: 1200, targetHateChange: 1 }]
+        effect: "対象に1,500フォロワーダメージ。対象のヘイトが3ならダメージ2倍。対象が現在フォロワー1位（同率含む）なら、追加で1,000ダメージし、対象のヘイトを1上げる。",
+        rankBonus: [{ condition: "leader", extraDamage: 1000, targetHateChange: 1 }]
     },
     {
         id: "card-45",
@@ -668,12 +672,12 @@ module.exports = [
         type: "攻撃",
         kind: "attack",
         targetType: "allEnemies",
-        damage: 1600,
+        damage: 1400,
         heal: 0,
         hateTarget: "self",
         hateChange: 3,
         hateText: "自分のヘイト +3",
-        effect: "敵全体に1,600フォロワーダメージ。対象のヘイトが3ならその対象へのダメージは2倍。自分のヘイトが3上がる。"
+        effect: "敵全体に1,400フォロワーダメージ。対象のヘイトが3ならその対象へのダメージは2倍。自分のヘイトが3上がる。"
     },
     {
         id: "card-46",
@@ -683,11 +687,11 @@ module.exports = [
         kind: "support",
         targetType: "self",
         damage: 0,
-        heal: 3000,
+        heal: 2500,
         hateTarget: "self",
         hateChange: -3,
         hateText: "自分のヘイト -3",
-        effect: "自分のフォロワーを3,000回復。自分のヘイトが3下がる。"
+        effect: "自分のフォロワーを2,500回復。自分のヘイトが3下がる。"
     },
     {
         id: "card-47",
@@ -716,32 +720,17 @@ module.exports = [
         heal: 0,
         hateTarget: "self",
         hateChange: 0,
-        hateText: "相手に1,600ダメージ / 相手のヘイト +2",
-        effect: "伏せカード。ダメージを受けた時、相手に1,600ダメージを与え、ヘイトを2上げる。",
+        hateText: "相手に1,300ダメージ / 相手のヘイト +2",
+        effect: "伏せカード。ダメージを受けた時、相手に1,300ダメージを与え、ヘイトを2上げる。",
         trapCondition: "onDamage",
         trapEffect: "damageAndHate",
-        trapDamage: 1600,
+        trapDamage: 1300,
         trapHateChange: 2
     },
     {
         id: "card-49",
-        name: "アカウント乗っ取り",
-        rarity: "UR",
-        type: "攻撃",
-        kind: "attack",
-        targetType: "enemy",
-        damage: 1500,
-        heal: 0,
-        hateTarget: "target",
-        hateChange: 3,
-        hateText: "対象のヘイト +3",
-        effect: "対象に1,500フォロワーダメージ。対象のヘイトが3ならダメージ2倍。ヘイト条件で追加効果。対象のヘイトが3上がる。",
-        hateBonus: [{ targetHateAtLeast: 2, extraDamage: 700 }]
-    },
-    {
-        id: "card-50",
         name: "全体監査",
-        rarity: "UR",
+        rarity: "SR",
         type: "特殊",
         kind: "special",
         targetType: "enemy",
@@ -752,5 +741,21 @@ module.exports = [
         hateChange: 0,
         hateText: "ヘイト変動なし",
         effect: "敵全体の伏せカードをすべて破壊する。"
+    },
+    // ===== UR =====
+    {
+        id: "card-50",
+        name: "アカウント乗っ取り",
+        rarity: "UR",
+        type: "攻撃",
+        kind: "attack",
+        targetType: "enemy",
+        damage: 1300,
+        heal: 0,
+        hateTarget: "target",
+        hateChange: 3,
+        hateText: "対象のヘイト +3",
+        effect: "対象に1,300フォロワーダメージ。対象のヘイトが3ならダメージ2倍。ヘイト条件で追加効果。対象のヘイトが3上がる。",
+        hateBonus: [{ targetHateAtLeast: 2, extraDamage: 600 }]
     }
 ];

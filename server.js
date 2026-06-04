@@ -166,7 +166,7 @@ const STATUS_INFO = {
     mute: {
         label: "ミュート",
         icon: "🔇",
-        description: "ヘイト上昇を受けない"
+        description: "ヘイト変動を受けない"
     },
     shadowban: {
         label: "シャドウバン",
@@ -453,7 +453,7 @@ function changeHate(player, amount) {
 
     if (!player || value === 0) return false;
 
-    if (value > 0 && hasStatusEffect(player, "mute")) {
+    if (hasStatusEffect(player, "mute")) {
         return false;
     }
 
