@@ -1166,7 +1166,7 @@ module.exports = [
         id: "card-106",
         name: "喧嘩凸",
         rarity: "R",
-        type: "ヘイト",
+        type: "妨害",
         kind: "hate",
         targetType: "enemy",
         damage: 0,
