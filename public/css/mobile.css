@@ -4403,3 +4403,13 @@
         max-height: calc(100dvh - 275px) !important;
     }
 }
+
+@media (max-width: 768px) {
+    .enemy-hand-badge {
+        font-size: 7px;
+        padding: 1px 3px;
+        border-radius: 4px;
+        left: 4px;
+        top: 4px;
+    }
+}
