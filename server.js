@@ -884,6 +884,7 @@ function createGameViewForPlayer(game, viewerId) {
         return {
             ...player,
             hand: canViewAll ? player.hand : [],
+            handCount: player.hand.length,
             fieldCards: canViewAll
                 ? player.fieldCards
                 : player.fieldCards.map(() => ({

@@ -2198,6 +2198,7 @@ window.onload = () => {
                     slot.classList.toggle("choosing-trap-player", Boolean(latestGame.waitingTrapChoice && player.id === latestGame.waitingTrapPlayerId));
 
                     slot.innerHTML = `
+                        <div class="enemy-hand-badge">🂠 ${player.handCount ?? player.hand.length}</div>
                         <div class="enemy-name">${player.defeated ? "💀 " : ""}${player.hate >= 3 ? "🔥 " : ""}${player.name}${disconnectedLabel(player)}</div>
                         <div class="follower-line ${player.defeated ? "owakon-text" : ""}">
                             ${followerText(player)}
@@ -2273,6 +2274,7 @@ window.onload = () => {
                 slot.classList.toggle("choosing-trap-player", Boolean(latestGame.waitingTrapChoice && enemy.id === latestGame.waitingTrapPlayerId));
 
                 slot.innerHTML = `
+                    <div class="enemy-hand-badge">🂠 ${enemy.handCount ?? enemy.hand.length}</div>
                     <div class="enemy-name">${enemy.defeated ? "💀 " : ""}${enemy.hate >= 3 ? "🔥 " : ""}${enemy.name}${disconnectedLabel(enemy)}</div>
                     <div class="follower-line ${enemy.defeated ? "owakon-text" : ""}">
                         ${followerText(enemy)}
