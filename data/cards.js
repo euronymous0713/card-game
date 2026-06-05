@@ -189,21 +189,6 @@ module.exports = [
         effect: "自分のフォロワーを600回復。自分のヘイトが1下がる。"
     },
     {
-        id: "card-101",
-        name: "謝罪文テンプレ",
-        rarity: "UC",
-        type: "防御",
-        kind: "support",
-        targetType: "self",
-        damage: 0,
-        heal: 500,
-        hateTarget: "self",
-        hateChange: -1,
-        hateText: "自分のヘイト -1",
-        effect: "自分のフォロワーを500回復。自分の状態異常をすべて解除する。自分のヘイトが1下がる。",
-        clearStatus: true
-    },
-    {
         id: "card-10",
         name: "煽りリプ",
         rarity: "C",
@@ -365,39 +350,6 @@ module.exports = [
         trapEffect: "damageAndHate",
         trapDamage: 400,
         trapHateChange: 1
-    },
-    {
-        id: "card-67",
-        name: "サイレント反撃",
-        rarity: "UC",
-        type: "罠",
-        kind: "trap",
-        targetType: "self",
-        damage: 0,
-        heal: 0,
-        hateTarget: "self",
-        hateChange: 0,
-        hateText: "相手を1ターン凍結",
-        effect: "伏せカード。ダメージを受けた時、相手に1ターン凍結（行動不能）を付与。",
-        trapCondition: "onDamage",
-        trapEffect: "freezeAttacker",
-        trapFreezeTurns: 1
-    },
-    {
-        id: "card-102",
-        name: "通知オフ",
-        rarity: "R",
-        type: "罠",
-        kind: "trap",
-        targetType: "self",
-        damage: 0,
-        heal: 0,
-        hateTarget: "self",
-        hateChange: 0,
-        hateText: "ダメージを無効化",
-        effect: "伏せカード。ダメージを受けた時、そのダメージを無効化する。",
-        trapCondition: "onDamage",
-        trapEffect: "cancelDamage"
     },
     // ===== UC =====
     {
@@ -605,6 +557,21 @@ module.exports = [
         effect: "自分のフォロワーを1,100回復。"
     },
     {
+        id: "card-101",
+        name: "謝罪文テンプレ",
+        rarity: "UC",
+        type: "防御",
+        kind: "support",
+        targetType: "self",
+        damage: 0,
+        heal: 500,
+        hateTarget: "self",
+        hateChange: -1,
+        hateText: "自分のヘイト -1",
+        effect: "自分のフォロワーを500回復。自分の状態異常をすべて解除する。自分のヘイトが1下がる。",
+        clearStatus: true
+    },
+    {
         id: "card-25",
         name: "アンチ召喚",
         rarity: "UC",
@@ -617,22 +584,6 @@ module.exports = [
         hateChange: 2,
         hateText: "対象のヘイト +2",
         effect: "対象プレイヤーのヘイトを2上げる。"
-    },
-    {
-        id: "card-26",
-        name: "一時凍結申請",
-        rarity: "R",
-        type: "特殊",
-        kind: "special",
-        targetType: "enemy",
-        effectType: "skipTurn",
-        damage: 0,
-        heal: 0,
-        hateTarget: "self",
-        hateChange: 0,
-        hateText: "ヘイト変動なし",
-        effect: "対象を1ターン凍結し、行動不能にする。",
-        skipTurns: 1
     },
     {
         id: "card-27",
@@ -702,23 +653,6 @@ module.exports = [
         discardCount: 2
     },
     {
-        id: "card-77",
-        name: "拡散スクショ",
-        rarity: "R",
-        type: "特殊",
-        kind: "special",
-        targetType: "allEnemies",
-        effectType: "applyStatus",
-        damage: 0,
-        heal: 0,
-        hateTarget: "self",
-        hateChange: 0,
-        hateText: "ヘイト変動なし",
-        effect: "敵全体に1ターン晒し中（受ける攻撃ダメージが300増える）を付与。",
-        statusType: "expose",
-        durationTurns: 1
-    },
-    {
         id: "card-78",
         name: "大量スパム",
         rarity: "UC",
@@ -733,6 +667,23 @@ module.exports = [
         hateText: "ヘイト変動なし",
         effect: "対象の手札をすべて捨てさせる。",
         discardAllHand: true
+    },
+    {
+        id: "card-31",
+        name: "ミュート通告",
+        rarity: "UC",
+        type: "特殊",
+        kind: "special",
+        targetType: "self",
+        effectType: "applyStatus",
+        damage: 0,
+        heal: 0,
+        hateTarget: "self",
+        hateChange: 0,
+        hateText: "ヘイト変動なし",
+        effect: "自身に1ターンミュート（ヘイト変動を受けない）を付与。",
+        statusType: "mute",
+        durationTurns: 1
     },
     {
         id: "card-30",
@@ -751,6 +702,23 @@ module.exports = [
         trapEffect: "damageAndHate",
         trapDamage: 800,
         trapHateChange: 1
+    },
+    {
+        id: "card-67",
+        name: "サイレント反撃",
+        rarity: "UC",
+        type: "罠",
+        kind: "trap",
+        targetType: "self",
+        damage: 0,
+        heal: 0,
+        hateTarget: "self",
+        hateChange: 0,
+        hateText: "相手を1ターン凍結",
+        effect: "伏せカード。ダメージを受けた時、相手に1ターン凍結（行動不能）を付与。",
+        trapCondition: "onDamage",
+        trapEffect: "freezeAttacker",
+        trapFreezeTurns: 1
     },
     {
         id: "card-79",
@@ -981,21 +949,34 @@ module.exports = [
         effect: "自分のフォロワーを2,000回復。"
     },
     {
-        id: "card-31",
-        name: "ミュート通告",
-        rarity: "UC",
+        id: "card-106",
+        name: "喧嘩凸",
+        rarity: "R",
+        type: "妨害",
+        kind: "hate",
+        targetType: "enemy",
+        damage: 0,
+        heal: 0,
+        hateTarget: "both",
+        hateChange: 3,
+        hateText: "自分・対象のヘイトを3にする",
+        effect: "自分と対象のヘイトが3になる。"
+    },
+    {
+        id: "card-26",
+        name: "一時凍結申請",
+        rarity: "R",
         type: "特殊",
         kind: "special",
-        targetType: "self",
-        effectType: "applyStatus",
+        targetType: "enemy",
+        effectType: "skipTurn",
         damage: 0,
         heal: 0,
         hateTarget: "self",
         hateChange: 0,
         hateText: "ヘイト変動なし",
-        effect: "自身に1ターンミュート（ヘイト変動を受けない）を付与。",
-        statusType: "mute",
-        durationTurns: 1
+        effect: "対象を1ターン凍結し、行動不能にする。",
+        skipTurns: 1
     },
     {
         id: "card-40",
@@ -1012,6 +993,23 @@ module.exports = [
         hateText: "ヘイト変動なし",
         effect: "対象の伏せカードを最大2枚破壊する。",
         destroyTrapCount: 2
+    },
+    {
+        id: "card-77",
+        name: "拡散スクショ",
+        rarity: "R",
+        type: "特殊",
+        kind: "special",
+        targetType: "allEnemies",
+        effectType: "applyStatus",
+        damage: 0,
+        heal: 0,
+        hateTarget: "self",
+        hateChange: 0,
+        hateText: "ヘイト変動なし",
+        effect: "敵全体に1ターン晒し中（受ける攻撃ダメージが300増える）を付与。",
+        statusType: "expose",
+        durationTurns: 1
     },
     {
         id: "card-87",
@@ -1132,18 +1130,20 @@ module.exports = [
         trapEffect: "cancelTrapAndDestroyEnemyTraps"
     },
     {
-        id: "card-106",
-        name: "喧嘩凸",
+        id: "card-102",
+        name: "通知オフ",
         rarity: "R",
-        type: "妨害",
-        kind: "hate",
-        targetType: "enemy",
+        type: "罠",
+        kind: "trap",
+        targetType: "self",
         damage: 0,
         heal: 0,
-        hateTarget: "both",
-        hateChange: 3,
-        hateText: "自分・対象のヘイトを3にする",
-        effect: "自分と対象のヘイトが3になる。"
+        hateTarget: "self",
+        hateChange: 0,
+        hateText: "ダメージを無効化",
+        effect: "伏せカード。ダメージを受けた時、そのダメージを無効化する。",
+        trapCondition: "onDamage",
+        trapEffect: "cancelDamage"
     },
     // ===== SR =====
     {
@@ -1339,22 +1339,6 @@ module.exports = [
         effect: "敵全体の伏せカードをすべて破壊する。"
     },
     {
-        id: "card-76",
-        name: "連投",
-        rarity: "UR",
-        type: "特殊",
-        kind: "special",
-        targetType: "self",
-        effectType: "extraTurn",
-        damage: 0,
-        heal: 0,
-        hateTarget: "self",
-        hateChange: 0,
-        hateText: "ヘイト変動なし",
-        effect: "自分は追加でもう1ターン行動できる。",
-        extraTurns: 1
-    },
-    {
         id: "card-97",
         name: "ネット暗黒街",
         rarity: "SR",
@@ -1440,6 +1424,22 @@ module.exports = [
         trapFreezeTurns: 2
     },
     // ===== UR =====
+    {
+        id: "card-76",
+        name: "連投",
+        rarity: "UR",
+        type: "特殊",
+        kind: "special",
+        targetType: "self",
+        effectType: "extraTurn",
+        damage: 0,
+        heal: 0,
+        hateTarget: "self",
+        hateChange: 0,
+        hateText: "ヘイト変動なし",
+        effect: "自分は追加でもう1ターン行動できる。",
+        extraTurns: 1
+    },
     {
         id: "card-50",
         name: "アカウント乗っ取り",
