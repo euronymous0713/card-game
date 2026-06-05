@@ -4,19 +4,21 @@
    - Windows・スマホのレイアウトには一切影響しない
    ========================================================= */
 
-/* ── フォント ──────────────────────────────────────────────
-   "Segoe UI" はWindows専用。Macではシステムフォントに差し替える。
-   文字幅・行高の違いによるレイアウトズレを防ぐ。
+/* ── フォント / アンチエイリアス ────────────────────────────
+   "Segoe UI" はWindows専用。Macではシステムフォントに差し替え。
+   -webkit-font-smoothing でサブピクセル描画を整える。
    ──────────────────────────────────────────────────────── */
 .mac-os body {
     font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
-/* ── backdrop-filter の webkit プレフィックス漏れ補完 ────────
-   Safariはベンダープレフィックスなしのbackdrop-filterを
-   バージョンによって無視するため、明示的に追加する。
+/* ── backdrop-filter webkit プレフィックス ──────────────────
+   Safariはベンダープレフィックスなしを無視する場合がある。
    ──────────────────────────────────────────────────────── */
-.mac-os .game-over-overlay {
+.mac-os .game-over-overlay,
+.mac-os .mobile-settings-overlay {
     -webkit-backdrop-filter: blur(4px);
 }
 
@@ -24,7 +26,89 @@
     -webkit-backdrop-filter: blur(5px);
 }
 
-/* ── 追加修正はここに書く ────────────────────────────────────
-   スクリーンショットで崩れを確認したらこの下に追記する。
-   必ず .mac-os で始めること（Windows・スマホに影響させない）。
+.mac-os .history-modal-overlay {
+    -webkit-backdrop-filter: blur(4px);
+}
+
+/* ── バトル画面：PCレイアウト修正 ──────────────────────────
+   Mac環境では画面幅が1280px前後のことが多く、
+   minmax(360px, 1fr) だとウィンドウが狭い時にグリッドがはみ出す。
+   repeat(3, 1fr) に変えて等幅・可変幅に修正する。
    ──────────────────────────────────────────────────────── */
+@media (min-width: 769px) {
+
+    /* 敵プレイヤーグリッド：固定最小幅を撤廃して均等割り */
+    .mac-os .enemy-slots {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: 8px !important;
+    }
+
+    /* 敵パネル：固定高さをやめて内容に合わせて伸縮させる
+       macOSフォントはSegoe UIより若干大きく描画されるため
+       固定高だとテキストが見切れる。 */
+    .mac-os .enemy-panel {
+        height: auto !important;
+        min-height: 175px !important;
+        overflow: visible !important;
+    }
+
+    /* 自分パネル：同様に高さを可変に */
+    .mac-os .my-panel {
+        height: auto !important;
+        min-height: 155px !important;
+        overflow: visible !important;
+    }
+
+    /* ── フォントサイズ微調整
+       Segoe UIより気持ち大きく出るため、パネル内は少し絞る。 */
+    .mac-os .enemy-panel .follower-line {
+        font-size: 22px !important;
+    }
+
+    .mac-os .enemy-panel .owakon-text {
+        font-size: 23px !important;
+    }
+
+    .mac-os .enemy-panel .panel-hate {
+        font-size: 14px !important;
+    }
+
+    /* ── ターン／使用履歴パネルの縦位置
+       enemy-panelが自動高さになるので、
+       下に続くパネルをわずかに下げて余白を確保。 */
+    .mac-os .turn-panel {
+        top: 248px !important;
+    }
+
+    .mac-os .history-panel {
+        top: 396px !important;
+    }
+
+    /* ── カード詳細枠
+       Safariのoverflow/scrollバグ対策で
+       overflow:hidden を明示する。 */
+    .mac-os .card-detail {
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* ── センターゾーン
+       Safariの transform + position:absolute の
+       ズレを最小化するため、will-change を指定する。 */
+    .mac-os .center-zone {
+        will-change: transform;
+    }
+
+    /* ── 手札エリア
+       Safariでtransform: translateX(-50%)がサブピクセルで
+       ブレる場合があるため、translate3d で GPU レイヤーに乗せる。 */
+    .mac-os .hand-area {
+        transform: translateX(-50%) translateZ(0);
+    }
+}
+
+/* ── -webkit-background-clip: text 保険
+   Safariでグラデーションテキストが消える場合の対策。 */
+.mac-os .game-title {
+    -webkit-background-clip: text;
+    background-clip: text;
+}
