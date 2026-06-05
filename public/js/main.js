@@ -1604,6 +1604,7 @@ window.onload = () => {
                     <div class="settings-spectators-label">観戦者 (${spectators.length})</div>
                     ${spectatorHtml}
                 </div>
+                <div class="settings-actions-divider" role="separator"></div>
                 <button id="mobileCardListButton" class="mobile-card-list-button" type="button">
                     カード一覧
                 </button>

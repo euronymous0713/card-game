@@ -600,6 +600,12 @@ button:disabled {
     cursor: not-allowed;
 }
 
+.settings-actions-divider {
+    margin: 14px 0 12px;
+    border: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.22);
+}
+
 .turn-order-list {
     list-style: none;
     padding: 0;
