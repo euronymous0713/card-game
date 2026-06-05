@@ -1569,6 +1569,26 @@ window.onload = () => {
             ? `<div class="settings-spectator-empty">観戦者はいません</div>`
             : spectators.map(s => `<div class="settings-spectator-item">👁 ${s.name}</div>`).join("");
 
+        const turnOrderHtml = (() => {
+            if (!latestGame) return "";
+            const { turnOrder, currentTurnIndex } = latestGame;
+            const items = turnOrder.map((player, index) => {
+                const isCurrent = index === currentTurnIndex && !player.defeated;
+                const isMe = player.id === socket.id;
+                const name = isMe ? `${player.name}（あなた）` : player.name;
+                const badge = player.defeated ? "オワコン" : (isCurrent ? "行動中" : "待機中");
+                const cls = "turn-order-item" +
+                    (isCurrent ? " turn-order-current" : "") +
+                    (player.defeated ? " turn-order-defeated" : "");
+                return `<li class="${cls}"><span class="turn-order-name">${name}</span><span class="turn-order-badge">${badge}</span></li>`;
+            }).join("");
+            return `
+                <div class="settings-spectators-section">
+                    <div class="settings-spectators-label">ターン順</div>
+                    <ol class="turn-order-list">${items}</ol>
+                </div>`;
+        })();
+
         mobileSettingsOverlay.innerHTML = `
             <div class="mobile-settings-box">
                 <div class="mobile-settings-header">
@@ -1579,6 +1599,7 @@ window.onload = () => {
                     <span>ルームID</span>
                     <strong>${currentRoomId || "----"}</strong>
                 </div>
+                ${turnOrderHtml}
                 <div class="settings-spectators-section">
                     <div class="settings-spectators-label">観戦者 (${spectators.length})</div>
                     ${spectatorHtml}
@@ -1719,6 +1740,8 @@ window.onload = () => {
             if (event.target === historyModalOverlay) closeHistoryModal();
         };
     }
+
+
 
     function updateMobileActionPanel() {
         if (!mobileActionPanel) return;
