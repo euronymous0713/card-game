@@ -151,11 +151,11 @@
 
     .center-zone {
         top: 50% !important;
-        width: 500px !important;
+        width: min(500px, 44vw) !important;
     }
 
     .drop-zone {
-        width: 480px !important;
+        width: min(480px, 42vw) !important;
         height: 135px !important;
     }
 

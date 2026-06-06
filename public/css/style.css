@@ -203,7 +203,7 @@ button:disabled {
     left: 10px;
     right: 10px;
     display: grid;
-    grid-template-columns: repeat(3, minmax(360px, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 8px;
     align-items: start;
 }
@@ -388,7 +388,7 @@ button:disabled {
     transform: translate(-50%, -50%);
     text-align: center;
     z-index: 2;
-    width: 520px;
+    width: min(520px, 50vw);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -404,7 +404,7 @@ button:disabled {
 }
 
 .drop-zone {
-    width: 500px;
+    width: min(500px, 48vw);
     height: 150px;
     border: 2px dashed rgba(255, 255, 255, 0.25);
     border-radius: 20px;
