@@ -580,6 +580,53 @@ function applyRankBonus(game, card, sourcePlayer, targetPlayer, baseDamage) {
     return { damage, details };
 }
 
+function applySelfHateBonus(card, casterPlayer, baseDamage, baseHeal) {
+    let damage = Number(baseDamage || 0);
+    let heal = Number(baseHeal || 0);
+    const details = [];
+    let extraHateChange = 0;
+
+    if (card.selfHateScaling && card.selfHateScaling.damagePerHate) {
+        const bonus = Number(casterPlayer.hate) * Number(card.selfHateScaling.damagePerHate);
+        if (bonus > 0) {
+            damage += bonus;
+            details.push(`自ヘイト${casterPlayer.hate}：+${formatNumber(bonus)}ダメージ`);
+        }
+    }
+
+    if (Array.isArray(card.selfHateBonus)) {
+        card.selfHateBonus.forEach(bonus => {
+            if (bonus.selfHateExact !== undefined && casterPlayer.hate !== Number(bonus.selfHateExact)) return;
+
+            const multiplier = Number(bonus.damageMultiplier ?? 1);
+            if (multiplier !== 1) {
+                damage = Math.round(damage * multiplier);
+                details.push(`自ヘイト${bonus.selfHateExact}：ダメージ${multiplier}倍`);
+            }
+
+            const bonusDamage = Number(bonus.extraDamage ?? 0);
+            if (bonusDamage > 0) {
+                damage += bonusDamage;
+                details.push(`自ヘイト${bonus.selfHateExact}：+${formatNumber(bonusDamage)}ダメージ`);
+            }
+
+            const bonusHeal = Number(bonus.extraHeal ?? 0);
+            if (bonusHeal > 0) {
+                heal += bonusHeal;
+                details.push(`自ヘイト${bonus.selfHateExact}：+${formatNumber(bonusHeal)}回復`);
+            }
+
+            const hateChange = Number(bonus.extraHateChange ?? 0);
+            if (hateChange !== 0) {
+                extraHateChange += hateChange;
+                details.push(`自ヘイト${bonus.selfHateExact}：ヘイト${hateChange > 0 ? "+" : ""}${hateChange}`);
+            }
+        });
+    }
+
+    return { damage, heal, details, extraHateChange };
+}
+
 function applySpecialEffect(game, card, caster, target) {
     const effectType = card.effectType;
     const details = [];
@@ -2041,7 +2088,8 @@ io.on("connection", socket => {
                 targets.forEach(enemy => {
                     const hateBonusResult = applyHateBonus(usedCard, caster, enemy, usedCard.damage);
                     const rankBonusResult = applyRankBonus(game, usedCard, caster, enemy, hateBonusResult.damage);
-                    let damage = rankBonusResult.damage;
+                    const selfHateBonusResult = applySelfHateBonus(usedCard, caster, rankBonusResult.damage, 0);
+                    let damage = selfHateBonusResult.damage;
 
                     if (hasStatusEffect(caster, "shadowban")) {
                         damage = Math.max(0, damage - 500);
@@ -2111,8 +2159,9 @@ io.on("connection", socket => {
 
             const hateBonusResult = applyHateBonus(usedCard, caster, finalTarget, usedCard.damage);
             const rankBonusResult = applyRankBonus(game, usedCard, caster, finalTarget, hateBonusResult.damage);
-            let damage = rankBonusResult.damage;
-            const bonusDetails = [...hateBonusResult.details, ...rankBonusResult.details];
+            const selfHateBonusResult = applySelfHateBonus(usedCard, caster, rankBonusResult.damage, 0);
+            let damage = selfHateBonusResult.damage;
+            const bonusDetails = [...hateBonusResult.details, ...rankBonusResult.details, ...selfHateBonusResult.details];
 
             if (hasStatusEffect(caster, "shadowban")) {
                 damage = Math.max(0, damage - 500);
@@ -2223,9 +2272,11 @@ io.on("connection", socket => {
         }
 
         if (usedCard.kind === "support") {
+            const selfHateBonusResult = applySelfHateBonus(usedCard, caster, 0, usedCard.heal);
+            const totalHeal = selfHateBonusResult.heal;
+
             const beforeFollowers = caster.followers;
-            caster.followers =
-                Math.min(10000, caster.followers + usedCard.heal);
+            caster.followers = Math.min(10000, caster.followers + totalHeal);
             const healAmount = Math.max(0, caster.followers - beforeFollowers);
 
             if (usedCard.clearStatus) {
@@ -2237,10 +2288,15 @@ io.on("connection", socket => {
                 changeHate(caster, usedCard.hateChange);
             }
 
+            if (selfHateBonusResult.extraHateChange !== 0) {
+                changeHate(caster, selfHateBonusResult.extraHateChange);
+            }
+
             finishCardPlay({
                 healText: `回復：${healAmount.toLocaleString()}`,
                 healAmount,
-                ...(usedCard.clearStatus ? { specialText: "状態異常解除" } : {})
+                ...(usedCard.clearStatus ? { specialText: "状態異常解除" } : {}),
+                ...(selfHateBonusResult.details.length > 0 ? { bonusText: selfHateBonusResult.details.join(" / ") } : {})
             });
             return;
         }

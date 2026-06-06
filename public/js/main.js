@@ -1026,12 +1026,17 @@ window.onload = () => {
             return;
         }
 
-        const visibleCards = filteredCards.slice(0, cardListVisibleCount);
-        const hasMoreCards = visibleCards.length < filteredCards.length;
+        const RARITY_SORT_ORDER = { C: 1, UC: 2, R: 3, SR: 4, UR: 5 };
+        const sortedCards = [...filteredCards].sort((a, b) => {
+            return (RARITY_SORT_ORDER[normalizeRarity(a.rarity)] || 0) - (RARITY_SORT_ORDER[normalizeRarity(b.rarity)] || 0);
+        });
+
+        const visibleCards = sortedCards.slice(0, cardListVisibleCount);
+        const hasMoreCards = visibleCards.length < sortedCards.length;
 
         cardListBody.innerHTML = `
             <div class="card-list-stats">
-                ${cardListStatsText()} / 表示:${visibleCards.length}/${filteredCards.length}枚 / ${cardListFilterDescription()}
+                ${cardListStatsText()} / 表示:${visibleCards.length}/${sortedCards.length}枚 / ${cardListFilterDescription()}
             </div>
             <div class="card-list-grid">
                 ${visibleCards.map(card => {
@@ -1060,7 +1065,7 @@ window.onload = () => {
             </div>
             ${hasMoreCards ? `
                 <button type="button" class="card-list-more-button" id="cardListMoreButton">
-                    さらに表示する（残り${filteredCards.length - visibleCards.length}枚）
+                    さらに表示する（残り${sortedCards.length - visibleCards.length}枚）
                 </button>
             ` : ""}
         `;
