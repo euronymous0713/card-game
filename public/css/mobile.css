@@ -4425,3 +4425,52 @@
         top: 4px;
     }
 }
+
+/* =========================================================
+   スマホ版：バグ報告モーダル
+   ========================================================= */
+@media (max-width: 768px) {
+    .bug-report-overlay {
+        align-items: flex-start;
+        padding: 16px 0 24px;
+        overflow-y: auto;
+    }
+    .bug-report-box {
+        padding: 20px 16px;
+        width: 92%;
+        max-height: none;
+        gap: 14px;
+    }
+    .bug-report-header {
+        font-size: 16px;
+    }
+    .bug-report-textarea {
+        resize: none;
+        min-height: 110px;
+    }
+    .bug-report-footer {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+    .bug-report-status {
+        text-align: center;
+        min-height: 1em;
+    }
+    .bug-report-submit {
+        width: 100%;
+        min-height: 44px;
+        font-size: 15px;
+    }
+}
+
+@media (max-width: 380px),
+(max-height: 680px) {
+    .bug-report-overlay {
+        padding: 10px 0 16px;
+    }
+    .bug-report-box {
+        padding: 14px 12px;
+        gap: 10px;
+    }
+}
