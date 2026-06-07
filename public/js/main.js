@@ -2435,6 +2435,7 @@ window.onload = () => {
                         selectedTargetId = player.id;
                         renderBattlePlayers();
                         renderHand();
+                        renderMyFieldCards();
                         updateMobileActionPanel();
                     };
                 } else {
@@ -2512,6 +2513,7 @@ window.onload = () => {
                         selectedTargetId = enemy.id;
                         renderBattlePlayers();
                         renderHand();
+                        renderMyFieldCards();
                         updateMobileActionPanel();
                         return;
                     }
@@ -2630,7 +2632,40 @@ window.onload = () => {
 
         myFieldCards.innerHTML = "";
 
-        if (isSpectatorMode()) return;
+        const spectator = isSpectatorMode();
+
+        if (spectator) {
+            const allPlayers = latestGame.turnOrder;
+            const watchedPlayer = allPlayers.find(p => p.id === selectedTargetId) || allPlayers[0];
+            if (!watchedPlayer) return;
+
+            for (let i = 0; i < 2; i++) {
+                const card = watchedPlayer.fieldCards[i];
+                const setCard = document.createElement("div");
+
+                setCard.className = `set-card ${card ? "has-set-card" : ""}`;
+                setCard.innerText = card ? "伏" : "空";
+
+                if (card && !card.hidden) {
+                    setCard.onmouseenter = () => {
+                        cardDetail.innerHTML = cardDetailHtml(card);
+                    };
+                    setCard.onmouseleave = () => {
+                        if (!isMobileLayout()) resetCardDetail();
+                    };
+                    setCard.onclick = () => {
+                        if (isMobileLayout()) {
+                            toggleMobileFieldCardEffect(card, card.fieldId || `field-card-${i}`);
+                        } else {
+                            cardDetail.innerHTML = cardDetailHtml(card);
+                        }
+                    };
+                }
+
+                myFieldCards.appendChild(setCard);
+            }
+            return;
+        }
 
         const me = latestGame.turnOrder.find(player => player.id === socket.id);
 

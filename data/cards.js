@@ -1363,10 +1363,8 @@ module.exports = [
         targetType: "enemy",
         damage: 2000,
         heal: 0,
-        hateTarget: "target",
-        hateChange: 3,
-        hateText: "対象のヘイト +3",
-        effect: "対象に2,000フォロワーダメージ。対象のヘイトが3ならダメージ2倍（最大4,000）。罠カードを無視してダメージを与える。攻撃が当たった時、対象に2ターン晒し中（受ける攻撃ダメージが300増える）を付与。対象のヘイトが3上がる。",
+        hateText: "",
+        effect: "対象に2,000フォロワーダメージ。対象のヘイトが3ならダメージ2倍（最大4,000）。罠カードを無視してダメージを与える。攻撃が当たった時、対象に2ターン晒し中（受ける攻撃ダメージが300増える）を付与。",
         ignoreTrap: true,
         attackStatusType: "expose",
         attackStatusDuration: 2
