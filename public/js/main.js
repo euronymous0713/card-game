@@ -2475,7 +2475,6 @@ window.onload = () => {
                     ${hateIcons(me.hate)}
                 </div>
                 ${statusEffectsHtml(me)}
-                <div class="my-hand-count">手札 ${me.hand.length} / ${maxHand}</div>
             `;
 
             bindStatusEffectEvents(myPanel);
