@@ -1135,6 +1135,61 @@ window.onload = () => {
         return battleField;
     }
 
+    function showOverwriteTrapModal(data) {
+        const oldOverlay = document.getElementById("overwriteTrapOverlay");
+        if (oldOverlay) oldOverlay.remove();
+
+        const overlay = document.createElement("div");
+        overlay.id = "overwriteTrapOverlay";
+        overlay.className = "trap-choice-overlay";
+
+        overlay.innerHTML = `
+        <div class="trap-choice-box light-trap-choice-box">
+            <h2>伏せカードを上書き</h2>
+            <p class="trap-choice-message">
+                <strong>${data.newCard.name}</strong> をセットします。<br>
+                上書きする伏せカードを選んでください（選ばれたカードは失われます）。
+            </p>
+            <div class="trap-new-card-preview">
+                <div class="trap-section-title">セットするカード</div>
+                <div class="trap-source-card-name">
+                    ${data.newCard.name}
+                    ${data.newCard.type ? `<span>${data.newCard.type}</span>` : ""}
+                </div>
+                <div class="trap-source-rarity ${rarityClass(data.newCard.rarity)}">${rarityLabel(data.newCard.rarity)}</div>
+                <p>${data.newCard.effect || ""}</p>
+                <small>発動条件：${data.newCard.conditionText}</small>
+            </div>
+            <div class="trap-choice-list compact-trap-choice-list">
+                ${data.currentTraps.map(trap => `
+                    <div
+                        class="trap-choice-card compact-trap-card"
+                        data-field-id="${trap.fieldId}"
+                    >
+                        <strong>${trap.name}</strong>
+                        <em class="trap-choice-rarity ${rarityClass(trap.rarity)}">${rarityLabel(normalizeRarity(trap.rarity))}</em>
+                        <span>${trap.effect}</span>
+                        <small>発動条件：${trap.conditionText}</small>
+                    </div>
+                `).join("")}
+            </div>
+        </div>
+        `;
+
+        document.body.appendChild(overlay);
+
+        overlay.querySelectorAll(".trap-choice-card").forEach(cardElement => {
+            cardElement.onclick = () => {
+                const fieldId = cardElement.dataset.fieldId;
+                socket.emit("chooseOverwriteTrapResponse", {
+                    choiceId: data.choiceId,
+                    fieldId
+                });
+                overlay.remove();
+            };
+        });
+    }
+
     function showTrapChoiceModal(data) {
         const oldOverlay = document.getElementById("trapChoiceOverlay");
 
@@ -2244,6 +2299,10 @@ window.onload = () => {
     socket.on("chooseTrap", data => {
         showTrapWaitingNotice("罠カードを選択してください");
         showTrapChoiceModal(data);
+    });
+
+    socket.on("chooseOverwriteTrap", data => {
+        showOverwriteTrapModal(data);
     });
 
     socket.on("updateGame", game => {

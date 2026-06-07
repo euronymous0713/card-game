@@ -63,6 +63,7 @@ app.post("/api/bug-report", (req, res) => {
 
 const rooms = {};
 const pendingTrapChoices = {};
+const pendingOverwriteChoices = {};
 const DEV_MODE = true;
 const RECONNECT_TIMEOUT_MS = 5 * 60 * 1000;
 
@@ -1072,6 +1073,47 @@ function removeTrapByFieldId(player, fieldId) {
     return trap;
 }
 
+function setTrapCard(caster, usedCard, game, roomId, overwrite = false) {
+    caster.fieldCards.push({
+        fieldId: `field-${usedCard.instanceId}`,
+        id: usedCard.id,
+        name: usedCard.name,
+        type: usedCard.type,
+        rarity: normalizeRarity(usedCard.rarity),
+        effect: usedCard.effect,
+        hateText: usedCard.hateText,
+        trapCondition: usedCard.trapCondition,
+        trapEffect: usedCard.trapEffect,
+        trapDamage: usedCard.trapDamage || 0,
+        trapHateChange: usedCard.trapHateChange || 0,
+        trapMuteTurns: usedCard.trapMuteTurns || 0,
+        trapFreezeTurns: usedCard.trapFreezeTurns || 0,
+        trapShadowbanTurns: usedCard.trapShadowbanTurns || 0
+    });
+
+    caster.cardsPlayedThisTurn = (caster.cardsPlayedThisTurn || 0) + 1;
+
+    if (usedCard.hateChange) {
+        changeHate(caster, usedCard.hateChange);
+    }
+
+    addLog(game, {
+        actionType: "setTrap",
+        playerId: caster.id,
+        playerName: caster.name,
+        targetName: "自分の場",
+        cardName: usedCard.name,
+        cardType: usedCard.type,
+        cardRarity: normalizeRarity(usedCard.rarity),
+        hateText: usedCard.hateText,
+        log: overwrite
+            ? `${caster.name} は伏せカードを上書きした`
+            : `${caster.name} は ${usedCard.name} を伏せた`
+    });
+
+    emitGameUpdate(roomId);
+}
+
 function conditionText(condition) {
     if (condition === "onDamage") return "ダメージを受けたとき";
     if (condition === "onHateChange") return "ヘイトを変動させられたとき";
@@ -1761,6 +1803,13 @@ function makePlayerOwakonBySocket(roomId, socketId) {
         }
     });
 
+    Object.entries(pendingOverwriteChoices).forEach(([choiceId, pending]) => {
+        if (!pending) return;
+        if (pending.roomId !== roomId) return;
+        if (pending.playerId !== socketId) return;
+        delete pendingOverwriteChoices[choiceId];
+    });
+
     addLog(game, {
         actionType: "defeated",
         playerId: gamePlayer.id,
@@ -2034,6 +2083,36 @@ io.on("connection", socket => {
         finishPending(result);
     });
 
+    socket.on("chooseOverwriteTrapResponse", ({ choiceId, fieldId }) => {
+        const pending = pendingOverwriteChoices[choiceId];
+        if (!pending) return;
+        if (socket.id !== pending.playerId) return;
+
+        const room = rooms[pending.roomId];
+        if (!room || !room.game) {
+            delete pendingOverwriteChoices[choiceId];
+            return;
+        }
+
+        const game = room.game;
+        const caster = game.turnOrder.find(p => p.id === pending.playerId);
+        if (!caster) {
+            delete pendingOverwriteChoices[choiceId];
+            return;
+        }
+
+        delete pendingOverwriteChoices[choiceId];
+
+        const removeIndex = caster.fieldCards.findIndex(c => c.fieldId === fieldId);
+        if (removeIndex !== -1) {
+            caster.fieldCards.splice(removeIndex, 1);
+        } else {
+            caster.fieldCards.shift();
+        }
+
+        setTrapCard(caster, pending.newCard, game, pending.roomId, true);
+    });
+
     socket.on("playCard", ({ roomId, cardInstanceId, targetId }) => {
         const room = rooms[roomId];
         if (!room || !room.game) return;
@@ -2072,47 +2151,38 @@ io.on("connection", socket => {
 
         if (usedCard.kind === "trap") {
             if (caster.fieldCards.length >= 2) {
-                caster.hand.push(usedCard);
-                socket.emit("errorMessage", "伏せカードは最大2枚までです");
+                const choiceId = `overwrite-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+                pendingOverwriteChoices[choiceId] = {
+                    roomId,
+                    playerId: caster.id,
+                    newCard: usedCard
+                };
+                socket.emit("chooseOverwriteTrap", {
+                    choiceId,
+                    newCard: {
+                        name: usedCard.name,
+                        type: usedCard.type,
+                        rarity: normalizeRarity(usedCard.rarity),
+                        effect: usedCard.effect,
+                        hateText: usedCard.hateText,
+                        trapCondition: usedCard.trapCondition,
+                        conditionText: conditionText(usedCard.trapCondition)
+                    },
+                    currentTraps: caster.fieldCards.map(card => ({
+                        fieldId: card.fieldId,
+                        name: card.name,
+                        type: card.type,
+                        rarity: card.rarity,
+                        effect: card.effect,
+                        hateText: card.hateText,
+                        trapCondition: card.trapCondition,
+                        conditionText: conditionText(card.trapCondition)
+                    }))
+                });
                 return;
             }
 
-            caster.fieldCards.push({
-                fieldId: `field-${usedCard.instanceId}`,
-                id: usedCard.id,
-                name: usedCard.name,
-                type: usedCard.type,
-                rarity: normalizeRarity(usedCard.rarity),
-                effect: usedCard.effect,
-                hateText: usedCard.hateText,
-                trapCondition: usedCard.trapCondition,
-                trapEffect: usedCard.trapEffect,
-                trapDamage: usedCard.trapDamage || 0,
-                trapHateChange: usedCard.trapHateChange || 0,
-                trapMuteTurns: usedCard.trapMuteTurns || 0,
-                trapFreezeTurns: usedCard.trapFreezeTurns || 0,
-                trapShadowbanTurns: usedCard.trapShadowbanTurns || 0
-            });
-
-            caster.cardsPlayedThisTurn = (caster.cardsPlayedThisTurn || 0) + 1;
-
-            if (usedCard.hateChange) {
-                changeHate(caster, usedCard.hateChange);
-            }
-
-            addLog(game, {
-                actionType: "setTrap",
-                playerId: caster.id,
-                playerName: caster.name,
-                targetName: "自分の場",
-                cardName: usedCard.name,
-                cardType: usedCard.type,
-                cardRarity: normalizeRarity(usedCard.rarity),
-                hateText: usedCard.hateText,
-                log: `${caster.name} は ${usedCard.name} を伏せた`
-            });
-
-            emitGameUpdate(roomId);
+            setTrapCard(caster, usedCard, game, roomId);
             return;
         }
 
