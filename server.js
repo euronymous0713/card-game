@@ -100,7 +100,7 @@ function drawCards(player, maxDraw = 4) {
     }
 }
 
-function drawCardsHandManage(player, drawCount, maxHand = 8) {
+function drawCardsHandManage(player, drawCount, maxHand = 4) {
     let drawn = 0;
     while (player.hand.length < maxHand && drawn < drawCount) {
         const card = generateCardInstance();
@@ -2535,7 +2535,7 @@ io.on("connection", socket => {
         const player = result.room.game.turnOrder.find(p => p.id === playerId);
         if (!player) return;
 
-        const maxHand = (result.room.game.drawRule === "handManage") ? 8 : 4;
+        const maxHand = 4;
         if (player.hand.length >= maxHand) {
             socket.emit("errorMessage", `手札は最大${maxHand}枚です`);
             return;

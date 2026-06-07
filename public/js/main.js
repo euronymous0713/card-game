@@ -2041,7 +2041,7 @@ window.onload = () => {
     };
     const RULE_DESCS = {
         classic: "毎ターン手札が4枚になるよう補充されます。",
-        handManage: "使った枚数だけ次のターンの補充が減ります（手札は最大8枚まで溜まります）。"
+        handManage: "使った枚数だけ次のターンの補充が減ります（手札は最大4枚まで溜まります）。"
     };
 
     const ruleSelector = document.getElementById("ruleSelector");
@@ -2050,6 +2050,11 @@ window.onload = () => {
     const ruleSelectorDesc = document.getElementById("ruleSelectorDesc");
     const ruleClassicBtn = document.getElementById("ruleClassicBtn");
     const ruleHandManageBtn = document.getElementById("ruleHandManageBtn");
+
+    const isDevMode = new URLSearchParams(window.location.search).get("dev") === "1";
+    if (ruleHandManageBtn && !isDevMode) {
+        ruleHandManageBtn.style.display = "none";
+    }
 
     function applyRuleUI(drawRule) {
         const label = RULE_LABELS[drawRule] || RULE_LABELS.classic;
@@ -2320,7 +2325,7 @@ window.onload = () => {
             myPanel.classList.toggle("choosing-trap-player", Boolean(latestGame.waitingTrapChoice && me.id === latestGame.waitingTrapPlayerId));
 
             const drawRule = latestGame.drawRule || "classic";
-            const maxHand = drawRule === "handManage" ? 8 : 4;
+            const maxHand = 4;
 
             myPanel.innerHTML = `
                 <div class="my-name">${me.defeated ? "💀 " : ""}${me.hate >= 3 ? "🔥 " : ""}${me.name}${disconnectedLabel(me)}</div>
@@ -2555,7 +2560,7 @@ window.onload = () => {
         if (!latestGame) return;
 
         const drawRule = latestGame.drawRule || "classic";
-        const maxHand = drawRule === "handManage" ? 8 : 4;
+        const maxHand = 4;
 
         const me = latestGame.turnOrder.find(player => player.id === socket.id);
 
