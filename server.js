@@ -100,6 +100,17 @@ function drawCards(player, maxDraw = 4) {
     }
 }
 
+function drawCardsHandManage(player, drawCount, maxHand = 8) {
+    let drawn = 0;
+    while (player.hand.length < maxHand && drawn < drawCount) {
+        const card = generateCardInstance();
+        if (card) {
+            player.hand.push(card);
+            drawn++;
+        }
+    }
+}
+
 function shuffleArray(array) {
     return [...array].sort(() => Math.random() - 0.5);
 }
@@ -108,7 +119,7 @@ function clamp(value, min, max) {
     return Math.max(min, Math.min(max, value));
 }
 
-function createGameState(players) {
+function createGameState(players, drawRule = "classic") {
     const turnOrder = shuffleArray(players).map(player => {
         const gamePlayer = {
             id: player.id,
@@ -123,7 +134,8 @@ function createGameState(players) {
             defeated: false,
             skipTurns: 0,
             extraTurns: 0,
-            statusEffects: []
+            statusEffects: [],
+            cardsPlayedThisTurn: 0
         };
 
         drawCards(gamePlayer);
@@ -139,7 +151,8 @@ function createGameState(players) {
         gameOver: false,
         waitingTrapChoice: false,
         waitingTrapPlayerId: null,
-        waitingTrapPlayerName: ""
+        waitingTrapPlayerName: "",
+        drawRule
     };
 }
 
@@ -429,7 +442,17 @@ function moveToNextAliveTurn(game) {
             continue;
         }
 
-        drawCards(nextPlayer, drawLimit);
+        if ((game.drawRule || "classic") === "handManage") {
+            const cardsPlayed = nextPlayer.cardsPlayedThisTurn || 0;
+            const baseCount = Math.max(0, 4 - cardsPlayed);
+            const drawCount = hasStatusEffect(nextPlayer, "digitalDetox")
+                ? Math.min(1, baseCount)
+                : baseCount;
+            nextPlayer.cardsPlayedThisTurn = 0;
+            drawCardsHandManage(nextPlayer, drawCount);
+        } else {
+            drawCards(nextPlayer, drawLimit);
+        }
         return;
     } while (guard < game.turnOrder.length * 3);
 }
@@ -838,7 +861,10 @@ function emitRoomUpdate(roomId) {
     const room = rooms[roomId];
     if (!room) return;
 
-    io.to(roomId).emit("updateRoom", room.players);
+    io.to(roomId).emit("updateRoom", {
+        players: room.players,
+        drawRule: room.drawRule || "classic"
+    });
 }
 
 function updateIdInLogs(logs, oldId, newId) {
@@ -1783,7 +1809,8 @@ io.on("connection", socket => {
                 disconnectedAt: null
             }],
             game: null,
-            reconnectCleanupTimers: {}
+            reconnectCleanupTimers: {},
+            drawRule: "classic"
         };
 
         socket.join(roomId);
@@ -1847,6 +1874,19 @@ io.on("connection", socket => {
         emitRoomUpdate(roomId);
     });
 
+    socket.on("setDrawRule", ({ roomId, drawRule }) => {
+        const room = rooms[roomId];
+        if (!room || room.game) return;
+
+        const player = room.players.find(p => p.id === socket.id);
+        if (!player || !player.host) return;
+
+        if (drawRule !== "classic" && drawRule !== "handManage") return;
+
+        room.drawRule = drawRule;
+        emitRoomUpdate(roomId);
+    });
+
     socket.on("startGame", roomId => {
         const room = rooms[roomId];
         if (!room) return;
@@ -1870,7 +1910,7 @@ io.on("connection", socket => {
             return;
         }
 
-        room.game = createGameState(activePlayers);
+        room.game = createGameState(activePlayers, room.drawRule || "classic");
         room.returnedToLobby = null;
 
         io.to(roomId).emit("gameStarted");
@@ -2003,6 +2043,8 @@ io.on("connection", socket => {
                 trapShadowbanTurns: usedCard.trapShadowbanTurns || 0
             });
 
+            caster.cardsPlayedThisTurn = (caster.cardsPlayedThisTurn || 0) + 1;
+
             if (usedCard.hateChange) {
                 changeHate(caster, usedCard.hateChange);
             }
@@ -2054,6 +2096,8 @@ io.on("connection", socket => {
             caster.hand.push(usedCard);
             return;
         }
+
+        caster.cardsPlayedThisTurn = (caster.cardsPlayedThisTurn || 0) + 1;
 
         const targetLabel = usedCard.targetType === "allEnemies"
             ? "敵全体"
@@ -2398,6 +2442,8 @@ io.on("connection", socket => {
             return;
         }
 
+        player.cardsPlayedThisTurn = (player.cardsPlayedThisTurn || 0) + 1;
+
         addLog(game, {
             actionType: "discard",
             playerId: player.id,
@@ -2489,8 +2535,9 @@ io.on("connection", socket => {
         const player = result.room.game.turnOrder.find(p => p.id === playerId);
         if (!player) return;
 
-        if (player.hand.length >= 4) {
-            socket.emit("errorMessage", "手札は最大4枚です");
+        const maxHand = (result.room.game.drawRule === "handManage") ? 8 : 4;
+        if (player.hand.length >= maxHand) {
+            socket.emit("errorMessage", `手札は最大${maxHand}枚です`);
             return;
         }
 

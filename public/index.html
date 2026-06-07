@@ -110,6 +110,19 @@
 
     <div id="playerList"></div>
 
+    <div id="ruleSelector" style="display:none;">
+      <div class="rule-selector-label">ルール選択</div>
+      <div class="rule-selector-buttons">
+        <button class="rule-select-btn" id="ruleClassicBtn" data-rule="classic">通常ルール</button>
+        <button class="rule-select-btn" id="ruleHandManageBtn" data-rule="handManage">手札管理ルール</button>
+      </div>
+      <p class="rule-selector-desc" id="ruleSelectorDesc"></p>
+    </div>
+
+    <div id="ruleDisplay" style="display:none;">
+      <p class="rule-display-text">ルール：<strong id="ruleDisplayLabel"></strong></p>
+    </div>
+
     <div class="lobby-buttons">
       <button id="readyButton">準備完了</button>
       <button id="leaveRoomButton">退出</button>

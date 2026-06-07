@@ -2173,3 +2173,80 @@ body.battle-active .mobile-trap-waiting-notice.show {
     }
 }
 
+/* 手札カウンター */
+.my-hand-count {
+    font-size: 0.78em;
+    color: rgba(255, 255, 255, 0.45);
+    margin-top: 6px;
+}
+
+.hand-empty-notice {
+    color: rgba(255, 255, 255, 0.35);
+    font-size: 0.85em;
+    align-self: center;
+    padding: 12px 0;
+}
+
+/* ルール選択UI */
+#ruleSelector {
+    margin: 16px 0;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+}
+
+.rule-selector-label {
+    font-size: 0.85em;
+    color: #aaa;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.rule-selector-buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.rule-select-btn {
+    padding: 8px 16px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.55);
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: all 0.15s;
+}
+
+.rule-select-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: white;
+}
+
+.rule-select-btn.rule-select-btn-active {
+    background: rgba(100, 160, 255, 0.2);
+    border-color: rgba(100, 160, 255, 0.6);
+    color: white;
+    font-weight: bold;
+}
+
+.rule-selector-desc {
+    margin-top: 10px;
+    font-size: 0.82em;
+    color: #aaa;
+    min-height: 1.2em;
+}
+
+#ruleDisplay {
+    margin: 12px 0;
+    font-size: 0.9em;
+    color: #bbb;
+}
+
+.rule-display-text strong {
+    color: white;
+}
+

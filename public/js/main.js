@@ -2035,7 +2035,45 @@ window.onload = () => {
         }
     });
 
-    socket.on("updateRoom", players => {
+    const RULE_LABELS = {
+        classic: "通常ルール",
+        handManage: "手札管理ルール（テスト）"
+    };
+    const RULE_DESCS = {
+        classic: "毎ターン手札が4枚になるよう補充されます。",
+        handManage: "使った枚数だけ次のターンの補充が減ります（手札は最大8枚まで溜まります）。"
+    };
+
+    const ruleSelector = document.getElementById("ruleSelector");
+    const ruleDisplay = document.getElementById("ruleDisplay");
+    const ruleDisplayLabel = document.getElementById("ruleDisplayLabel");
+    const ruleSelectorDesc = document.getElementById("ruleSelectorDesc");
+    const ruleClassicBtn = document.getElementById("ruleClassicBtn");
+    const ruleHandManageBtn = document.getElementById("ruleHandManageBtn");
+
+    function applyRuleUI(drawRule) {
+        const label = RULE_LABELS[drawRule] || RULE_LABELS.classic;
+        const desc = RULE_DESCS[drawRule] || RULE_DESCS.classic;
+
+        if (ruleDisplayLabel) ruleDisplayLabel.textContent = label;
+        if (ruleSelectorDesc) ruleSelectorDesc.textContent = desc;
+
+        [ruleClassicBtn, ruleHandManageBtn].forEach(btn => {
+            if (!btn) return;
+            const active = btn.dataset.rule === drawRule;
+            btn.classList.toggle("rule-select-btn-active", active);
+        });
+    }
+
+    [ruleClassicBtn, ruleHandManageBtn].forEach(btn => {
+        if (!btn) return;
+        btn.onclick = () => {
+            socket.emit("setDrawRule", { roomId: currentRoomId, drawRule: btn.dataset.rule });
+        };
+    });
+
+    socket.on("updateRoom", ({ players, drawRule }) => {
+        drawRule = drawRule || "classic";
         playerList.innerHTML = "";
 
         const me = players.find(player => player.id === socket.id);
@@ -2075,9 +2113,15 @@ window.onload = () => {
         if (isHost) {
             startGameButton.style.display = "block";
             startGameButton.disabled = !canStart;
+            if (ruleSelector) ruleSelector.style.display = "block";
+            if (ruleDisplay) ruleDisplay.style.display = "none";
         } else {
             startGameButton.style.display = "none";
+            if (ruleSelector) ruleSelector.style.display = "none";
+            if (ruleDisplay) ruleDisplay.style.display = "block";
         }
+
+        applyRuleUI(drawRule);
     });
 
     readyButton.onclick = () => {
@@ -2275,6 +2319,9 @@ window.onload = () => {
             myPanel.classList.toggle("defeated-player", me.defeated);
             myPanel.classList.toggle("choosing-trap-player", Boolean(latestGame.waitingTrapChoice && me.id === latestGame.waitingTrapPlayerId));
 
+            const drawRule = latestGame.drawRule || "classic";
+            const maxHand = drawRule === "handManage" ? 8 : 4;
+
             myPanel.innerHTML = `
                 <div class="my-name">${me.defeated ? "💀 " : ""}${me.hate >= 3 ? "🔥 " : ""}${me.name}${disconnectedLabel(me)}</div>
                 <div class="follower-line ${me.defeated ? "owakon-text" : ""}">
@@ -2284,6 +2331,7 @@ window.onload = () => {
                     ${hateIcons(me.hate)}
                 </div>
                 ${statusEffectsHtml(me)}
+                <div class="my-hand-count">手札 ${me.hand.length} / ${maxHand}</div>
             `;
 
             bindStatusEffectEvents(myPanel);
@@ -2506,6 +2554,9 @@ window.onload = () => {
     function renderHand() {
         if (!latestGame) return;
 
+        const drawRule = latestGame.drawRule || "classic";
+        const maxHand = drawRule === "handManage" ? 8 : 4;
+
         const me = latestGame.turnOrder.find(player => player.id === socket.id);
 
         handArea.innerHTML = "";
@@ -2527,7 +2578,9 @@ window.onload = () => {
             handArea.appendChild(notice);
         }
 
-        for (let i = 0; i < 4; i++) {
+        const slotCount = drawRule === "handManage" ? displayHand.length : 4;
+
+        for (let i = 0; i < slotCount; i++) {
             const card = displayHand[i];
 
             const cardElement = document.createElement("div");
@@ -2598,6 +2651,13 @@ window.onload = () => {
             };
 
             handArea.appendChild(cardElement);
+        }
+
+        if (drawRule === "handManage" && displayHand.length === 0 && !isSpectatorHand) {
+            const empty = document.createElement("div");
+            empty.className = "hand-empty-notice";
+            empty.textContent = "手札なし（次のターンで4枚補充）";
+            handArea.appendChild(empty);
         }
     }
 
