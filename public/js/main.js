@@ -2003,6 +2003,8 @@ window.onload = () => {
     }
 
     if (bugReportTitleBtn)   bugReportTitleBtn.onclick  = openBugReport;
+    const bugReportCardListBtn = document.getElementById("bugReportCardListButton");
+    if (bugReportCardListBtn) bugReportCardListBtn.onclick = openBugReport;
     if (bugReportCloseBtn)   bugReportCloseBtn.onclick  = closeBugReport;
     if (bugReportSubmitBtn)  bugReportSubmitBtn.onclick = submitBugReport;
     if (bugReportOverlay) {

@@ -29,6 +29,11 @@ function sendDiscordWebhook(payload) {
             "Content-Type": "application/json",
             "Content-Length": Buffer.byteLength(body)
         }
+    }, (res) => {
+        res.resume();
+        if (res.statusCode < 200 || res.statusCode >= 300) {
+            console.error("Discord webhook failed, status:", res.statusCode);
+        }
     });
     req.on("error", (e) => console.error("Discord webhook error:", e));
     req.write(body);
