@@ -33,6 +33,7 @@
 
     <div class="title-sub-buttons">
       <button id="cardListButton" class="card-list-title-button" type="button">カード一覧</button>
+      <button id="bugReportTitleButton" class="bug-report-title-button" type="button">バグ報告</button>
     </div>
 
     <div class="creator-credit">
@@ -203,6 +204,25 @@
         </div>
       </div>
 
+    </div>
+  </div>
+
+  <div id="bugReportOverlay" class="bug-report-overlay" style="display:none;">
+    <div class="bug-report-box">
+      <div class="bug-report-header">
+        <strong>バグ報告</strong>
+        <button id="bugReportCloseButton" type="button" aria-label="閉じる">×</button>
+      </div>
+      <div class="bug-report-body">
+        <label class="bug-report-label" for="bugReportSummary">件名</label>
+        <input type="text" id="bugReportSummary" class="bug-report-input" placeholder="バグの概要を入力してください" maxlength="100">
+        <label class="bug-report-label" for="bugReportDetail">詳細</label>
+        <textarea id="bugReportDetail" class="bug-report-textarea" placeholder="再現手順や状況を詳しく書いてください" rows="5" maxlength="500"></textarea>
+      </div>
+      <div class="bug-report-footer">
+        <span id="bugReportStatus" class="bug-report-status"></span>
+        <button id="bugReportSubmitButton" type="button" class="bug-report-submit">送信</button>
+      </div>
     </div>
   </div>
 

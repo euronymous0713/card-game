@@ -1,14 +1,60 @@
 const express = require("express");
 const http = require("http");
+const https = require("https");
 const { Server } = require("socket.io");
 
 const CARD_MASTER = require("./data/cards");
+
+let DISCORD_WEBHOOK_URL = "";
+try {
+    DISCORD_WEBHOOK_URL = require("./config.local").DISCORD_WEBHOOK_URL || "";
+} catch (_) {}
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
 app.use(express.static("public"));
+app.use(express.json());
+
+function sendDiscordWebhook(payload) {
+    if (!DISCORD_WEBHOOK_URL) return;
+    const body = JSON.stringify(payload);
+    const url = new URL(DISCORD_WEBHOOK_URL);
+    const req = https.request({
+        hostname: url.hostname,
+        path: url.pathname + url.search,
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Content-Length": Buffer.byteLength(body)
+        }
+    });
+    req.on("error", (e) => console.error("Discord webhook error:", e));
+    req.write(body);
+    req.end();
+}
+
+app.post("/api/bug-report", (req, res) => {
+    const { name, summary, detail, roomId } = req.body || {};
+    if (!summary || !summary.trim()) {
+        return res.status(400).json({ error: "件名は必須です" });
+    }
+    sendDiscordWebhook({
+        embeds: [{
+            title: "🐛 バグ報告",
+            color: 0xe74c3c,
+            fields: [
+                { name: "送信者", value: name || "不明", inline: true },
+                { name: "場所", value: roomId ? `ルーム ${roomId}` : "タイトル画面", inline: true },
+                { name: "件名", value: summary.slice(0, 256) },
+                { name: "詳細", value: (detail || "").slice(0, 1024) || "（なし）" }
+            ],
+            timestamp: new Date().toISOString()
+        }]
+    });
+    res.json({ ok: true });
+});
 
 const rooms = {};
 const pendingTrapChoices = {};

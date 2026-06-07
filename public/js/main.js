@@ -1613,6 +1613,9 @@ window.onload = () => {
                 <button id="mobileCardListButton" class="mobile-card-list-button" type="button">
                     カード一覧
                 </button>
+                <button id="mobileBugReportButton" class="mobile-bug-report-button" type="button">
+                    バグ報告
+                </button>
                 <button id="mobileBattleLeaveButton" class="mobile-battle-leave-button" type="button">
                     退出してオワコンになる
                 </button>
@@ -1635,6 +1638,14 @@ window.onload = () => {
             cardListBtn.onclick = () => {
                 closeMobileSettings();
                 openTitleCardList();
+            };
+        }
+
+        const bugReportBtn = document.getElementById("mobileBugReportButton");
+        if (bugReportBtn) {
+            bugReportBtn.onclick = () => {
+                closeMobileSettings();
+                openBugReport();
             };
         }
 
@@ -1931,6 +1942,73 @@ window.onload = () => {
 
     if (savedName) {
         nameInput.value = savedName;
+    }
+
+    // ---- バグ報告モーダル ----
+    const bugReportOverlay    = document.getElementById("bugReportOverlay");
+    const bugReportCloseBtn   = document.getElementById("bugReportCloseButton");
+    const bugReportSummary    = document.getElementById("bugReportSummary");
+    const bugReportDetail     = document.getElementById("bugReportDetail");
+    const bugReportStatus     = document.getElementById("bugReportStatus");
+    const bugReportSubmitBtn  = document.getElementById("bugReportSubmitButton");
+    const bugReportTitleBtn   = document.getElementById("bugReportTitleButton");
+
+    function openBugReport() {
+        bugReportSummary.value = "";
+        bugReportDetail.value  = "";
+        bugReportStatus.textContent = "";
+        bugReportStatus.className   = "bug-report-status";
+        bugReportOverlay.style.display = "flex";
+        bugReportSummary.focus();
+    }
+
+    function closeBugReport() {
+        bugReportOverlay.style.display = "none";
+    }
+
+    async function submitBugReport() {
+        const summary = bugReportSummary.value.trim();
+        if (!summary) {
+            bugReportStatus.textContent = "件名を入力してください";
+            bugReportStatus.className   = "bug-report-status error";
+            return;
+        }
+        bugReportSubmitBtn.disabled  = true;
+        bugReportStatus.textContent  = "送信中…";
+        bugReportStatus.className    = "bug-report-status";
+        try {
+            const res = await fetch("/api/bug-report", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    name:    localStorage.getItem("playerName") || "不明",
+                    summary,
+                    detail:  bugReportDetail.value.trim(),
+                    roomId:  currentRoomId || ""
+                })
+            });
+            if (res.ok) {
+                bugReportStatus.textContent = "送信しました！ありがとうございます";
+                bugReportStatus.className   = "bug-report-status success";
+                setTimeout(closeBugReport, 1800);
+            } else {
+                throw new Error("server error");
+            }
+        } catch (_) {
+            bugReportStatus.textContent = "送信に失敗しました。もう一度お試しください";
+            bugReportStatus.className   = "bug-report-status error";
+        } finally {
+            bugReportSubmitBtn.disabled = false;
+        }
+    }
+
+    if (bugReportTitleBtn)   bugReportTitleBtn.onclick  = openBugReport;
+    if (bugReportCloseBtn)   bugReportCloseBtn.onclick  = closeBugReport;
+    if (bugReportSubmitBtn)  bugReportSubmitBtn.onclick = submitBugReport;
+    if (bugReportOverlay) {
+        bugReportOverlay.addEventListener("click", (e) => {
+            if (e.target === bugReportOverlay) closeBugReport();
+        });
     }
 
     createRoomButton.onclick = () => {

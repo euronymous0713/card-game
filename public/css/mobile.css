@@ -4196,6 +4196,18 @@
         margin-bottom: 8px !important;
     }
 
+    .mobile-bug-report-button {
+        width: 100% !important;
+        min-height: 42px !important;
+        padding: 10px 12px !important;
+        border-radius: 12px !important;
+        font-size: 13px !important;
+        background: linear-gradient(135deg, #7b3a3a, #3a0000) !important;
+        box-shadow: 0 0 14px rgba(255, 107, 107, 0.2) !important;
+        margin-bottom: 8px !important;
+        color: #ffaaaa !important;
+    }
+
     .mobile-battle-leave-button {
         width: 100% !important;
         min-height: 42px !important;
