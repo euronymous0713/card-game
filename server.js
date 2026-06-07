@@ -5,9 +5,9 @@ const { Server } = require("socket.io");
 
 const CARD_MASTER = require("./data/cards");
 
-let DISCORD_WEBHOOK_URL = "";
+let DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL || "";
 try {
-    DISCORD_WEBHOOK_URL = require("./config.local").DISCORD_WEBHOOK_URL || "";
+    DISCORD_WEBHOOK_URL = DISCORD_WEBHOOK_URL || require("./config.local").DISCORD_WEBHOOK_URL || "";
 } catch (_) {}
 
 const app = express();
