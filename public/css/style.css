@@ -1525,6 +1525,7 @@ body.battle-active .mobile-trap-waiting-notice.show {
 }
 
 .card-list-body {
+    flex: 1;
     overflow-y: auto;
     padding-right: 6px;
 }
