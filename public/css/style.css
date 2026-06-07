@@ -2174,12 +2174,6 @@ body.battle-active .mobile-trap-waiting-notice.show {
     }
 }
 
-/* 手札カウンター */
-.my-hand-count {
-    font-size: 0.78em;
-    color: rgba(255, 255, 255, 0.45);
-    margin-top: 6px;
-}
 
 .hand-empty-notice {
     color: rgba(255, 255, 255, 0.35);

@@ -2463,9 +2463,6 @@ window.onload = () => {
             myPanel.classList.toggle("defeated-player", me.defeated);
             myPanel.classList.toggle("choosing-trap-player", Boolean(latestGame.waitingTrapChoice && me.id === latestGame.waitingTrapPlayerId));
 
-            const drawRule = latestGame.drawRule || "classic";
-            const maxHand = 4;
-
             myPanel.innerHTML = `
                 <div class="my-name">${me.defeated ? "💀 " : ""}${me.hate >= 3 ? "🔥 " : ""}${me.name}${disconnectedLabel(me)}</div>
                 <div class="follower-line ${me.defeated ? "owakon-text" : ""}">
@@ -2487,7 +2484,7 @@ window.onload = () => {
 
             if (enemy) {
                 slot.classList.remove("empty-enemy");
-                slot.classList.toggle("selected-target", selectedTargetId === enemy.id);
+                slot.classList.toggle("selected-target", isMyTurnNow() && selectedTargetId === enemy.id);
                 slot.classList.toggle("max-hate-player", enemy.hate >= 3);
                 slot.classList.toggle("defeated-player", enemy.defeated);
                 slot.classList.remove("spectator-hand-owner");

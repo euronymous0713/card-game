@@ -1170,19 +1170,6 @@ function createGameViewForPlayer(game, viewerId) {
             };
         }
 
-        if (log.actionType === "trap" && log.playerId !== viewerId) {
-            return {
-                ...log,
-                log: `${log.playerName} の ${log.cardName} が発動した`
-            };
-        }
-
-        if (log.actionType === "trapEffect" && log.playerId !== viewerId) {
-            return {
-                ...log
-            };
-        }
-
         return log;
     });
 
@@ -1418,7 +1405,7 @@ function resolveTrapEffect(game, roomId, trapOwner, sourcePlayer, trap, context,
         cardType: trap.type,
         cardRarity: normalizeRarity(trap.rarity),
         hateText: trap.hateText || "罠が発動した",
-        log: `${trapOwner.name} の罠が発動した`
+        log: `${trapOwner.name} の ${trap.name} が発動した`
     });
 
     if (trap.trapEffect === "reflectDamage") {
@@ -1433,7 +1420,7 @@ function resolveTrapEffect(game, roomId, trapOwner, sourcePlayer, trap, context,
             cardType: trap.type,
             cardRarity: normalizeRarity(trap.rarity),
             hateText: `${damage.toLocaleString()}ダメージを跳ね返した`,
-            log: `${trapOwner.name} はダメージを跳ね返した`,
+            log: `${trapOwner.name} の ${trap.name} がダメージを跳ね返した`,
             damageText: `反射ダメージ：${damage.toLocaleString()}`,
             damageAmount: damage,
             trapDetailText: `反射：${sourcePlayer.name} に ${damage.toLocaleString()}ダメージ`
@@ -1477,7 +1464,7 @@ function resolveTrapEffect(game, roomId, trapOwner, sourcePlayer, trap, context,
             cardType: trap.type,
             cardRarity: normalizeRarity(trap.rarity),
             hateText: "ヘイト変動を打ち消した",
-            log: `${trapOwner.name} はヘイト変動を打ち消した`,
+            log: `${trapOwner.name} の ${trap.name} がヘイト変動を打ち消した`,
             trapDetailText: "ヘイト変動を無効化"
         });
 
@@ -1494,7 +1481,7 @@ function resolveTrapEffect(game, roomId, trapOwner, sourcePlayer, trap, context,
             cardType: trap.type,
             cardRarity: normalizeRarity(trap.rarity),
             hateText: "罠効果を打ち消した",
-            log: `${trapOwner.name} は罠効果を打ち消した`,
+            log: `${trapOwner.name} の ${trap.name} が罠効果を打ち消した`,
             trapDetailText: "罠効果を無効化"
         });
 
@@ -1513,7 +1500,7 @@ function resolveTrapEffect(game, roomId, trapOwner, sourcePlayer, trap, context,
             cardType: trap.type,
             cardRarity: normalizeRarity(trap.rarity),
             hateText: "罠効果を打ち消し、相手の伏せカードを全破壊",
-            log: `${trapOwner.name} は罠効果を打ち消し、相手の伏せカードをすべて破壊した`,
+            log: `${trapOwner.name} の ${trap.name} が罠効果を打ち消し、相手の伏せカードをすべて破壊した`,
             trapDetailText: "罠効果を無効化 / 相手の伏せカードを全破壊"
         });
 
@@ -1533,7 +1520,7 @@ function resolveTrapEffect(game, roomId, trapOwner, sourcePlayer, trap, context,
             cardType: trap.type,
             cardRarity: normalizeRarity(trap.rarity),
             hateText: `${sourcePlayer.name} に ${damage.toLocaleString()}ダメージ / ヘイト +${hateChange}`,
-            log: `${trapOwner.name} の罠が ${sourcePlayer.name} に反撃した`,
+            log: `${trapOwner.name} の ${trap.name} が ${sourcePlayer.name} に反撃した`,
             damageText: `罠ダメージ：${damage.toLocaleString()}`,
             damageAmount: damage,
             hateAmount: hateChange,
@@ -1582,7 +1569,7 @@ function resolveTrapEffect(game, roomId, trapOwner, sourcePlayer, trap, context,
             cardType: trap.type,
             cardRarity: normalizeRarity(trap.rarity),
             hateText: `${sourcePlayer.name} を ${freezeTurns}ターン凍結`,
-            log: `${trapOwner.name} の罠が ${sourcePlayer.name} を凍結した`,
+            log: `${trapOwner.name} の ${trap.name} が ${sourcePlayer.name} を凍結した`,
             trapDetailText: `凍結：${sourcePlayer.name} ${freezeTurns}ターン行動不能`
         });
 
@@ -1611,7 +1598,7 @@ function resolveTrapEffect(game, roomId, trapOwner, sourcePlayer, trap, context,
             cardType: trap.type,
             cardRarity: normalizeRarity(trap.rarity),
             hateText: `${sourcePlayer.name} を ${shadowbanTurns}ターンシャドウバン`,
-            log: `${trapOwner.name} の罠が ${sourcePlayer.name} をシャドウバンした`,
+            log: `${trapOwner.name} の ${trap.name} が ${sourcePlayer.name} をシャドウバンした`,
             trapDetailText: `シャドウバン：${sourcePlayer.name} ${shadowbanTurns}ターン`
         });
 
@@ -1641,7 +1628,7 @@ function resolveTrapEffect(game, roomId, trapOwner, sourcePlayer, trap, context,
             cardType: trap.type,
             cardRarity: normalizeRarity(trap.rarity),
             hateText: `${sourcePlayer.name} に ${damage.toLocaleString()}ダメージ / 凍結 ${freezeTurns}ターン`,
-            log: `${trapOwner.name} の罠が ${sourcePlayer.name} に反撃・凍結した`,
+            log: `${trapOwner.name} の ${trap.name} が ${sourcePlayer.name} に反撃・凍結した`,
             damageText: damage > 0 ? `罠ダメージ：${damage.toLocaleString()}` : "ダメージなし",
             damageAmount: damage,
             trapDetailText: `反撃：${sourcePlayer.name} に ${damage.toLocaleString()}ダメージ / 凍結 ${freezeTurns}ターン`
@@ -1692,7 +1679,7 @@ function resolveTrapEffect(game, roomId, trapOwner, sourcePlayer, trap, context,
             cardType: trap.type,
             cardRarity: normalizeRarity(trap.rarity),
             hateText: "ダメージを無効化した",
-            log: `${trapOwner.name} はダメージを無効化した`,
+            log: `${trapOwner.name} の ${trap.name} がダメージを無効化した`,
             trapDetailText: "ダメージ無効化"
         });
 
@@ -1713,7 +1700,7 @@ function resolveTrapEffect(game, roomId, trapOwner, sourcePlayer, trap, context,
             cardType: trap.type,
             cardRarity: normalizeRarity(trap.rarity),
             hateText: `${sourcePlayer.name} に ${damage.toLocaleString()}ダメージ / ミュート ${muteTurns}ターン`,
-            log: `${trapOwner.name} の罠が ${sourcePlayer.name} を反撃・ミュートした`,
+            log: `${trapOwner.name} の ${trap.name} が ${sourcePlayer.name} を反撃・ミュートした`,
             damageText: damage > 0 ? `罠ダメージ：${damage.toLocaleString()}` : "ダメージなし",
             damageAmount: damage,
             trapDetailText: `反撃：${sourcePlayer.name} に ${damage.toLocaleString()}ダメージ / ミュート ${muteTurns}ターン`
