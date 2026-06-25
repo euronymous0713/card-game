@@ -1294,11 +1294,20 @@ function requestTrapEffectThenDamage({
     trapRarity = "C",
     trapEffectText,
     trapHateText,
+    onEffectConfirmed,
     onComplete
 }) {
     const complete = () => {
         if (typeof onComplete === "function") {
             onComplete();
+        }
+    };
+
+    // ダメージ以外の付随効果（ヘイト変動・状態異常）は、onTrapEffect連鎖で
+    // 効果そのものが無効化されなかったと確定した時点でのみ反映する。
+    const confirmEffect = () => {
+        if (typeof onEffectConfirmed === "function") {
+            onEffectConfirmed();
         }
     };
 
@@ -1324,6 +1333,8 @@ function requestTrapEffectThenDamage({
                 complete();
                 return;
             }
+
+            confirmEffect();
 
             const damageRequested = requestTrapChoice({
                 roomId,
@@ -1360,6 +1371,8 @@ function requestTrapEffectThenDamage({
     if (trapEffectRequested) {
         return true;
     }
+
+    confirmEffect();
 
     const damageRequested = requestTrapChoice({
         roomId,
@@ -1527,8 +1540,6 @@ function resolveTrapEffect(game, roomId, trapOwner, sourcePlayer, trap, context,
             trapDetailText: `反撃：${sourcePlayer.name} に ${damage.toLocaleString()}ダメージ / ヘイト +${hateChange}`
         });
 
-        changeHate(sourcePlayer, hateChange);
-
         const pending = requestTrapEffectThenDamage({
             roomId,
             game,
@@ -1540,6 +1551,9 @@ function resolveTrapEffect(game, roomId, trapOwner, sourcePlayer, trap, context,
             trapRarity: trap.rarity,
             trapEffectText: trap.effect,
             trapHateText: trap.hateText,
+            onEffectConfirmed: () => {
+                changeHate(sourcePlayer, hateChange);
+            },
             onComplete: () => {
                 afterPendingComplete({
                     canceled: false
@@ -1634,37 +1648,36 @@ function resolveTrapEffect(game, roomId, trapOwner, sourcePlayer, trap, context,
             trapDetailText: `反撃：${sourcePlayer.name} に ${damage.toLocaleString()}ダメージ / 凍結 ${freezeTurns}ターン`
         });
 
-        sourcePlayer.skipTurns = Number(sourcePlayer.skipTurns || 0) + freezeTurns;
-        addStatusEffect(sourcePlayer, {
-            type: "freeze",
-            remainingTurns: freezeTurns,
-            sourcePlayerId: trapOwner.id,
-            sourcePlayerName: trapOwner.name,
-            cardName: trap.name,
-            cardRarity: trap.rarity
+        const pending = requestTrapEffectThenDamage({
+            roomId,
+            game,
+            targetPlayer: sourcePlayer,
+            sourcePlayer: trapOwner,
+            damage,
+            trapName: trap.name,
+            trapType: trap.type,
+            trapRarity: trap.rarity,
+            trapEffectText: trap.effect,
+            trapHateText: trap.hateText,
+            onEffectConfirmed: () => {
+                sourcePlayer.skipTurns = Number(sourcePlayer.skipTurns || 0) + freezeTurns;
+                addStatusEffect(sourcePlayer, {
+                    type: "freeze",
+                    remainingTurns: freezeTurns,
+                    sourcePlayerId: trapOwner.id,
+                    sourcePlayerName: trapOwner.name,
+                    cardName: trap.name,
+                    cardRarity: trap.rarity
+                });
+
+                if (hateChange !== 0) changeHate(sourcePlayer, hateChange);
+            },
+            onComplete: () => {
+                afterPendingComplete({ canceled: false });
+            }
         });
 
-        if (hateChange !== 0) changeHate(sourcePlayer, hateChange);
-
-        if (damage > 0) {
-            const pending = requestTrapEffectThenDamage({
-                roomId,
-                game,
-                targetPlayer: sourcePlayer,
-                sourcePlayer: trapOwner,
-                damage,
-                trapName: trap.name,
-                trapType: trap.type,
-                trapRarity: trap.rarity,
-                trapEffectText: trap.effect,
-                trapHateText: trap.hateText,
-                onComplete: () => {
-                    afterPendingComplete({ canceled: false });
-                }
-            });
-
-            if (pending) return { canceled: false, pending: true };
-        }
+        if (pending) return { canceled: false, pending: true };
 
         return { canceled: false };
     }
@@ -1706,39 +1719,38 @@ function resolveTrapEffect(game, roomId, trapOwner, sourcePlayer, trap, context,
             trapDetailText: `反撃：${sourcePlayer.name} に ${damage.toLocaleString()}ダメージ / ミュート ${muteTurns}ターン`
         });
 
-        addStatusEffect(sourcePlayer, {
-            type: "mute",
-            remainingTurns: muteTurns,
-            sourcePlayerId: trapOwner.id,
-            sourcePlayerName: trapOwner.name,
-            cardName: trap.name,
-            cardRarity: trap.rarity
+        const pending = requestTrapEffectThenDamage({
+            roomId,
+            game,
+            targetPlayer: sourcePlayer,
+            sourcePlayer: trapOwner,
+            damage,
+            trapName: trap.name,
+            trapType: trap.type,
+            trapRarity: trap.rarity,
+            trapEffectText: trap.effect,
+            trapHateText: trap.hateText,
+            onEffectConfirmed: () => {
+                addStatusEffect(sourcePlayer, {
+                    type: "mute",
+                    remainingTurns: muteTurns,
+                    sourcePlayerId: trapOwner.id,
+                    sourcePlayerName: trapOwner.name,
+                    cardName: trap.name,
+                    cardRarity: trap.rarity
+                });
+
+                if (hateChange !== 0) {
+                    changeHate(sourcePlayer, hateChange);
+                }
+            },
+            onComplete: () => {
+                afterPendingComplete({ canceled: false });
+            }
         });
 
-        if (hateChange !== 0) {
-            changeHate(sourcePlayer, hateChange);
-        }
-
-        if (damage > 0) {
-            const pending = requestTrapEffectThenDamage({
-                roomId,
-                game,
-                targetPlayer: sourcePlayer,
-                sourcePlayer: trapOwner,
-                damage,
-                trapName: trap.name,
-                trapType: trap.type,
-                trapRarity: trap.rarity,
-                trapEffectText: trap.effect,
-                trapHateText: trap.hateText,
-                onComplete: () => {
-                    afterPendingComplete({ canceled: false });
-                }
-            });
-
-            if (pending) {
-                return { canceled: false, pending: true };
-            }
+        if (pending) {
+            return { canceled: false, pending: true };
         }
 
         return { canceled: false };
@@ -2295,8 +2307,7 @@ io.on("connection", socket => {
                 const allEnemiesExtra = {
                     log: `${caster.name} → 敵全体：${usedCard.name}`,
                     damageText: `全体ダメージ：${damageDetails.join(" / ")}`,
-                    damageAmount: totalDamage,
-                    damageDetailText: damageDetails.join(" / ")
+                    damageAmount: totalDamage
                 };
 
                 if (usedCard.attackStatusType) {

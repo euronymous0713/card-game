@@ -146,7 +146,7 @@ window.onload = () => {
     }
 
     function attemptReconnect() {
-        if (reconnectAttempted || currentRoomId) return;
+        if (reconnectAttempted) return;
 
         const reconnectInfo = getReconnectInfo();
 
@@ -186,6 +186,11 @@ window.onload = () => {
 
     socket.on("connect", () => {
         attemptReconnect();
+    });
+
+    // 切断時にフラグを戻し、自動再接続後の "connect" で必ず reconnectPlayer を送れるようにする。
+    socket.on("disconnect", () => {
+        reconnectAttempted = false;
     });
 
     if (socket.connected) {
