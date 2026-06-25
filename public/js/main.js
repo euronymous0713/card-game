@@ -42,6 +42,8 @@ window.onload = () => {
 
     const gameOverOverlay = document.getElementById("gameOverOverlay");
     const gameOverText = document.getElementById("gameOverText");
+    const gameOverKime = document.getElementById("gameOverKime");
+    const gameOverResults = document.getElementById("gameOverResults");
     const nextButton = document.getElementById("nextButton");
 
     const turnAnnouncement = document.getElementById("turnAnnouncement");
@@ -2361,6 +2363,7 @@ window.onload = () => {
 
         previousGame = cloneGame(latestGame);
 
+        console.log("[updateGame] gameOver:", game.gameOver, "winner:", game.winner?.name);
         if (game.gameOver && game.winner) {
             showGameOver(game.winner);
         }
@@ -2934,7 +2937,65 @@ window.onload = () => {
         });
     };
 
+    function renderGameOverKime(winnerId) {
+        if (!gameOverKime || !latestGame) return;
+
+        const me = latestGame.turnOrder.find(p => p.id === socket.id);
+        const isWinner = winnerId === socket.id;
+
+        if (!isWinner && me?.defeatCause?.cardName) {
+            const cause = me.defeatCause;
+            const rarity = normalizeRarity(cause.cardRarity);
+            gameOverKime.innerHTML = `
+                <div class="kime-label">💀 あなたを倒した決め手</div>
+                <div class="kime-card-display">
+                    <span class="kime-rarity-badge ${rarityClass(rarity)}">${rarity}</span>
+                    <span class="kime-card-name">「${cause.cardName}」</span>
+                </div>
+                ${cause.playerName ? `<div class="kime-attacker">by ${cause.playerName}</div>` : ""}
+            `;
+        } else {
+            gameOverKime.innerHTML = "";
+        }
+    }
+
+    function renderGameOverResults(winnerId) {
+        if (!gameOverResults) return;
+
+        const players = (latestGame && Array.isArray(latestGame.turnOrder)) ? latestGame.turnOrder : [];
+
+        const sorted = [...players].sort((a, b) => {
+            if (a.id === winnerId) return -1;
+            if (b.id === winnerId) return 1;
+            return 0;
+        });
+
+        gameOverResults.innerHTML = sorted.map(player => {
+            const isWinner = player.id === winnerId;
+            const cause = player.defeatCause;
+
+            const statusHtml = isWinner
+                ? `<span class="game-over-result-status game-over-result-winner">🏆 生き残った</span>`
+                : `<span class="game-over-result-status game-over-result-defeated">
+                        💀 ${cause?.playerName ? `${cause.playerName} の ` : ""}${cause?.cardName ? `「${cause.cardName}」で撃破` : "オワコン"}
+                   </span>`;
+
+            const rarityHtml = (!isWinner && cause?.cardName)
+                ? `<span class="game-over-result-rarity ${rarityClass(normalizeRarity(cause.cardRarity))}">${normalizeRarity(cause.cardRarity)}</span>`
+                : "";
+
+            return `
+                <div class="game-over-result-row ${isWinner ? "game-over-result-row-winner" : ""}">
+                    <span class="game-over-result-name">${player.name}</span>
+                    ${statusHtml}
+                    ${rarityHtml}
+                </div>
+            `;
+        }).join("");
+    }
+
     function showGameOver(winner) {
+        console.log("[showGameOver] called", winner, "socket.id:", socket.id);
         const isWinner = winner.id === socket.id;
 
         document.body.classList.add("game-over-active");
@@ -2948,6 +3009,9 @@ window.onload = () => {
         gameOverText.innerText = isWinner
             ? "勝利！最後まで生き残った"
             : `${winner.name} の勝利`;
+
+        renderGameOverKime(winner.id);
+        renderGameOverResults(winner.id);
 
         gameOverOverlay.style.display = "flex";
 

@@ -373,7 +373,11 @@ function applyTurnStartEffects(game, player) {
             const damage = Number(effect.amount || 0);
 
             if (damage > 0) {
-                applyDamage(game, player, damage);
+                applyDamage(game, player, damage, {
+                    playerName: effect.sourcePlayerName || "状態異常",
+                    cardName: effect.cardName || "炎上",
+                    cardRarity: effect.cardRarity
+                });
 
                 addLog(game, {
                     actionType: "statusEffect",
@@ -536,11 +540,21 @@ function formatNumber(value) {
     return Number(value || 0).toLocaleString();
 }
 
-function applyDamage(game, target, amount) {
+function applyDamage(game, target, amount, source = null) {
+    const wasAlreadyDefeated = target.defeated;
+
     target.followers = Math.max(0, target.followers - amount);
 
     if (target.followers <= 0) {
         target.defeated = true;
+
+        if (!wasAlreadyDefeated && source) {
+            target.defeatCause = {
+                playerName: source.playerName || "",
+                cardName: source.cardName || "",
+                cardRarity: normalizeRarity(source.cardRarity)
+            };
+        }
     }
 
     checkGameOver(game);
@@ -1354,7 +1368,11 @@ function requestTrapEffectThenDamage({
                     if (damageResult.pending) return;
 
                     if (!damageResult.canceled) {
-                        applyDamage(game, targetPlayer, damage);
+                        applyDamage(game, targetPlayer, damage, {
+                            playerName: sourcePlayer.name,
+                            cardName: trapName,
+                            cardRarity: trapRarity
+                        });
                     }
 
                     complete();
@@ -1362,7 +1380,11 @@ function requestTrapEffectThenDamage({
             });
 
             if (!damageRequested) {
-                applyDamage(game, targetPlayer, damage);
+                applyDamage(game, targetPlayer, damage, {
+                    playerName: sourcePlayer.name,
+                    cardName: trapName,
+                    cardRarity: trapRarity
+                });
                 complete();
             }
         }
@@ -1393,7 +1415,11 @@ function requestTrapEffectThenDamage({
             if (damageResult.pending) return;
 
             if (!damageResult.canceled) {
-                applyDamage(game, targetPlayer, damage);
+                applyDamage(game, targetPlayer, damage, {
+                    playerName: sourcePlayer.name,
+                    cardName: trapName,
+                    cardRarity: trapRarity
+                });
             }
 
             complete();
@@ -1404,7 +1430,11 @@ function requestTrapEffectThenDamage({
         return true;
     }
 
-    applyDamage(game, targetPlayer, damage);
+    applyDamage(game, targetPlayer, damage, {
+        playerName: sourcePlayer.name,
+        cardName: trapName,
+        cardRarity: trapRarity
+    });
     return false;
 }
 
@@ -1780,6 +1810,11 @@ function makePlayerOwakonBySocket(roomId, socketId) {
 
     gamePlayer.followers = 0;
     gamePlayer.defeated = true;
+    gamePlayer.defeatCause = {
+        playerName: "",
+        cardName: "途中退出",
+        cardRarity: "C"
+    };
     gamePlayer.disconnected = true;
     gamePlayer.disconnectedAt = Date.now();
 
@@ -2268,7 +2303,11 @@ io.on("connection", socket => {
                         damage *= 2;
                     }
 
-                    applyDamage(game, enemy, damage);
+                    applyDamage(game, enemy, damage, {
+                        playerName: caster.name,
+                        cardName: usedCard.name,
+                        cardRarity: usedCard.rarity
+                    });
 
                     if (usedCard.attackSlipDamage > 0) {
                         addStatusEffect(enemy, {
@@ -2344,7 +2383,11 @@ io.on("connection", socket => {
 
             const afterDamage = result => {
                 if (!result.canceled) {
-                    applyDamage(game, finalTarget, damage);
+                    applyDamage(game, finalTarget, damage, {
+                        playerName: caster.name,
+                        cardName: usedCard.name,
+                        cardRarity: usedCard.rarity
+                    });
 
                     if (usedCard.attackSlipDamage > 0) {
                         addStatusEffect(finalTarget, {
@@ -2615,7 +2658,7 @@ io.on("connection", socket => {
         }
 
         moveToNextAliveTurn(game);
-        emitGameUpdate(roomId);
+        finishGameIfNeeded(roomId);
     });
 
     socket.on("devSetFollowers", ({ playerId, followers }) => {
