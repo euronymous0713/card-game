@@ -2901,7 +2901,7 @@ window.onload = () => {
             targetId = socket.id;
         }
 
-        if (draggedCard.kind === "attack" && targetId) {
+        if (draggedCard.targetType === "enemy" && targetId) {
             const t = latestGame.turnOrder.find(p => p.id === targetId);
             const tIsKaikakou = t && Array.isArray(t.statusEffects) && t.statusEffects.some(e => e && e.type === "kagiaka" && Number(e.remainingTurns || 0) > 0);
             if (tIsKaikakou) {

@@ -2249,9 +2249,9 @@ io.on("connection", socket => {
                 return;
             }
 
-            if (usedCard.kind === "attack" && hasStatusEffect(target, "kagiaka")) {
+            if (hasStatusEffect(target, "kagiaka")) {
                 caster.hand.push(usedCard);
-                socket.emit("errorMessage", `${target.name} は鍵垢中のため攻撃対象にできません`);
+                socket.emit("errorMessage", `${target.name} は鍵垢中のため対象にできません`);
                 return;
             }
         }
