@@ -312,20 +312,6 @@ module.exports = [
         effect: "敵全体に600フォロワーダメージ。対象のヘイトが3ならその対象へのダメージは2倍（最大1,200/人）。自分のヘイトが1上がる。"
     },
     {
-        id: "card-23",
-        name: "鍵垢避難",
-        rarity: "UC",
-        type: "防御",
-        kind: "support",
-        targetType: "self",
-        damage: 0,
-        heal: 1100,
-        hateTarget: "self",
-        hateChange: -2,
-        hateText: "自分のヘイト -2",
-        effect: "自分のフォロワーを1,100回復。自分のヘイトが2下がる。"
-    },
-    {
         id: "card-24",
         name: "デマ訂正",
         rarity: "UC",
@@ -1527,8 +1513,8 @@ module.exports = [
     },
     {
         id: "card-111",
-        name: "鍵垢設定",
-        rarity: "UC",
+        name: "鍵垢避難",
+        rarity: "R",
         type: "防御",
         kind: "support",
         targetType: "self",
@@ -1545,7 +1531,7 @@ module.exports = [
     {
         id: "card-112",
         name: "完全鍵垢",
-        rarity: "R",
+        rarity: "SR",
         type: "防御",
         kind: "support",
         targetType: "self",

@@ -2516,10 +2516,23 @@ io.on("connection", socket => {
                 changeHate(caster, selfHateBonusResult.extraHateChange);
             }
 
+            if (usedCard.statusType) {
+                const sInfo = statusInfo(usedCard.statusType);
+                addStatusEffect(caster, {
+                    type: usedCard.statusType,
+                    remainingTurns: Number(usedCard.durationTurns || 1),
+                    sourcePlayerId: caster.id,
+                    sourcePlayerName: caster.name,
+                    cardName: usedCard.name,
+                    cardRarity: usedCard.rarity
+                });
+            }
+
             finishCardPlay({
                 healText: `回復：${healAmount.toLocaleString()}`,
                 healAmount,
                 ...(usedCard.clearStatus ? { specialText: "状態異常解除" } : {}),
+                ...(usedCard.statusType ? { specialText: `${statusInfo(usedCard.statusType).label}：${Number(usedCard.durationTurns || 1)}ターン` } : {}),
                 ...(selfHateBonusResult.details.length > 0 ? { bonusText: selfHateBonusResult.details.join(" / ") } : {})
             });
             return;
