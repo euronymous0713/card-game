@@ -187,7 +187,8 @@ function createGameState(players, drawRule = "classic") {
             skipTurns: 0,
             extraTurns: 0,
             statusEffects: [],
-            cardsPlayedThisTurn: 0
+            cardsPlayedThisTurn: 0,
+            totalDamageTaken: 0
         };
 
         drawCards(gamePlayer);
@@ -542,8 +543,10 @@ function formatNumber(value) {
 
 function applyDamage(game, target, amount, source = null) {
     const wasAlreadyDefeated = target.defeated;
+    const actualDamage = Math.min(amount, target.followers);
 
     target.followers = Math.max(0, target.followers - amount);
+    target.totalDamageTaken = (target.totalDamageTaken || 0) + actualDamage;
 
     if (target.followers <= 0) {
         target.defeated = true;
@@ -552,7 +555,8 @@ function applyDamage(game, target, amount, source = null) {
             target.defeatCause = {
                 playerName: source.playerName || "",
                 cardName: source.cardName || "",
-                cardRarity: normalizeRarity(source.cardRarity)
+                cardRarity: normalizeRarity(source.cardRarity),
+                cardEffect: source.cardEffect || ""
             };
         }
     }
@@ -2306,7 +2310,8 @@ io.on("connection", socket => {
                     applyDamage(game, enemy, damage, {
                         playerName: caster.name,
                         cardName: usedCard.name,
-                        cardRarity: usedCard.rarity
+                        cardRarity: usedCard.rarity,
+                        cardEffect: usedCard.effect || ""
                     });
 
                     if (usedCard.attackSlipDamage > 0) {
@@ -2386,7 +2391,8 @@ io.on("connection", socket => {
                     applyDamage(game, finalTarget, damage, {
                         playerName: caster.name,
                         cardName: usedCard.name,
-                        cardRarity: usedCard.rarity
+                        cardRarity: usedCard.rarity,
+                        cardEffect: usedCard.effect || ""
                     });
 
                     if (usedCard.attackSlipDamage > 0) {

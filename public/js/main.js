@@ -2967,28 +2967,39 @@ window.onload = () => {
         const sorted = [...players].sort((a, b) => {
             if (a.id === winnerId) return -1;
             if (b.id === winnerId) return 1;
-            return 0;
+            return (b.followers || 0) - (a.followers || 0);
         });
 
         gameOverResults.innerHTML = sorted.map(player => {
             const isWinner = player.id === winnerId;
             const cause = player.defeatCause;
+            const remaining = Number(player.followers || 0).toLocaleString();
+            const damageTaken = Number(player.totalDamageTaken || 0).toLocaleString();
 
-            const statusHtml = isWinner
-                ? `<span class="game-over-result-status game-over-result-winner">🏆 生き残った</span>`
-                : `<span class="game-over-result-status game-over-result-defeated">
-                        💀 ${cause?.playerName ? `${cause.playerName} の ` : ""}${cause?.cardName ? `「${cause.cardName}」で撃破` : "オワコン"}
-                   </span>`;
-
-            const rarityHtml = (!isWinner && cause?.cardName)
+            const rarityLabel = (!isWinner && cause?.cardName)
                 ? `<span class="game-over-result-rarity ${rarityClass(normalizeRarity(cause.cardRarity))}">${normalizeRarity(cause.cardRarity)}</span>`
                 : "";
 
+            const defeatDetail = (!isWinner && cause?.cardName)
+                ? `<div class="game-over-defeat-detail">
+                       ${rarityLabel}「${cause.cardName}」${cause.playerName ? ` by ${cause.playerName}` : ""}
+                       ${cause.cardEffect ? `<div class="game-over-defeat-effect">${cause.cardEffect}</div>` : ""}
+                   </div>`
+                : (!isWinner ? `<div class="game-over-defeat-detail">オワコン</div>` : "");
+
             return `
                 <div class="game-over-result-row ${isWinner ? "game-over-result-row-winner" : ""}">
-                    <span class="game-over-result-name">${player.name}</span>
-                    ${statusHtml}
-                    ${rarityHtml}
+                    <div class="game-over-result-header">
+                        <span class="game-over-result-name">${player.name}</span>
+                        <span class="game-over-result-status ${isWinner ? "game-over-result-winner" : "game-over-result-defeated"}">
+                            ${isWinner ? "🏆 生き残った" : "💀 撃破"}
+                        </span>
+                    </div>
+                    <div class="game-over-result-stats">
+                        <span class="game-over-stat">残り <strong>${remaining}</strong> F</span>
+                        <span class="game-over-stat game-over-stat-damage">被ダメ <strong>${damageTaken}</strong></span>
+                    </div>
+                    ${defeatDetail}
                 </div>
             `;
         }).join("");
