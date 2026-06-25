@@ -1982,6 +1982,7 @@ body.battle-active .mobile-trap-waiting-notice.show {
     opacity: 0.7;
     border-color: rgba(100, 160, 255, 0.6) !important;
     box-shadow: 0 0 10px rgba(100, 160, 255, 0.25) !important;
+    cursor: not-allowed !important;
 }
 
 

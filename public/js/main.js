@@ -2349,8 +2349,11 @@ window.onload = () => {
             return player.id !== socket.id && !player.defeated;
         });
 
+        const isKaikakou = p => Array.isArray(p.statusEffects) && p.statusEffects.some(e => e && e.type === "kaikakou" && Number(e.remainingTurns || 0) > 0);
+        const preferredEnemy = enemies.find(e => !isKaikakou(e)) || enemies[0];
+
         if (!selectedTargetId && enemies.length > 0) {
-            selectedTargetId = enemies[0].id;
+            selectedTargetId = preferredEnemy.id;
         }
 
         if (
@@ -2359,7 +2362,13 @@ window.onload = () => {
                 return player.id === selectedTargetId && !player.defeated;
             })
         ) {
-            selectedTargetId = enemies[0]?.id || "";
+            selectedTargetId = preferredEnemy?.id || "";
+        }
+
+        const currentTarget = enemies.find(e => e.id === selectedTargetId);
+        if (currentTarget && isKaikakou(currentTarget)) {
+            const alt = enemies.find(e => !isKaikakou(e));
+            if (alt) selectedTargetId = alt.id;
         }
 
         renderBattlePlayers();
@@ -2545,6 +2554,7 @@ window.onload = () => {
                     }
 
                     if (enemy.defeated) return;
+                    if (enemyHasKaikakou) return;
 
                     selectedTargetId = enemy.id;
 
@@ -2884,6 +2894,17 @@ window.onload = () => {
 
         if (draggedCard.targetType === "self") {
             targetId = socket.id;
+        }
+
+        if (draggedCard.kind === "attack" && targetId) {
+            const t = latestGame.turnOrder.find(p => p.id === targetId);
+            const tIsKaikakou = t && Array.isArray(t.statusEffects) && t.statusEffects.some(e => e && e.type === "kaikakou" && Number(e.remainingTurns || 0) > 0);
+            if (tIsKaikakou) {
+                const alt = latestGame.turnOrder.find(p => p.id !== socket.id && !p.defeated && !(Array.isArray(p.statusEffects) && p.statusEffects.some(e => e && e.type === "kaikakou" && Number(e.remainingTurns || 0) > 0)));
+                if (!alt) return;
+                targetId = alt.id;
+                selectedTargetId = alt.id;
+            }
         }
 
         if (draggedCard.targetType === "enemy" && !targetId) {
