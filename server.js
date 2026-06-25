@@ -1418,6 +1418,7 @@ function resolveTrapEffect(game, roomId, trapOwner, sourcePlayer, trap, context,
         cardType: trap.type,
         cardRarity: normalizeRarity(trap.rarity),
         hateText: trap.hateText || "罠が発動した",
+        effect: trap.effect || "",
         log: `${trapOwner.name} の ${trap.name} が発動した`
     });
 

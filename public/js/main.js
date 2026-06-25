@@ -129,19 +129,22 @@ window.onload = () => {
     function saveReconnectInfo(roomId, reconnectToken) {
         if (!roomId || !reconnectToken) return;
 
-        localStorage.setItem(RECONNECT_ROOM_KEY, roomId);
-        localStorage.setItem(RECONNECT_TOKEN_KEY, reconnectToken);
+        // sessionStorageはタブ/ウィンドウごとに独立しているため、
+        // 同じブラウザで複数タブを開いて多人数操作するテスト時に
+        // 再接続トークンが他タブのものへ書き換わってしまう事故を防げる。
+        sessionStorage.setItem(RECONNECT_ROOM_KEY, roomId);
+        sessionStorage.setItem(RECONNECT_TOKEN_KEY, reconnectToken);
     }
 
     function clearReconnectInfo() {
-        localStorage.removeItem(RECONNECT_ROOM_KEY);
-        localStorage.removeItem(RECONNECT_TOKEN_KEY);
+        sessionStorage.removeItem(RECONNECT_ROOM_KEY);
+        sessionStorage.removeItem(RECONNECT_TOKEN_KEY);
     }
 
     function getReconnectInfo() {
         return {
-            roomId: localStorage.getItem(RECONNECT_ROOM_KEY) || "",
-            reconnectToken: localStorage.getItem(RECONNECT_TOKEN_KEY) || ""
+            roomId: sessionStorage.getItem(RECONNECT_ROOM_KEY) || "",
+            reconnectToken: sessionStorage.getItem(RECONNECT_TOKEN_KEY) || ""
         };
     }
 
@@ -1209,6 +1212,7 @@ window.onload = () => {
 
         const sourceCardName = data.context?.cardName || "不明なカード";
         const sourceCardType = data.context?.cardType || "";
+        const sourceEffectText = data.context?.effect || "";
         const sourceResultText = data.context?.resultText || "";
         const sourceCardRarity = normalizeRarity(data.context?.cardRarity);
         const sourceActionText =
@@ -1227,6 +1231,7 @@ window.onload = () => {
                 </div>
                 <div class="trap-source-rarity ${rarityClass(sourceCardRarity)}">${rarityLabel(sourceCardRarity)}</div>
                 <p>${sourceActionText}</p>
+                ${sourceEffectText ? `<p class="trap-source-effect">${sourceEffectText}</p>` : ""}
                 ${sourceResultText ? `<p class="trap-danger-text">${sourceResultText}</p>` : ""}
             </div>
 
