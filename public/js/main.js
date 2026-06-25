@@ -533,6 +533,16 @@ window.onload = () => {
                 label: "晒し中",
                 icon: "👁",
                 description: "受ける攻撃ダメージが300増えます。"
+            },
+            digitalDetox: {
+                label: "電波障害",
+                icon: "📵",
+                description: "ターン開始時のドローが1枚になります。"
+            },
+            kaikakou: {
+                label: "鍵垢",
+                icon: "🔒",
+                description: "攻撃カードの対象に選ばれません。（範囲攻撃は除く）"
             }
         };
 
@@ -2497,16 +2507,19 @@ window.onload = () => {
             const enemy = enemies[index];
 
             if (enemy) {
+                const enemyHasKaikakou = Array.isArray(enemy.statusEffects) && enemy.statusEffects.some(e => e && e.type === "kaikakou" && Number(e.remainingTurns || 0) > 0);
+
                 slot.classList.remove("empty-enemy");
                 slot.classList.toggle("selected-target", isMyTurnNow() && selectedTargetId === enemy.id);
                 slot.classList.toggle("max-hate-player", enemy.hate >= 3);
                 slot.classList.toggle("defeated-player", enemy.defeated);
+                slot.classList.toggle("kaikakou-player", enemyHasKaikakou);
                 slot.classList.remove("spectator-hand-owner");
                 slot.classList.toggle("choosing-trap-player", Boolean(latestGame.waitingTrapChoice && enemy.id === latestGame.waitingTrapPlayerId));
 
                 slot.innerHTML = `
                     <div class="enemy-hand-badge">🂠 ${enemy.handCount ?? enemy.hand.length}</div>
-                    <div class="enemy-name">${enemy.defeated ? "💀 " : ""}${enemy.hate >= 3 ? "🔥 " : ""}${enemy.name}${disconnectedLabel(enemy)}</div>
+                    <div class="enemy-name">${enemy.defeated ? "💀 " : ""}${enemy.hate >= 3 ? "🔥 " : ""}${enemyHasKaikakou ? "🔒 " : ""}${enemy.name}${disconnectedLabel(enemy)}</div>
                     <div class="follower-line ${enemy.defeated ? "owakon-text" : ""}">
                         ${followerText(enemy)}
                     </div>

@@ -247,6 +247,11 @@ const STATUS_INFO = {
         label: "電波障害",
         icon: "📵",
         description: "ターン開始時のドローが1枚になる"
+    },
+    kaikakou: {
+        label: "鍵垢",
+        icon: "🔒",
+        description: "攻撃カードの対象に選ばれなくなる（範囲攻撃は除く）"
     }
 };
 
@@ -2241,6 +2246,12 @@ io.on("connection", socket => {
             if (target.defeated) {
                 caster.hand.push(usedCard);
                 socket.emit("errorMessage", "オワコン済みのプレイヤーは対象にできません");
+                return;
+            }
+
+            if (usedCard.kind === "attack" && hasStatusEffect(target, "kaikakou")) {
+                caster.hand.push(usedCard);
+                socket.emit("errorMessage", `${target.name} は鍵垢中のため攻撃対象にできません`);
                 return;
             }
         }

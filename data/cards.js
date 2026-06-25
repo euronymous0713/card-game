@@ -1524,5 +1524,39 @@ module.exports = [
         hateText: "自分のヘイト +1",
         effect: "対象に900フォロワーダメージ＋自分のヘイト×500の追加ダメージ（自ヘイト3なら2,400）。対象のヘイトが3ならダメージ2倍（最大4,800）。自分のヘイトが1上がる。",
         selfHateScaling: { damagePerHate: 500 }
+    },
+    {
+        id: "card-111",
+        name: "鍵垢設定",
+        rarity: "UC",
+        type: "防御",
+        kind: "support",
+        targetType: "self",
+        effectType: "applyStatus",
+        damage: 0,
+        heal: 0,
+        hateTarget: "self",
+        hateChange: 0,
+        hateText: "ヘイト変動なし",
+        effect: "1ターン間、攻撃の対象に選ばれなくなる。（範囲攻撃には有効ではない）",
+        statusType: "kaikakou",
+        durationTurns: 1
+    },
+    {
+        id: "card-112",
+        name: "完全鍵垢",
+        rarity: "R",
+        type: "防御",
+        kind: "support",
+        targetType: "self",
+        effectType: "applyStatus",
+        damage: 0,
+        heal: 0,
+        hateTarget: "self",
+        hateChange: 0,
+        hateText: "ヘイト変動なし",
+        effect: "2ターン間、攻撃の対象に選ばれなくなる。（範囲攻撃には有効ではない）",
+        statusType: "kaikakou",
+        durationTurns: 2
     }
 ];
