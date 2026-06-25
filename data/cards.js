@@ -1525,7 +1525,7 @@ module.exports = [
         hateChange: 0,
         hateText: "ヘイト変動なし",
         effect: "自身に1ターン鍵垢（攻撃の対象に選ばれなくなる。範囲攻撃には有効ではない）を付与。",
-        statusType: "kaikakou",
+        statusType: "kagiaka",
         durationTurns: 1
     },
     {
@@ -1542,7 +1542,7 @@ module.exports = [
         hateChange: 0,
         hateText: "ヘイト変動なし",
         effect: "自分のフォロワーを1,000回復。自身に2ターン鍵垢（攻撃の対象に選ばれなくなる。範囲攻撃には有効ではない）を付与。",
-        statusType: "kaikakou",
+        statusType: "kagiaka",
         durationTurns: 2
     }
 ];

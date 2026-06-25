@@ -539,7 +539,7 @@ window.onload = () => {
                 icon: "📵",
                 description: "ターン開始時のドローが1枚になります。"
             },
-            kaikakou: {
+            kagiaka: {
                 label: "鍵垢",
                 icon: "🔒",
                 description: "攻撃カードの対象に選ばれません。（範囲攻撃は除く）"
@@ -2349,7 +2349,7 @@ window.onload = () => {
             return player.id !== socket.id && !player.defeated;
         });
 
-        const isKaikakou = p => Array.isArray(p.statusEffects) && p.statusEffects.some(e => e && e.type === "kaikakou" && Number(e.remainingTurns || 0) > 0);
+        const isKaikakou = p => Array.isArray(p.statusEffects) && p.statusEffects.some(e => e && e.type === "kagiaka" && Number(e.remainingTurns || 0) > 0);
         const preferredEnemy = enemies.find(e => !isKaikakou(e)) || enemies[0];
 
         if (!selectedTargetId && enemies.length > 0) {
@@ -2512,17 +2512,22 @@ window.onload = () => {
 
         const enemies = latestGame.turnOrder.filter(player => player.id !== socket.id);
 
+        const activeEnemies = enemies.filter(e => !e.defeated);
+        const allEnemiesKaikakou = activeEnemies.length > 0 && activeEnemies.every(e =>
+            Array.isArray(e.statusEffects) && e.statusEffects.some(s => s && s.type === "kagiaka" && Number(s.remainingTurns || 0) > 0)
+        );
+
         enemySlots.forEach((slot, index) => {
             const enemy = enemies[index];
 
             if (enemy) {
-                const enemyHasKaikakou = Array.isArray(enemy.statusEffects) && enemy.statusEffects.some(e => e && e.type === "kaikakou" && Number(e.remainingTurns || 0) > 0);
+                const enemyHasKaikakou = Array.isArray(enemy.statusEffects) && enemy.statusEffects.some(e => e && e.type === "kagiaka" && Number(e.remainingTurns || 0) > 0);
 
                 slot.classList.remove("empty-enemy");
-                slot.classList.toggle("selected-target", isMyTurnNow() && selectedTargetId === enemy.id);
+                slot.classList.toggle("selected-target", isMyTurnNow() && selectedTargetId === enemy.id && !allEnemiesKaikakou);
                 slot.classList.toggle("max-hate-player", enemy.hate >= 3);
                 slot.classList.toggle("defeated-player", enemy.defeated);
-                slot.classList.toggle("kaikakou-player", enemyHasKaikakou);
+                slot.classList.toggle("kagiaka-player", enemyHasKaikakou);
                 slot.classList.remove("spectator-hand-owner");
                 slot.classList.toggle("choosing-trap-player", Boolean(latestGame.waitingTrapChoice && enemy.id === latestGame.waitingTrapPlayerId));
 
@@ -2898,9 +2903,9 @@ window.onload = () => {
 
         if (draggedCard.kind === "attack" && targetId) {
             const t = latestGame.turnOrder.find(p => p.id === targetId);
-            const tIsKaikakou = t && Array.isArray(t.statusEffects) && t.statusEffects.some(e => e && e.type === "kaikakou" && Number(e.remainingTurns || 0) > 0);
+            const tIsKaikakou = t && Array.isArray(t.statusEffects) && t.statusEffects.some(e => e && e.type === "kagiaka" && Number(e.remainingTurns || 0) > 0);
             if (tIsKaikakou) {
-                const alt = latestGame.turnOrder.find(p => p.id !== socket.id && !p.defeated && !(Array.isArray(p.statusEffects) && p.statusEffects.some(e => e && e.type === "kaikakou" && Number(e.remainingTurns || 0) > 0)));
+                const alt = latestGame.turnOrder.find(p => p.id !== socket.id && !p.defeated && !(Array.isArray(p.statusEffects) && p.statusEffects.some(e => e && e.type === "kagiaka" && Number(e.remainingTurns || 0) > 0)));
                 if (!alt) return;
                 targetId = alt.id;
                 selectedTargetId = alt.id;

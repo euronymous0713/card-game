@@ -248,7 +248,7 @@ const STATUS_INFO = {
         icon: "📵",
         description: "ターン開始時のドローが1枚になる"
     },
-    kaikakou: {
+    kagiaka: {
         label: "鍵垢",
         icon: "🔒",
         description: "攻撃カードの対象に選ばれなくなる（範囲攻撃は除く）"
@@ -2249,7 +2249,7 @@ io.on("connection", socket => {
                 return;
             }
 
-            if (usedCard.kind === "attack" && hasStatusEffect(target, "kaikakou")) {
+            if (usedCard.kind === "attack" && hasStatusEffect(target, "kagiaka")) {
                 caster.hand.push(usedCard);
                 socket.emit("errorMessage", `${target.name} は鍵垢中のため攻撃対象にできません`);
                 return;
