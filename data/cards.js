@@ -428,7 +428,7 @@ module.exports = [
         id: "card-31",
         name: "ミュート通告",
         rarity: "UC",
-        type: "特殊",
+        type: "防御",
         kind: "special",
         targetType: "self",
         effectType: "applyStatus",
@@ -1524,7 +1524,7 @@ module.exports = [
         hateTarget: "self",
         hateChange: 0,
         hateText: "ヘイト変動なし",
-        effect: "1ターン間、攻撃の対象に選ばれなくなる。（範囲攻撃には有効ではない）",
+        effect: "自身に1ターン鍵垢（攻撃の対象に選ばれなくなる。範囲攻撃には有効ではない）を付与。",
         statusType: "kaikakou",
         durationTurns: 1
     },
@@ -1537,11 +1537,11 @@ module.exports = [
         targetType: "self",
         effectType: "applyStatus",
         damage: 0,
-        heal: 0,
+        heal: 1000,
         hateTarget: "self",
         hateChange: 0,
         hateText: "ヘイト変動なし",
-        effect: "2ターン間、攻撃の対象に選ばれなくなる。（範囲攻撃には有効ではない）",
+        effect: "自分のフォロワーを1,000回復。自身に2ターン鍵垢（攻撃の対象に選ばれなくなる。範囲攻撃には有効ではない）を付与。",
         statusType: "kaikakou",
         durationTurns: 2
     }
