@@ -6,9 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>インターネット世紀末</title>
   <link rel="icon" href="data:,">
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/pc.css">
-  <link rel="stylesheet" href="css/mobile.css">
+  <link rel="stylesheet" href="css/style.css?v=5">
+  <link rel="stylesheet" href="css/pc.css?v=5">
+  <link rel="stylesheet" href="css/mobile.css?v=5">
   <link rel="stylesheet" href="css/mac.css">
   <script>if (/Macintosh/.test(navigator.userAgent)) document.documentElement.classList.add('mac-os');</script>
 </head>
@@ -119,10 +119,9 @@
     <div id="playerList"></div>
 
     <div id="ruleSelector" style="display:none;">
-      <div class="rule-selector-label">ルール選択</div>
       <div class="rule-selector-buttons">
-        <button class="rule-select-btn" id="ruleClassicBtn" data-rule="classic">通常ルール</button>
-        <button class="rule-select-btn" id="ruleHandManageBtn" data-rule="handManage">手札管理ルール</button>
+        <button class="rule-select-btn" id="ruleClassicBtn">通常ルール</button>
+        <button class="rule-select-btn" id="grudgeRuleBtn">遺恨ルール</button>
       </div>
       <p class="rule-selector-desc" id="ruleSelectorDesc"></p>
     </div>

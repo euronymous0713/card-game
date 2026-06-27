@@ -171,14 +171,14 @@ function clamp(value, min, max) {
     return Math.max(min, Math.min(max, value));
 }
 
-function createGameState(players, drawRule = "classic") {
+function createGameState(players, drawRule = "classic", grudgeHate = {}, grudgeRule = false) {
     const turnOrder = shuffleArray(players).map(player => {
         const gamePlayer = {
             id: player.id,
             reconnectToken: player.reconnectToken || generateReconnectToken(),
             name: player.name,
             followers: 10000,
-            hate: 0,
+            hate: grudgeRule ? clamp(Number((grudgeHate || {})[player.id] || 0), 0, 3) : 0,
             host: player.host,
             disconnected: Boolean(player.disconnected),
             hand: [],
@@ -205,7 +205,8 @@ function createGameState(players, drawRule = "classic") {
         waitingTrapChoice: false,
         waitingTrapPlayerId: null,
         waitingTrapPlayerName: "",
-        drawRule
+        drawRule,
+        grudgeRule
     };
 }
 
@@ -382,7 +383,8 @@ function applyTurnStartEffects(game, player) {
                 applyDamage(game, player, damage, {
                     playerName: effect.sourcePlayerName || "状態異常",
                     cardName: effect.cardName || "炎上",
-                    cardRarity: effect.cardRarity
+                    cardRarity: effect.cardRarity,
+                    sourcePlayerId: effect.sourcePlayerId || ""
                 });
 
                 addLog(game, {
@@ -556,13 +558,38 @@ function applyDamage(game, target, amount, source = null) {
     if (target.followers <= 0) {
         target.defeated = true;
 
-        if (!wasAlreadyDefeated && source) {
-            target.defeatCause = {
-                playerName: source.playerName || "",
-                cardName: source.cardName || "",
-                cardRarity: normalizeRarity(source.cardRarity),
-                cardEffect: source.cardEffect || ""
-            };
+        if (!wasAlreadyDefeated) {
+            if (source) {
+                target.defeatCause = {
+                    playerName: source.playerName || "",
+                    cardName: source.cardName || "",
+                    cardRarity: normalizeRarity(source.cardRarity),
+                    cardEffect: source.cardEffect || ""
+                };
+            }
+
+            // 遺恨ルール（Aルール）: 脱落させた相手のヘイト分、自分のヘイトが増える
+            if (game.grudgeRule && source && source.sourcePlayerId && target.hate > 0) {
+                const eliminator = game.turnOrder.find(p => p.id === source.sourcePlayerId);
+                if (eliminator && !eliminator.defeated) {
+                    const before = eliminator.hate;
+                    eliminator.hate = clamp(eliminator.hate + target.hate, 0, 3);
+                    const gained = eliminator.hate - before;
+                    if (gained > 0) {
+                        addLog(game, {
+                            actionType: "grudgeHate",
+                            playerId: eliminator.id,
+                            playerName: eliminator.name,
+                            targetName: target.name,
+                            cardName: "遺恨",
+                            cardType: "特殊",
+                            cardRarity: "C",
+                            hateText: `${eliminator.name} のヘイト +${gained}（遺恨）`,
+                            log: `${target.name} の遺恨：${eliminator.name} のヘイトが ${gained} 上がった`
+                        });
+                    }
+                }
+            }
         }
     }
 
@@ -938,7 +965,9 @@ function emitRoomUpdate(roomId) {
 
     io.to(roomId).emit("updateRoom", {
         players: room.players,
-        drawRule: room.drawRule || "classic"
+        drawRule: room.drawRule || "classic",
+        grudgeRule: Boolean(room.grudgeRule),
+        grudgeHate: room.grudgeHate || {}
     });
 }
 
@@ -1233,6 +1262,14 @@ function finishGameIfNeeded(roomId) {
     emitGameUpdate(roomId);
 
     if (room.game.gameOver) {
+        // 遺恨ルール（Bルール）: ゲーム終了時のヘイトを次の試合の開始ヘイトとして保存
+        if (room.grudgeRule) {
+            room.grudgeHate = {};
+            room.game.turnOrder.forEach(p => {
+                room.grudgeHate[p.id] = p.hate;
+            });
+        }
+
         io.to(roomId).emit("gameOver", room.game.winner);
     }
 }
@@ -1380,7 +1417,8 @@ function requestTrapEffectThenDamage({
                         applyDamage(game, targetPlayer, damage, {
                             playerName: sourcePlayer.name,
                             cardName: trapName,
-                            cardRarity: trapRarity
+                            cardRarity: trapRarity,
+                            sourcePlayerId: sourcePlayer.id
                         });
                     }
 
@@ -1392,7 +1430,8 @@ function requestTrapEffectThenDamage({
                 applyDamage(game, targetPlayer, damage, {
                     playerName: sourcePlayer.name,
                     cardName: trapName,
-                    cardRarity: trapRarity
+                    cardRarity: trapRarity,
+                    sourcePlayerId: sourcePlayer.id
                 });
                 complete();
             }
@@ -1427,7 +1466,8 @@ function requestTrapEffectThenDamage({
                 applyDamage(game, targetPlayer, damage, {
                     playerName: sourcePlayer.name,
                     cardName: trapName,
-                    cardRarity: trapRarity
+                    cardRarity: trapRarity,
+                    sourcePlayerId: sourcePlayer.id
                 });
             }
 
@@ -1442,7 +1482,8 @@ function requestTrapEffectThenDamage({
     applyDamage(game, targetPlayer, damage, {
         playerName: sourcePlayer.name,
         cardName: trapName,
-        cardRarity: trapRarity
+        cardRarity: trapRarity,
+        sourcePlayerId: sourcePlayer.id
     });
     return false;
 }
@@ -1954,7 +1995,8 @@ io.on("connection", socket => {
             }],
             game: null,
             reconnectCleanupTimers: {},
-            drawRule: "classic"
+            drawRule: "classic",
+            grudgeRule: false
         };
 
         socket.join(roomId);
@@ -2031,6 +2073,18 @@ io.on("connection", socket => {
         emitRoomUpdate(roomId);
     });
 
+    socket.on("setGrudgeRule", ({ roomId, grudgeRule }) => {
+        const room = rooms[roomId];
+        if (!room || room.game) return;
+
+        const player = room.players.find(p => p.id === socket.id);
+        if (!player || !player.host) return;
+
+        room.grudgeRule = Boolean(grudgeRule);
+        if (!room.grudgeRule) room.grudgeHate = {};
+        emitRoomUpdate(roomId);
+    });
+
     socket.on("startGame", roomId => {
         const room = rooms[roomId];
         if (!room) return;
@@ -2054,7 +2108,7 @@ io.on("connection", socket => {
             return;
         }
 
-        room.game = createGameState(activePlayers, room.drawRule || "classic");
+        room.game = createGameState(activePlayers, room.drawRule || "classic", room.grudgeHate || {}, Boolean(room.grudgeRule));
         room.returnedToLobby = null;
 
         io.to(roomId).emit("gameStarted");
@@ -2322,7 +2376,8 @@ io.on("connection", socket => {
                         playerName: caster.name,
                         cardName: usedCard.name,
                         cardRarity: usedCard.rarity,
-                        cardEffect: usedCard.effect || ""
+                        cardEffect: usedCard.effect || "",
+                        sourcePlayerId: caster.id
                     });
 
                     if (usedCard.attackSlipDamage > 0) {
@@ -2403,7 +2458,8 @@ io.on("connection", socket => {
                         playerName: caster.name,
                         cardName: usedCard.name,
                         cardRarity: usedCard.rarity,
-                        cardEffect: usedCard.effect || ""
+                        cardEffect: usedCard.effect || "",
+                        sourcePlayerId: caster.id
                     });
 
                     if (usedCard.attackSlipDamage > 0) {

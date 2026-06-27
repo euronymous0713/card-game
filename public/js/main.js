@@ -2192,13 +2192,9 @@ window.onload = () => {
         }
     });
 
-    const RULE_LABELS = {
-        classic: "通常ルール",
-        handManage: "手札管理ルール（テスト）"
-    };
     const RULE_DESCS = {
-        classic: "毎ターン手札が4枚になるよう補充されます。",
-        handManage: "使った枚数だけ次のターンの補充が減ります（手札は最大4枚まで溜まります）。"
+        normal: "毎ターン手札が4枚になるよう補充されます。",
+        grudge: "プレイヤーを脱落させるとそのヘイト値が自分のヘイトに加算されます。ゲーム終了時のヘイトは次の試合の開始ヘイトに引き継がれます。"
     };
 
     const ruleSelector = document.getElementById("ruleSelector");
@@ -2206,35 +2202,29 @@ window.onload = () => {
     const ruleDisplayLabel = document.getElementById("ruleDisplayLabel");
     const ruleSelectorDesc = document.getElementById("ruleSelectorDesc");
     const ruleClassicBtn = document.getElementById("ruleClassicBtn");
-    const ruleHandManageBtn = document.getElementById("ruleHandManageBtn");
+    const grudgeRuleBtn = document.getElementById("grudgeRuleBtn");
 
-    const isDevMode = new URLSearchParams(window.location.search).get("dev") === "1";
-    if (ruleHandManageBtn && !isDevMode) {
-        ruleHandManageBtn.style.display = "none";
+    function applyRuleUI(drawRule, grudgeRule) {
+        const isGrudge = Boolean(grudgeRule);
+        if (ruleDisplayLabel) ruleDisplayLabel.textContent = isGrudge ? "遺恨ルール" : "通常ルール";
+        if (ruleSelectorDesc) ruleSelectorDesc.textContent = isGrudge ? RULE_DESCS.grudge : RULE_DESCS.normal;
+        if (ruleClassicBtn) ruleClassicBtn.classList.toggle("rule-select-btn-active", !isGrudge);
+        if (grudgeRuleBtn) grudgeRuleBtn.classList.toggle("rule-select-btn-active", isGrudge);
     }
 
-    function applyRuleUI(drawRule) {
-        const label = RULE_LABELS[drawRule] || RULE_LABELS.classic;
-        const desc = RULE_DESCS[drawRule] || RULE_DESCS.classic;
-
-        if (ruleDisplayLabel) ruleDisplayLabel.textContent = label;
-        if (ruleSelectorDesc) ruleSelectorDesc.textContent = desc;
-
-        [ruleClassicBtn, ruleHandManageBtn].forEach(btn => {
-            if (!btn) return;
-            const active = btn.dataset.rule === drawRule;
-            btn.classList.toggle("rule-select-btn-active", active);
-        });
-    }
-
-    [ruleClassicBtn, ruleHandManageBtn].forEach(btn => {
-        if (!btn) return;
-        btn.onclick = () => {
-            socket.emit("setDrawRule", { roomId: currentRoomId, drawRule: btn.dataset.rule });
+    if (ruleClassicBtn) {
+        ruleClassicBtn.onclick = () => {
+            socket.emit("setGrudgeRule", { roomId: currentRoomId, grudgeRule: false });
         };
-    });
+    }
 
-    socket.on("updateRoom", ({ players, drawRule }) => {
+    if (grudgeRuleBtn) {
+        grudgeRuleBtn.onclick = () => {
+            socket.emit("setGrudgeRule", { roomId: currentRoomId, grudgeRule: true });
+        };
+    }
+
+    socket.on("updateRoom", ({ players, drawRule, grudgeRule, grudgeHate }) => {
         drawRule = drawRule || "classic";
         playerList.innerHTML = "";
 
@@ -2260,10 +2250,15 @@ window.onload = () => {
                         ? "準備完了"
                         : "待機中";
 
+            const hate = (grudgeHate && !isSpectatorPlayer) ? (grudgeHate[player.id] || 0) : 0;
+            const grudgeHateHtml = hate > 0
+                ? `<span class="grudge-hate" title="遺恨ヘイト（次の試合の開始ヘイト）">${"🔴".repeat(hate)}</span>`
+                : "";
+
             playerList.innerHTML += `
                 <div class="player-card ${!isSpectatorPlayer && player.ready ? "ready" : "not-ready"} ${player.disconnected ? "disconnected-player-card" : ""} ${isSpectatorPlayer ? "spectator-player-card" : ""}">
                     <span class="player-name">${player.host ? "👑 " : ""}${isSpectatorPlayer ? "👁 " : ""}${player.name}${disconnectedLabel(player)}</span>
-                    <span class="player-status">${statusText}</span>
+                    <span class="player-status">${statusText}${grudgeHateHtml}</span>
                 </div>
             `;
         });
@@ -2283,7 +2278,7 @@ window.onload = () => {
             if (ruleDisplay) ruleDisplay.style.display = "block";
         }
 
-        applyRuleUI(drawRule);
+        applyRuleUI(drawRule, grudgeRule);
     });
 
     readyButton.onclick = () => {
