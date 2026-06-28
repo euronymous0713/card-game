@@ -3405,7 +3405,6 @@ window.onload = () => {
     function renderDeckViewerCol(player, isMe) {
         const deck = Array.isArray(player.deck) ? player.deck : [];
         const used = Array.isArray(player.usedCards) ? player.usedCards : [];
-        const traps = Array.isArray(player.fieldCards) ? player.fieldCards.filter(c => !c.hidden) : [];
         const hand = Array.isArray(player.hand) ? player.hand : [];
 
         const drawCount = Math.max(0, 4 - hand.length);
@@ -3446,10 +3445,6 @@ window.onload = () => {
               <div class="deck-viewer-card-list">${deckHtml}</div>
             </div>
             ${handSection}
-            <div class="deck-viewer-section">
-              <div class="deck-viewer-section-label">伏せカード (場)</div>
-              <div class="deck-viewer-card-list">${trapsHtml}</div>
-            </div>
             <div class="deck-viewer-section">
               <div class="deck-viewer-section-label">使用済み <span class="deck-viewer-count">(${used.length}枚)</span></div>
               <div class="deck-viewer-card-list">${usedHtml}</div>
