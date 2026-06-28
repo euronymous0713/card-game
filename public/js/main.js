@@ -2563,6 +2563,20 @@ window.onload = () => {
             turnTimerSeconds.classList.toggle("timer-warning", isWarning);
             turnTimerSeconds.classList.toggle("timer-critical", isCritical);
         }
+
+        if (remaining <= 0 && !endTurnRequestPending && latestGame && !latestGame.gameOver && !latestGame.waitingTrapChoice) {
+            const cp = latestGame.turnOrder[latestGame.currentTurnIndex];
+            if (cp && cp.id === socket.id) {
+                endTurnRequestPending = true;
+                if (endTurnButton) endTurnButton.disabled = true;
+                socket.emit("endTurn", {
+                    roomId: currentRoomId,
+                    turnIndex: latestGame.currentTurnIndex,
+                    playerId: socket.id
+                });
+            }
+        }
+
         turnTimerRAF = requestAnimationFrame(tickTurnTimer);
     }
 
