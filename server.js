@@ -118,11 +118,34 @@ function generateTaimanRefillDeck() {
     return shuffleArray(deck);
 }
 
+function generateTaimanRarityPool() {
+    const rarities = [];
+    for (let i = 0; i < 20; i++) {
+        rarities.push(selectRarityByWeight());
+    }
+    return rarities;
+}
+
 function generateTaimanDraftOptions() {
     return [
         [generateCardInstance(), generateCardInstance()].filter(Boolean),
         [generateCardInstance(), generateCardInstance()].filter(Boolean)
     ];
+}
+
+function generateTaimanDraftOptionsFromPool(rarityPool, round) {
+    const setA = [];
+    const setB = [];
+    for (let i = 0; i < 2; i++) {
+        const rarity = rarityPool[round * 2 + i];
+        const candidates = getCardsByRarity(rarity);
+        const pool = shuffleArray([...(candidates.length > 0 ? candidates : CARD_MASTER)]);
+        const baseA = normalizeCard(pool[0]);
+        const baseB = normalizeCard(pool[1] ?? pool[0]);
+        setA.push({ ...baseA, instanceId: `${baseA.id}-${Date.now()}-${Math.random()}` });
+        setB.push({ ...baseB, instanceId: `${baseB.id}-${Date.now()}-${Math.random()}` });
+    }
+    return [setA, setB];
 }
 
 function selectRandomCardByRarity() {
@@ -1321,11 +1344,13 @@ function startDraft(roomId) {
     const room = rooms[roomId];
     if (!room) return;
     const [f1id, f2id] = room.taimanFighters;
+    const rarityPool = generateTaimanRarityPool();
     room.draft = {
         round: 0,
         fighters: [f1id, f2id],
         waitingFor: f1id,
-        options: generateTaimanDraftOptions(),
+        rarityPool,
+        options: generateTaimanDraftOptionsFromPool(rarityPool, 0),
         picks: { [f1id]: [], [f2id]: [] }
     };
     emitDraftUpdate(roomId);
@@ -1466,7 +1491,7 @@ function doBotDraftPick(roomId) {
     }
 
     draft.waitingFor = draft.fighters[draft.round % 2];
-    draft.options = generateTaimanDraftOptions();
+    draft.options = generateTaimanDraftOptionsFromPool(draft.rarityPool, draft.round);
     emitDraftUpdate(roomId);
 }
 
@@ -2339,7 +2364,7 @@ io.on("connection", socket => {
         }
 
         draft.waitingFor = draft.fighters[draft.round % 2];
-        draft.options = generateTaimanDraftOptions();
+        draft.options = generateTaimanDraftOptionsFromPool(draft.rarityPool, draft.round);
         emitDraftUpdate(roomId);
     });
 
