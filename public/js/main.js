@@ -3453,10 +3453,6 @@ window.onload = () => {
             ? `<span class="dv-card-empty">なし</span>`
             : used.map(dvCardChip).join("");
 
-        const trapsHtml = traps.length === 0
-            ? `<span class="dv-card-empty">なし</span>`
-            : traps.map(dvCardChip).join("");
-
         const handSection = isMe
             ? `<div class="deck-viewer-section">
                 <div class="deck-viewer-section-label">手札 (${hand.length}枚)</div>
