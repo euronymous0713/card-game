@@ -75,6 +75,7 @@ const rooms = {};
 const pendingTrapChoices = {};
 const pendingOverwriteChoices = {};
 const DEV_MODE = true;
+const TURN_DURATION_MS = 60 * 1000;
 const RECONNECT_TIMEOUT_MS = 5 * 60 * 1000;
 
 const RARITY_INFO = {
@@ -1416,7 +1417,7 @@ function startTaimanGame(roomId) {
     room.draft = null;
 
     io.to(roomId).emit("gameStarted");
-    emitGameUpdate(roomId);
+    finishGameIfNeeded(roomId);
 }
 
 function emitGameUpdate(roomId) {
@@ -1451,11 +1452,56 @@ function emitGameUpdate(roomId) {
     scheduleBotTick(roomId);
 }
 
+function clearTurnTimer(room) {
+    if (room._turnTimer) {
+        clearTimeout(room._turnTimer);
+        delete room._turnTimer;
+    }
+    if (room.game) {
+        room.game.turnStartedAt = null;
+        room.game.turnDuration = null;
+    }
+}
+
+function setupTurnTimerIfNeeded(roomId) {
+    const room = rooms[roomId];
+    if (!room || !room.game || room.game.gameOver) return;
+    if (room.game.turnStartedAt) return; // already running for this turn
+
+    const currentPlayer = getCurrentPlayer(room.game);
+    if (!currentPlayer || currentPlayer.isBot) return;
+
+    const playerId = currentPlayer.id;
+    room.game.turnStartedAt = Date.now();
+    room.game.turnDuration = TURN_DURATION_MS;
+
+    room._turnTimer = setTimeout(() => {
+        delete room._turnTimer;
+        const r = rooms[roomId];
+        if (!r || !r.game || r.game.gameOver || r.game.waitingTrapChoice) return;
+        const cp = getCurrentPlayer(r.game);
+        if (!cp || cp.id !== playerId) return;
+
+        clearTurnTimer(r);
+        moveToNextAliveTurn(r.game);
+        finishGameIfNeeded(roomId);
+    }, TURN_DURATION_MS);
+}
+
 function finishGameIfNeeded(roomId) {
     const room = rooms[roomId];
     if (!room || !room.game) return;
 
     checkGameOver(room.game);
+
+    if (room.game.gameOver) {
+        if (room._turnTimer) { clearTimeout(room._turnTimer); delete room._turnTimer; }
+        room.game.turnStartedAt = null;
+        room.game.turnDuration = null;
+    } else {
+        setupTurnTimerIfNeeded(roomId);
+    }
+
     emitGameUpdate(roomId);
 
     if (room.game.gameOver) {
@@ -1490,6 +1536,7 @@ function doBotTurn(roomId) {
     if (game.gameOver || game.waitingTrapChoice) return;
     const current = getCurrentPlayer(game);
     if (!current || !current.isBot) return;
+    clearTurnTimer(room);
     moveToNextAliveTurn(game);
     finishGameIfNeeded(roomId);
 }
@@ -2443,7 +2490,7 @@ io.on("connection", socket => {
         room.returnedToLobby = null;
 
         io.to(roomId).emit("gameStarted");
-        emitGameUpdate(roomId);
+        finishGameIfNeeded(roomId);
     });
 
     socket.on("chooseTrapResponse", ({ choiceId, fieldId }) => {
@@ -3076,6 +3123,7 @@ io.on("connection", socket => {
             return;
         }
 
+        clearTurnTimer(room);
         moveToNextAliveTurn(game);
         finishGameIfNeeded(roomId);
     });

@@ -44,6 +44,8 @@ window.onload = () => {
     const historyModalBody = document.getElementById("historyModalBody");
     const historyModalCloseButton = document.getElementById("historyModalCloseButton");
     const endTurnButton = document.getElementById("endTurnButton");
+    const turnTimerWrap = document.getElementById("turnTimerWrap");
+    const turnTimerBar = document.getElementById("turnTimerBar");
     const myFieldCards = document.getElementById("myFieldCards");
 
     const gameOverOverlay = document.getElementById("gameOverOverlay");
@@ -118,6 +120,7 @@ window.onload = () => {
     let selectedMobileFieldCardKey = "";
     let selectedMobileStatusKey = "";
     let endTurnRequestPending = false;
+    let turnTimerRAF = null;
     let titleCardList = [];
     let currentCardListRarityFilter = "all";
     let currentCardListKindFilter = "all";
@@ -2535,6 +2538,34 @@ window.onload = () => {
         showOverwriteTrapModal(data);
     });
 
+    function tickTurnTimer() {
+        if (!latestGame || !latestGame.turnStartedAt || !latestGame.turnDuration) {
+            turnTimerRAF = null;
+            if (turnTimerWrap) turnTimerWrap.style.display = "none";
+            return;
+        }
+        const remaining = latestGame.turnStartedAt + latestGame.turnDuration - Date.now();
+        const pct = Math.max(0, Math.min(100, remaining / latestGame.turnDuration * 100));
+        if (turnTimerWrap) turnTimerWrap.style.display = "";
+        if (turnTimerBar) {
+            turnTimerBar.style.width = pct + "%";
+            const sec = remaining / 1000;
+            turnTimerBar.classList.toggle("timer-warning", sec <= 30 && sec > 10);
+            turnTimerBar.classList.toggle("timer-critical", sec <= 10);
+        }
+        turnTimerRAF = requestAnimationFrame(tickTurnTimer);
+    }
+
+    function startTurnTimerUI() {
+        if (turnTimerRAF) cancelAnimationFrame(turnTimerRAF);
+        turnTimerRAF = requestAnimationFrame(tickTurnTimer);
+    }
+
+    function stopTurnTimerUI() {
+        if (turnTimerRAF) { cancelAnimationFrame(turnTimerRAF); turnTimerRAF = null; }
+        if (turnTimerWrap) turnTimerWrap.style.display = "none";
+    }
+
     socket.on("updateGame", game => {
         const oldGame = previousGame;
 
@@ -2597,8 +2628,15 @@ window.onload = () => {
             game.deckRefillEvents.forEach(ev => showDeckRefillNotification(ev.playerName));
         }
 
+        if (game.turnStartedAt && game.turnDuration) {
+            startTurnTimerUI();
+        } else {
+            stopTurnTimerUI();
+        }
+
         console.log("[updateGame] gameOver:", game.gameOver, "winner:", game.winner?.name);
         if (game.gameOver && game.winner) {
+            stopTurnTimerUI();
             showGameOver(game.winner);
         }
     });
@@ -3399,7 +3437,7 @@ window.onload = () => {
         alert(message);
     });
 
-    // ===== デッキ確認 (タイマンモード専用) =====
+    // ===== デッキ確認 (タイマンルール専用) =====
     const deckViewerBtn = document.getElementById("deckViewerBtn");
     const deckViewerOverlay = document.getElementById("deckViewerOverlay");
     const deckViewerCloseBtn = document.getElementById("deckViewerCloseBtn");
