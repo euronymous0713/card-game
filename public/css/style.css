@@ -3111,6 +3111,7 @@ body.battle-active .mobile-trap-waiting-notice.show {
     font-size: 0.72em;
     border: 1px solid transparent;
     white-space: nowrap;
+    cursor: pointer;
 }
 .dv-card-chip.rarity-c   { background: rgba(150,150,150,0.15); border-color: #555; color: #bbb; }
 .dv-card-chip.rarity-uc  { background: rgba(80,200,120,0.12);  border-color: #3a7a50; color: #6ddc8e; }
