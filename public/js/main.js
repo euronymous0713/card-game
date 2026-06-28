@@ -2233,8 +2233,10 @@ window.onload = () => {
     const ruleClassicBtn = document.getElementById("ruleClassicBtn");
     const grudgeRuleBtn = document.getElementById("grudgeRuleBtn");
     const taimanModeBtn = document.getElementById("taimanModeBtn");
-    const taimanFighterSelector = document.getElementById("taimanFighterSelector");
     const taimanFighterList = document.getElementById("taimanFighterList");
+    const fighterSelectOpenBtn = document.getElementById("fighterSelectOpenBtn");
+    const fighterModalOverlay = document.getElementById("fighterModalOverlay");
+    const fighterModalCloseBtn = document.getElementById("fighterModalCloseBtn");
 
     const hostRuleDescToggleBtn = document.getElementById("hostRuleDescToggleBtn");
     const guestRuleDescToggleBtn = document.getElementById("guestRuleDescToggleBtn");
@@ -2243,10 +2245,13 @@ window.onload = () => {
     const ruleDescModalBody = document.getElementById("ruleDescModalBody");
     const ruleDescModalCloseBtn = document.getElementById("ruleDescModalCloseBtn");
 
+    let currentRuleLabel = "";
+    let currentRuleDesc = "";
+
     function openRuleDescModal() {
-        if (!ruleDescModalOverlay || !ruleDescModalTitle || !ruleDescModalBody) return;
-        ruleDescModalTitle.textContent = ruleDisplayLabel ? ruleDisplayLabel.textContent : "ルール説明";
-        ruleDescModalBody.textContent = ruleSelectorDesc ? ruleSelectorDesc.textContent : "";
+        if (!ruleDescModalOverlay) return;
+        if (ruleDescModalTitle) ruleDescModalTitle.textContent = currentRuleLabel;
+        if (ruleDescModalBody) ruleDescModalBody.textContent = currentRuleDesc;
         ruleDescModalOverlay.style.display = "flex";
     }
 
@@ -2259,13 +2264,23 @@ window.onload = () => {
         if (e.target === ruleDescModalOverlay) ruleDescModalOverlay.style.display = "none";
     });
 
+    if (fighterSelectOpenBtn) fighterSelectOpenBtn.addEventListener("click", () => {
+        if (fighterModalOverlay) fighterModalOverlay.style.display = "flex";
+    });
+    if (fighterModalCloseBtn) fighterModalCloseBtn.addEventListener("click", () => {
+        if (fighterModalOverlay) fighterModalOverlay.style.display = "none";
+    });
+    if (fighterModalOverlay) fighterModalOverlay.addEventListener("click", e => {
+        if (e.target === fighterModalOverlay) fighterModalOverlay.style.display = "none";
+    });
+
     function applyRuleUI(drawRule, grudgeRule, taimanMode) {
         const isTaiman = Boolean(taimanMode);
         const isGrudge = !isTaiman && Boolean(grudgeRule);
-        const descText = isTaiman ? RULE_DESCS.taiman : isGrudge ? RULE_DESCS.grudge : RULE_DESCS.normal;
-        const labelText = isTaiman ? "タイマンモード" : isGrudge ? "遺恨ルール" : "通常ルール";
-        if (ruleDisplayLabel) ruleDisplayLabel.textContent = labelText;
-        if (ruleSelectorDesc) ruleSelectorDesc.textContent = descText;
+        currentRuleDesc = isTaiman ? RULE_DESCS.taiman : isGrudge ? RULE_DESCS.grudge : RULE_DESCS.normal;
+        currentRuleLabel = isTaiman ? "タイマンモード" : isGrudge ? "遺恨ルール" : "通常ルール";
+        if (ruleDisplayLabel) ruleDisplayLabel.textContent = currentRuleLabel;
+        if (fighterSelectOpenBtn) fighterSelectOpenBtn.style.display = isTaiman ? "inline-block" : "none";
         if (ruleClassicBtn) ruleClassicBtn.classList.toggle("rule-select-btn-active", !isGrudge && !isTaiman);
         if (grudgeRuleBtn) grudgeRuleBtn.classList.toggle("rule-select-btn-active", isGrudge);
         if (taimanModeBtn) taimanModeBtn.classList.toggle("rule-select-btn-active", isTaiman);
@@ -2372,15 +2387,11 @@ window.onload = () => {
             startGameButton.disabled = !canStart;
             if (ruleSelector) ruleSelector.style.display = "block";
             if (ruleDisplay) ruleDisplay.style.display = "none";
-            if (taimanFighterSelector) {
-                taimanFighterSelector.style.display = isTaimanMode ? "block" : "none";
-                if (isTaimanMode) renderTaimanFighterSelector(players, taimanFighters);
-            }
+            if (isTaimanMode) renderTaimanFighterSelector(players, taimanFighters);
         } else {
             startGameButton.style.display = "none";
             if (ruleSelector) ruleSelector.style.display = "none";
             if (ruleDisplay) ruleDisplay.style.display = "block";
-            if (taimanFighterSelector) taimanFighterSelector.style.display = "none";
         }
 
         applyRuleUI(drawRule, grudgeRule, isTaimanMode);

@@ -125,7 +125,10 @@
           <button class="rule-select-btn" id="grudgeRuleBtn">遺恨ルール</button>
           <button class="rule-select-btn" id="taimanModeBtn">タイマンモード</button>
         </div>
-        <button type="button" class="rule-desc-toggle-btn" id="hostRuleDescToggleBtn">？ ルール説明</button>
+        <div class="rule-selector-sub-row">
+          <button type="button" class="rule-desc-toggle-btn" id="hostRuleDescToggleBtn">？ ルール説明</button>
+          <button type="button" class="fighter-select-open-btn" id="fighterSelectOpenBtn" style="display:none;">⚔ ファイター選択</button>
+        </div>
       </div>
 
       <div id="ruleDisplay" style="display:none;">
@@ -133,11 +136,6 @@
           <p class="rule-display-text">ルール：<strong id="ruleDisplayLabel"></strong></p>
           <button type="button" class="rule-desc-toggle-btn" id="guestRuleDescToggleBtn">？</button>
         </div>
-      </div>
-
-      <div id="taimanFighterSelector" style="display:none;">
-        <p class="taiman-fighter-label">⚔ 戦う2人を選択</p>
-        <div id="taimanFighterList"></div>
       </div>
     </div>
 
@@ -148,6 +146,16 @@
           <button type="button" id="ruleDescModalCloseBtn" class="rule-desc-modal-close">✕</button>
         </div>
         <p id="ruleDescModalBody" class="rule-desc-modal-body"></p>
+      </div>
+    </div>
+
+    <div class="rule-desc-modal-overlay" id="fighterModalOverlay" style="display:none;">
+      <div class="rule-desc-modal">
+        <div class="rule-desc-modal-header">
+          <strong>⚔ 戦う2人を選択</strong>
+          <button type="button" id="fighterModalCloseBtn" class="rule-desc-modal-close">✕</button>
+        </div>
+        <div id="taimanFighterList" class="fighter-modal-list"></div>
       </div>
     </div>
 

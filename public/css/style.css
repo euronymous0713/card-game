@@ -2381,11 +2381,18 @@ body.battle-active .mobile-trap-waiting-notice.show {
 
 .lobby-rule-area {
     width: 100%;
-    min-height: 160px;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 0;
+}
+
+.rule-selector-sub-row {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 10px;
+    flex-wrap: wrap;
 }
 
 .rule-display-row {
@@ -2395,7 +2402,8 @@ body.battle-active .mobile-trap-waiting-notice.show {
     gap: 8px;
 }
 
-.rule-desc-toggle-btn {
+.rule-desc-toggle-btn,
+.fighter-select-open-btn {
     background: rgba(255, 255, 255, 0.08);
     border: 1px solid rgba(255, 255, 255, 0.18);
     border-radius: 20px;
@@ -2404,12 +2412,19 @@ body.battle-active .mobile-trap-waiting-notice.show {
     cursor: pointer;
     transition: background 0.15s, color 0.15s;
     padding: 4px 10px;
-    margin-top: 10px;
 }
 
-.rule-desc-toggle-btn:hover {
+.rule-desc-toggle-btn:hover,
+.fighter-select-open-btn:hover {
     background: rgba(255, 255, 255, 0.15);
     color: #fff;
+}
+
+.fighter-modal-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 4px;
 }
 
 .rule-desc-modal-overlay {
@@ -2479,12 +2494,12 @@ body.battle-active .mobile-trap-waiting-notice.show {
 
 .rule-select-btn {
     flex: 1;
-    padding: 14px 16px;
+    padding: 8px 10px;
     border: 1.5px solid rgba(255, 255, 255, 0.12);
-    border-radius: 12px;
-    font-weight: 900;
-    font-size: 0.95em;
-    letter-spacing: 0.04em;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.8em;
+    letter-spacing: 0.02em;
     background: rgba(255, 255, 255, 0.04);
     color: rgba(255, 255, 255, 0.4);
     cursor: pointer;
