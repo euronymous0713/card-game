@@ -119,10 +119,17 @@ function generateTaimanRefillDeck() {
 }
 
 function generateTaimanDraftOptions() {
-    return [
-        [generateCardInstance(), generateCardInstance()].filter(Boolean),
-        [generateCardInstance(), generateCardInstance()].filter(Boolean)
-    ];
+    const setA = [];
+    const setB = [];
+    for (let i = 0; i < 2; i++) {
+        const rarity = selectRarityByWeight();
+        const pool = shuffleArray([...(getCardsByRarity(rarity).length > 0 ? getCardsByRarity(rarity) : CARD_MASTER)]);
+        const baseA = normalizeCard(pool[0]);
+        const baseB = normalizeCard(pool[1] ?? pool[0]);
+        setA.push({ ...baseA, instanceId: `${baseA.id}-${Date.now()}-${Math.random()}` });
+        setB.push({ ...baseB, instanceId: `${baseB.id}-${Date.now()}-${Math.random()}` });
+    }
+    return [setA, setB];
 }
 
 function selectRandomCardByRarity() {
