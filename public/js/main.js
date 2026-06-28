@@ -4,7 +4,7 @@ window.socket = socket;
 let cardMasterMap = {};
 fetch("/api/cards").then(r => r.json()).then(cards => {
     cards.forEach(c => { cardMasterMap[c.name] = c; });
-}).catch(() => {});
+}).catch(() => { });
 
 window.onload = () => {
     const titleScreen = document.getElementById("titleScreen");
@@ -685,7 +685,7 @@ window.onload = () => {
                 selectedMobileFieldCardKey = "";
                 selectedMobileStatusKey = statusKey;
                 document.body.classList.remove("mobile-card-action-open");
-        document.body.classList.remove("game-over-active");
+                document.body.classList.remove("game-over-active");
                 updateMobileActionPanel();
                 renderHand();
 
@@ -2049,19 +2049,19 @@ window.onload = () => {
     }
 
     // ---- バグ報告モーダル ----
-    const bugReportOverlay    = document.getElementById("bugReportOverlay");
-    const bugReportCloseBtn   = document.getElementById("bugReportCloseButton");
-    const bugReportSummary    = document.getElementById("bugReportSummary");
-    const bugReportDetail     = document.getElementById("bugReportDetail");
-    const bugReportStatus     = document.getElementById("bugReportStatus");
-    const bugReportSubmitBtn  = document.getElementById("bugReportSubmitButton");
-    const bugReportTitleBtn   = document.getElementById("bugReportTitleButton");
+    const bugReportOverlay = document.getElementById("bugReportOverlay");
+    const bugReportCloseBtn = document.getElementById("bugReportCloseButton");
+    const bugReportSummary = document.getElementById("bugReportSummary");
+    const bugReportDetail = document.getElementById("bugReportDetail");
+    const bugReportStatus = document.getElementById("bugReportStatus");
+    const bugReportSubmitBtn = document.getElementById("bugReportSubmitButton");
+    const bugReportTitleBtn = document.getElementById("bugReportTitleButton");
 
     function openBugReport() {
         bugReportSummary.value = "";
-        bugReportDetail.value  = "";
+        bugReportDetail.value = "";
         bugReportStatus.textContent = "";
-        bugReportStatus.className   = "bug-report-status";
+        bugReportStatus.className = "bug-report-status";
         bugReportOverlay.style.display = "flex";
         bugReportSummary.focus();
     }
@@ -2074,43 +2074,43 @@ window.onload = () => {
         const summary = bugReportSummary.value.trim();
         if (!summary) {
             bugReportStatus.textContent = "件名を入力してください";
-            bugReportStatus.className   = "bug-report-status error";
+            bugReportStatus.className = "bug-report-status error";
             return;
         }
-        bugReportSubmitBtn.disabled  = true;
-        bugReportStatus.textContent  = "送信中…";
-        bugReportStatus.className    = "bug-report-status";
+        bugReportSubmitBtn.disabled = true;
+        bugReportStatus.textContent = "送信中…";
+        bugReportStatus.className = "bug-report-status";
         try {
             const res = await fetch("/api/bug-report", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    name:    localStorage.getItem("playerName") || "不明",
+                    name: localStorage.getItem("playerName") || "不明",
                     summary,
-                    detail:  bugReportDetail.value.trim(),
-                    roomId:  currentRoomId || ""
+                    detail: bugReportDetail.value.trim(),
+                    roomId: currentRoomId || ""
                 })
             });
             if (res.ok) {
                 bugReportStatus.textContent = "送信しました！ありがとうございます";
-                bugReportStatus.className   = "bug-report-status success";
+                bugReportStatus.className = "bug-report-status success";
                 setTimeout(closeBugReport, 1800);
             } else {
                 throw new Error("server error");
             }
         } catch (_) {
             bugReportStatus.textContent = "送信に失敗しました。もう一度お試しください";
-            bugReportStatus.className   = "bug-report-status error";
+            bugReportStatus.className = "bug-report-status error";
         } finally {
             bugReportSubmitBtn.disabled = false;
         }
     }
 
-    if (bugReportTitleBtn)   bugReportTitleBtn.onclick  = openBugReport;
+    if (bugReportTitleBtn) bugReportTitleBtn.onclick = openBugReport;
     const bugReportCardListBtn = document.getElementById("bugReportCardListButton");
     if (bugReportCardListBtn) bugReportCardListBtn.onclick = openBugReport;
-    if (bugReportCloseBtn)   bugReportCloseBtn.onclick  = closeBugReport;
-    if (bugReportSubmitBtn)  bugReportSubmitBtn.onclick = submitBugReport;
+    if (bugReportCloseBtn) bugReportCloseBtn.onclick = closeBugReport;
+    if (bugReportSubmitBtn) bugReportSubmitBtn.onclick = submitBugReport;
     if (bugReportOverlay) {
         bugReportOverlay.addEventListener("click", (e) => {
             if (e.target === bugReportOverlay) closeBugReport();
@@ -2224,9 +2224,9 @@ window.onload = () => {
     });
 
     const RULE_DESCS = {
-        normal: "毎ターン手札が4枚になるよう補充されます。",
+        normal: "インターネット世紀末の通常ルールです。",
         grudge: "プレイヤーを脱落させるとそのヘイト値が自分のヘイトに加算されます。ゲーム終了時のヘイトは次の試合の開始ヘイトに引き継がれます。",
-        taiman: "1対1専用。ドラフトで20枚のデッキを組み戦います。他のプレイヤーは観戦できます。"
+        taiman: "1対1専用。ドラフトで20枚のデッキを組み戦います。"
     };
 
     const ruleSelector = document.getElementById("ruleSelector");
@@ -3506,7 +3506,7 @@ window.onload = () => {
             try {
                 const card = JSON.parse(chip.dataset.dvCard);
                 deckViewerCardDetailEl.innerHTML = cardDetailHtml(card);
-            } catch (_) {}
+            } catch (_) { }
         });
     }
 
