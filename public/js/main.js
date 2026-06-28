@@ -2229,6 +2229,7 @@ window.onload = () => {
     const ruleSelector = document.getElementById("ruleSelector");
     const ruleDisplay = document.getElementById("ruleDisplay");
     const ruleDisplayLabel = document.getElementById("ruleDisplayLabel");
+    const ruleDisplayDesc = document.getElementById("ruleDisplayDesc");
     const ruleSelectorDesc = document.getElementById("ruleSelectorDesc");
     const ruleClassicBtn = document.getElementById("ruleClassicBtn");
     const grudgeRuleBtn = document.getElementById("grudgeRuleBtn");
@@ -2236,19 +2237,41 @@ window.onload = () => {
     const taimanFighterSelector = document.getElementById("taimanFighterSelector");
     const taimanFighterList = document.getElementById("taimanFighterList");
 
+    let hostDescVisible = true;
+    let guestDescVisible = false;
+
+    const hostRuleDescToggleBtn = document.getElementById("hostRuleDescToggleBtn");
+    const guestRuleDescToggleBtn = document.getElementById("guestRuleDescToggleBtn");
+
+    if (hostRuleDescToggleBtn) {
+        hostRuleDescToggleBtn.addEventListener("click", () => {
+            hostDescVisible = !hostDescVisible;
+            if (ruleSelectorDesc) ruleSelectorDesc.style.display = hostDescVisible ? "" : "none";
+            hostRuleDescToggleBtn.textContent = hostDescVisible ? "▲" : "？";
+            hostRuleDescToggleBtn.title = hostDescVisible ? "説明を隠す" : "ルール説明";
+        });
+    }
+
+    if (guestRuleDescToggleBtn) {
+        guestRuleDescToggleBtn.addEventListener("click", () => {
+            guestDescVisible = !guestDescVisible;
+            if (ruleDisplayDesc) ruleDisplayDesc.style.display = guestDescVisible ? "" : "none";
+            guestRuleDescToggleBtn.textContent = guestDescVisible ? "▲" : "？";
+            guestRuleDescToggleBtn.title = guestDescVisible ? "説明を隠す" : "ルール説明";
+        });
+    }
+
     function applyRuleUI(drawRule, grudgeRule, taimanMode) {
         const isTaiman = Boolean(taimanMode);
         const isGrudge = !isTaiman && Boolean(grudgeRule);
-        if (ruleDisplayLabel) {
-            if (isTaiman) ruleDisplayLabel.textContent = "タイマンモード";
-            else if (isGrudge) ruleDisplayLabel.textContent = "遺恨ルール";
-            else ruleDisplayLabel.textContent = "通常ルール";
-        }
+        const descText = isTaiman ? RULE_DESCS.taiman : isGrudge ? RULE_DESCS.grudge : RULE_DESCS.normal;
+        const labelText = isTaiman ? "タイマンモード" : isGrudge ? "遺恨ルール" : "通常ルール";
+        if (ruleDisplayLabel) ruleDisplayLabel.textContent = labelText;
         if (ruleSelectorDesc) {
-            if (isTaiman) ruleSelectorDesc.textContent = RULE_DESCS.taiman;
-            else if (isGrudge) ruleSelectorDesc.textContent = RULE_DESCS.grudge;
-            else ruleSelectorDesc.textContent = RULE_DESCS.normal;
+            ruleSelectorDesc.textContent = descText;
+            ruleSelectorDesc.style.display = hostDescVisible ? "" : "none";
         }
+        if (ruleDisplayDesc) ruleDisplayDesc.textContent = descText;
         if (ruleClassicBtn) ruleClassicBtn.classList.toggle("rule-select-btn-active", !isGrudge && !isTaiman);
         if (grudgeRuleBtn) grudgeRuleBtn.classList.toggle("rule-select-btn-active", isGrudge);
         if (taimanModeBtn) taimanModeBtn.classList.toggle("rule-select-btn-active", isTaiman);

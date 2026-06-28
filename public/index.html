@@ -118,22 +118,31 @@
 
     <div id="playerList"></div>
 
-    <div id="ruleSelector" style="display:none;">
-      <div class="rule-selector-buttons">
-        <button class="rule-select-btn" id="ruleClassicBtn">通常ルール</button>
-        <button class="rule-select-btn" id="grudgeRuleBtn">遺恨ルール</button>
-        <button class="rule-select-btn" id="taimanModeBtn">タイマンモード</button>
+    <div class="lobby-rule-area">
+      <div id="ruleSelector" style="display:none;">
+        <div class="rule-selector-buttons">
+          <button class="rule-select-btn" id="ruleClassicBtn">通常ルール</button>
+          <button class="rule-select-btn" id="grudgeRuleBtn">遺恨ルール</button>
+          <button class="rule-select-btn" id="taimanModeBtn">タイマンモード</button>
+        </div>
+        <div class="rule-desc-row">
+          <p class="rule-selector-desc" id="ruleSelectorDesc"></p>
+          <button type="button" class="rule-desc-toggle-btn" id="hostRuleDescToggleBtn" title="説明を隠す">▲</button>
+        </div>
       </div>
-      <p class="rule-selector-desc" id="ruleSelectorDesc"></p>
-    </div>
 
-    <div id="taimanFighterSelector" style="display:none;">
-      <p class="taiman-fighter-label">⚔ 戦う2人を選択</p>
-      <div id="taimanFighterList"></div>
-    </div>
+      <div id="ruleDisplay" style="display:none;">
+        <div class="rule-display-row">
+          <p class="rule-display-text">ルール：<strong id="ruleDisplayLabel"></strong></p>
+          <button type="button" class="rule-desc-toggle-btn" id="guestRuleDescToggleBtn" title="ルール説明">？</button>
+        </div>
+        <p class="rule-selector-desc" id="ruleDisplayDesc" style="display:none;"></p>
+      </div>
 
-    <div id="ruleDisplay" style="display:none;">
-      <p class="rule-display-text">ルール：<strong id="ruleDisplayLabel"></strong></p>
+      <div id="taimanFighterSelector" style="display:none;">
+        <p class="taiman-fighter-label">⚔ 戦う2人を選択</p>
+        <div id="taimanFighterList"></div>
+      </div>
     </div>
 
     <div class="lobby-buttons">

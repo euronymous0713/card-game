@@ -2379,6 +2379,53 @@ body.battle-active .mobile-trap-waiting-notice.show {
     opacity: 0.75;
 }
 
+.lobby-rule-area {
+    width: 100%;
+    min-height: 230px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.rule-desc-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    width: 100%;
+}
+
+.rule-desc-row .rule-selector-desc {
+    flex: 1;
+    margin-top: 0;
+}
+
+.rule-display-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.rule-desc-toggle-btn {
+    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 50%;
+    color: rgba(255, 255, 255, 0.6);
+    width: 26px;
+    height: 26px;
+    font-size: 0.8em;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    line-height: 1;
+    padding: 0;
+}
+
+.rule-desc-toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+}
+
 .rule-selector-label {
     font-size: 0.85em;
     color: #aaa;
