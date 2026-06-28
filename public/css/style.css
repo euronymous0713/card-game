@@ -214,6 +214,20 @@ button:disabled {
     align-items: start;
 }
 
+.taiman-battle .enemy-slots {
+    display: flex;
+    justify-content: center;
+}
+
+.taiman-battle .enemy-panel.empty-enemy {
+    display: none;
+}
+
+.taiman-battle .enemy-panel {
+    width: 280px;
+    flex-shrink: 0;
+}
+
 .enemy-panel {
     width: 100%;
     min-width: 0;

@@ -2729,6 +2729,8 @@ window.onload = () => {
             Array.isArray(e.statusEffects) && e.statusEffects.some(s => s && s.type === "kagiaka" && Number(s.remainingTurns || 0) > 0)
         );
 
+        battleField.classList.toggle("taiman-battle", Boolean(latestGame.taimanMode));
+
         enemySlots.forEach((slot, index) => {
             const enemy = enemies[index];
 
