@@ -2229,7 +2229,6 @@ window.onload = () => {
     const ruleSelector = document.getElementById("ruleSelector");
     const ruleDisplay = document.getElementById("ruleDisplay");
     const ruleDisplayLabel = document.getElementById("ruleDisplayLabel");
-    const ruleDisplayDesc = document.getElementById("ruleDisplayDesc");
     const ruleSelectorDesc = document.getElementById("ruleSelectorDesc");
     const ruleClassicBtn = document.getElementById("ruleClassicBtn");
     const grudgeRuleBtn = document.getElementById("grudgeRuleBtn");
@@ -2237,29 +2236,28 @@ window.onload = () => {
     const taimanFighterSelector = document.getElementById("taimanFighterSelector");
     const taimanFighterList = document.getElementById("taimanFighterList");
 
-    let hostDescVisible = true;
-    let guestDescVisible = false;
-
     const hostRuleDescToggleBtn = document.getElementById("hostRuleDescToggleBtn");
     const guestRuleDescToggleBtn = document.getElementById("guestRuleDescToggleBtn");
+    const ruleDescModalOverlay = document.getElementById("ruleDescModalOverlay");
+    const ruleDescModalTitle = document.getElementById("ruleDescModalTitle");
+    const ruleDescModalBody = document.getElementById("ruleDescModalBody");
+    const ruleDescModalCloseBtn = document.getElementById("ruleDescModalCloseBtn");
 
-    if (hostRuleDescToggleBtn) {
-        hostRuleDescToggleBtn.addEventListener("click", () => {
-            hostDescVisible = !hostDescVisible;
-            if (ruleSelectorDesc) ruleSelectorDesc.style.display = hostDescVisible ? "" : "none";
-            hostRuleDescToggleBtn.textContent = hostDescVisible ? "▲" : "？";
-            hostRuleDescToggleBtn.title = hostDescVisible ? "説明を隠す" : "ルール説明";
-        });
+    function openRuleDescModal() {
+        if (!ruleDescModalOverlay || !ruleDescModalTitle || !ruleDescModalBody) return;
+        ruleDescModalTitle.textContent = ruleDisplayLabel ? ruleDisplayLabel.textContent : "ルール説明";
+        ruleDescModalBody.textContent = ruleSelectorDesc ? ruleSelectorDesc.textContent : "";
+        ruleDescModalOverlay.style.display = "flex";
     }
 
-    if (guestRuleDescToggleBtn) {
-        guestRuleDescToggleBtn.addEventListener("click", () => {
-            guestDescVisible = !guestDescVisible;
-            if (ruleDisplayDesc) ruleDisplayDesc.style.display = guestDescVisible ? "" : "none";
-            guestRuleDescToggleBtn.textContent = guestDescVisible ? "▲" : "？";
-            guestRuleDescToggleBtn.title = guestDescVisible ? "説明を隠す" : "ルール説明";
-        });
-    }
+    if (hostRuleDescToggleBtn) hostRuleDescToggleBtn.addEventListener("click", openRuleDescModal);
+    if (guestRuleDescToggleBtn) guestRuleDescToggleBtn.addEventListener("click", openRuleDescModal);
+    if (ruleDescModalCloseBtn) ruleDescModalCloseBtn.addEventListener("click", () => {
+        ruleDescModalOverlay.style.display = "none";
+    });
+    if (ruleDescModalOverlay) ruleDescModalOverlay.addEventListener("click", e => {
+        if (e.target === ruleDescModalOverlay) ruleDescModalOverlay.style.display = "none";
+    });
 
     function applyRuleUI(drawRule, grudgeRule, taimanMode) {
         const isTaiman = Boolean(taimanMode);
@@ -2267,11 +2265,7 @@ window.onload = () => {
         const descText = isTaiman ? RULE_DESCS.taiman : isGrudge ? RULE_DESCS.grudge : RULE_DESCS.normal;
         const labelText = isTaiman ? "タイマンモード" : isGrudge ? "遺恨ルール" : "通常ルール";
         if (ruleDisplayLabel) ruleDisplayLabel.textContent = labelText;
-        if (ruleSelectorDesc) {
-            ruleSelectorDesc.textContent = descText;
-            ruleSelectorDesc.style.display = hostDescVisible ? "" : "none";
-        }
-        if (ruleDisplayDesc) ruleDisplayDesc.textContent = descText;
+        if (ruleSelectorDesc) ruleSelectorDesc.textContent = descText;
         if (ruleClassicBtn) ruleClassicBtn.classList.toggle("rule-select-btn-active", !isGrudge && !isTaiman);
         if (grudgeRuleBtn) grudgeRuleBtn.classList.toggle("rule-select-btn-active", isGrudge);
         if (taimanModeBtn) taimanModeBtn.classList.toggle("rule-select-btn-active", isTaiman);

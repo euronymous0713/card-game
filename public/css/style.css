@@ -2381,22 +2381,11 @@ body.battle-active .mobile-trap-waiting-notice.show {
 
 .lobby-rule-area {
     width: 100%;
-    min-height: 230px;
+    min-height: 160px;
     display: flex;
     flex-direction: column;
     align-items: center;
-}
-
-.rule-desc-row {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    width: 100%;
-}
-
-.rule-desc-row .rule-selector-desc {
-    flex: 1;
-    margin-top: 0;
+    gap: 0;
 }
 
 .rule-display-row {
@@ -2407,23 +2396,72 @@ body.battle-active .mobile-trap-waiting-notice.show {
 }
 
 .rule-desc-toggle-btn {
-    flex-shrink: 0;
     background: rgba(255, 255, 255, 0.08);
     border: 1px solid rgba(255, 255, 255, 0.18);
-    border-radius: 50%;
+    border-radius: 20px;
     color: rgba(255, 255, 255, 0.6);
-    width: 26px;
-    height: 26px;
-    font-size: 0.8em;
+    font-size: 0.78em;
     cursor: pointer;
     transition: background 0.15s, color 0.15s;
-    line-height: 1;
-    padding: 0;
+    padding: 4px 10px;
+    margin-top: 10px;
 }
 
 .rule-desc-toggle-btn:hover {
     background: rgba(255, 255, 255, 0.15);
     color: #fff;
+}
+
+.rule-desc-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    z-index: 5000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+
+.rule-desc-modal {
+    background: #1a1a2e;
+    border: 1px solid #3a3a6e;
+    border-radius: 14px;
+    width: min(440px, 92vw);
+    padding: 20px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.rule-desc-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.rule-desc-modal-header strong {
+    font-size: 1.05em;
+    color: #c8caff;
+}
+
+.rule-desc-modal-close {
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 1.1em;
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.rule-desc-modal-close:hover { color: #fff; }
+
+.rule-desc-modal-body {
+    font-size: 0.92em;
+    color: rgba(255, 255, 255, 0.75);
+    line-height: 1.7;
+    margin: 0;
 }
 
 .rule-selector-label {
