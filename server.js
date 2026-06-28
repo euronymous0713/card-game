@@ -128,6 +128,15 @@ function generateTaimanRarityPool() {
     ];
 }
 
+function generateTaimanKindPool() {
+    const cKinds    = shuffleArray(["attack","attack","attack","support","support","hate","special","trap"]);
+    const ucKinds   = shuffleArray(["attack","attack","support","special","trap"]);
+    const rKinds    = shuffleArray(["attack","attack","special","trap"]);
+    const srKinds   = shuffleArray(["attack","trap"]);
+    const urKinds   = ["special"];
+    return [...cKinds, ...ucKinds, ...rKinds, ...srKinds, ...urKinds];
+}
+
 function generateTaimanDraftOptions() {
     return [
         [generateCardInstance(), generateCardInstance()].filter(Boolean),
@@ -135,15 +144,16 @@ function generateTaimanDraftOptions() {
     ];
 }
 
-function generateTaimanDraftOptionsFromPool(rarityPool, round) {
+function generateTaimanDraftOptionsFromPool(rarityPool, kindPool, round) {
     const setA = [];
     const setB = [];
     for (let i = 0; i < 2; i++) {
         const rarity = rarityPool[round * 2 + i];
-        const candidates = getCardsByRarity(rarity);
-        const pool = shuffleArray([...(candidates.length > 0 ? candidates : CARD_MASTER)]);
-        const baseA = normalizeCard(pool[0]);
-        const baseB = normalizeCard(pool[1] ?? pool[0]);
+        const kind   = kindPool[round * 2 + i];
+        const byKind = CARD_MASTER.filter(c => normalizeRarity(c.rarity) === rarity && c.kind === kind);
+        const pool   = shuffleArray([...(byKind.length > 0 ? byKind : getCardsByRarity(rarity))]);
+        const baseA  = normalizeCard(pool[0]);
+        const baseB  = normalizeCard(pool[1] ?? pool[0]);
         setA.push({ ...baseA, instanceId: `${baseA.id}-${Date.now()}-${Math.random()}` });
         setB.push({ ...baseB, instanceId: `${baseB.id}-${Date.now()}-${Math.random()}` });
     }
@@ -1347,12 +1357,14 @@ function startDraft(roomId) {
     if (!room) return;
     const [f1id, f2id] = room.taimanFighters;
     const rarityPool = generateTaimanRarityPool();
+    const kindPool = generateTaimanKindPool();
     room.draft = {
         round: 0,
         fighters: [f1id, f2id],
         waitingFor: f1id,
         rarityPool,
-        options: generateTaimanDraftOptionsFromPool(rarityPool, 0),
+        kindPool,
+        options: generateTaimanDraftOptionsFromPool(rarityPool, kindPool, 0),
         picks: { [f1id]: [], [f2id]: [] }
     };
     emitDraftUpdate(roomId);
@@ -1493,7 +1505,7 @@ function doBotDraftPick(roomId) {
     }
 
     draft.waitingFor = draft.fighters[draft.round % 2];
-    draft.options = generateTaimanDraftOptionsFromPool(draft.rarityPool, draft.round);
+    draft.options = generateTaimanDraftOptionsFromPool(draft.rarityPool, draft.kindPool, draft.round);
     emitDraftUpdate(roomId);
 }
 
@@ -2366,7 +2378,7 @@ io.on("connection", socket => {
         }
 
         draft.waitingFor = draft.fighters[draft.round % 2];
-        draft.options = generateTaimanDraftOptionsFromPool(draft.rarityPool, draft.round);
+        draft.options = generateTaimanDraftOptionsFromPool(draft.rarityPool, draft.kindPool, draft.round);
         emitDraftUpdate(roomId);
     });
 
