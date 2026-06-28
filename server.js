@@ -128,13 +128,23 @@ function generateTaimanRarityPool() {
     ];
 }
 
-function generateTaimanKindPool() {
-    const cKinds    = shuffleArray(["attack","attack","attack","support","support","hate","special","trap"]);
-    const ucKinds   = shuffleArray(["attack","attack","support","special","trap"]);
-    const rKinds    = shuffleArray(["attack","attack","special","trap"]);
-    const srKinds   = shuffleArray(["attack","trap"]);
-    const urKinds   = ["special"];
-    return [...cKinds, ...ucKinds, ...rKinds, ...srKinds, ...urKinds];
+function generateTaimanKindPool(rarityPool) {
+    const limits  = { attack: 8, support: 4, hate: 2, special: 5, trap: 4 };
+    const counts  = { attack: 0, support: 0, hate: 0, special: 0, trap: 0 };
+    const allKinds = ["attack", "support", "hate", "special", "trap"];
+
+    return rarityPool.map(rarity => {
+        const available = allKinds.filter(kind =>
+            counts[kind] < limits[kind] &&
+            CARD_MASTER.some(c => normalizeRarity(c.rarity) === rarity && c.kind === kind)
+        );
+        const pool = available.length > 0
+            ? available
+            : allKinds.filter(kind => CARD_MASTER.some(c => normalizeRarity(c.rarity) === rarity && c.kind === kind));
+        const picked = pool[Math.floor(Math.random() * pool.length)];
+        counts[picked]++;
+        return picked;
+    });
 }
 
 function generateTaimanDraftOptions() {
@@ -1357,7 +1367,7 @@ function startDraft(roomId) {
     if (!room) return;
     const [f1id, f2id] = room.taimanFighters;
     const rarityPool = generateTaimanRarityPool();
-    const kindPool = generateTaimanKindPool();
+    const kindPool = generateTaimanKindPool(rarityPool);
     room.draft = {
         round: 0,
         fighters: [f1id, f2id],
