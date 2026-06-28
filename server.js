@@ -119,14 +119,13 @@ function generateTaimanRefillDeck() {
 }
 
 function generateTaimanRarityPool() {
-    const pool = [
+    return [
         ...Array(8).fill("C"),
         ...Array(5).fill("UC"),
         ...Array(4).fill("R"),
         ...Array(2).fill("SR"),
         ...Array(1).fill("UR"),
     ];
-    return shuffleArray(pool);
 }
 
 function generateTaimanDraftOptions() {
