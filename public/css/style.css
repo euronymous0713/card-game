@@ -2856,6 +2856,23 @@ body.battle-active .mobile-trap-waiting-notice.show {
     .draft-picks-list { max-height: 30vh; }
 }
 
+/* ===== 使用履歴カードリンク ===== */
+.history-card-link {
+    background: none;
+    border: none;
+    border-bottom: 1px dashed rgba(160, 180, 255, 0.5);
+    color: #a0b4ff;
+    font: inherit;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 0;
+    transition: color 0.15s, border-color 0.15s;
+}
+.history-card-link:hover {
+    color: #c8d8ff;
+    border-bottom-color: #c8d8ff;
+}
+
 /* ===== デッキ補充通知 ===== */
 .deck-refill-notification {
     position: fixed;

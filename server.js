@@ -40,6 +40,16 @@ function sendDiscordWebhook(payload) {
     req.end();
 }
 
+app.get("/api/cards", (req, res) => {
+    res.json(CARD_MASTER.map(c => ({
+        name: c.name,
+        rarity: c.rarity,
+        type: c.type,
+        effect: c.effect,
+        hateText: c.hateText
+    })));
+});
+
 app.post("/api/bug-report", (req, res) => {
     const { name, summary, detail, roomId } = req.body || {};
     if (!summary || !summary.trim()) {

@@ -1,6 +1,11 @@
 const socket = io();
 window.socket = socket;
 
+let cardMasterMap = {};
+fetch("/api/cards").then(r => r.json()).then(cards => {
+    cards.forEach(c => { cardMasterMap[c.name] = c; });
+}).catch(() => {});
+
 window.onload = () => {
     const titleScreen = document.getElementById("titleScreen");
     const lobbyScreen = document.getElementById("lobbyScreen");
@@ -1809,9 +1814,10 @@ window.onload = () => {
             historyModalBody.innerHTML = `<div class="history-modal-empty">まだ使用されたカードはありません。</div>`;
         } else {
             [...latestGame.playedCards].reverse().forEach(card => {
+                const logText = card.log || `${card.playerName} → ${card.targetName}`;
                 historyModalBody.innerHTML += `
                     <div class="played-card">
-                        <strong>${card.log || `${card.playerName} → ${card.targetName}`}</strong><br>
+                        <strong>${logWithCardLink(logText, card.cardName)}</strong><br>
                         ${card.hateText || ""}
                         ${playedCardExtraText(card)}
                     </div>
@@ -1844,7 +1850,16 @@ window.onload = () => {
         };
     }
 
+    function handleHistoryCardLinkClick(e) {
+        const btn = e.target.closest(".history-card-link");
+        if (!btn) return;
+        const card = cardMasterMap[btn.dataset.cardName];
+        if (!card) return;
+        cardDetail.innerHTML = cardDetailHtml(card);
+    }
 
+    if (playedCardList) playedCardList.addEventListener("click", handleHistoryCardLinkClick);
+    if (historyModalBody) historyModalBody.addEventListener("click", handleHistoryCardLinkClick);
 
     function updateMobileActionPanel() {
         if (!mobileActionPanel) return;
@@ -2821,15 +2836,26 @@ window.onload = () => {
         return lines.map(line => `<div class="played-card-extra">${line}</div>`).join("");
     }
 
+    function logWithCardLink(log, cardName) {
+        if (!cardName || !cardMasterMap[cardName]) return log;
+        const idx = log.indexOf(cardName);
+        if (idx === -1) return log;
+        const escaped = cardName.replace(/"/g, "&quot;");
+        return log.slice(0, idx)
+            + `<button class="history-card-link" data-card-name="${escaped}">${cardName}</button>`
+            + log.slice(idx + cardName.length);
+    }
+
     function renderPlayedCards() {
         if (!latestGame) return;
 
         playedCardList.innerHTML = "";
 
         [...latestGame.playedCards].reverse().forEach(card => {
+            const logText = card.log || `${card.playerName} → ${card.targetName}`;
             playedCardList.innerHTML += `
                 <div class="played-card">
-                    <strong>${card.log || `${card.playerName} → ${card.targetName}`}</strong><br>
+                    <strong>${logWithCardLink(logText, card.cardName)}</strong><br>
                     ${card.hateText || ""}
                     ${playedCardExtraText(card)}
                 </div>
