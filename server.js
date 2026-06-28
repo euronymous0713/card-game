@@ -2409,12 +2409,12 @@ io.on("connection", socket => {
                 .filter(Boolean);
 
             if (fighters.length !== 2) {
-                socket.emit("errorMessage", "タイマンモード：戦う2人を選択してください");
+                socket.emit("errorMessage", "タイマンルール：戦う2人を選択してください");
                 return;
             }
 
             if (!fighters.every(p => p.ready)) {
-                socket.emit("errorMessage", "タイマンモード：選手が準備完了していません");
+                socket.emit("errorMessage", "タイマンルール：選手が準備完了していません");
                 return;
             }
 

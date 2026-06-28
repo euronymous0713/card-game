@@ -2281,7 +2281,7 @@ window.onload = () => {
         const isTaiman = Boolean(taimanMode);
         const isGrudge = !isTaiman && Boolean(grudgeRule);
         currentRuleDesc = isTaiman ? RULE_DESCS.taiman : isGrudge ? RULE_DESCS.grudge : RULE_DESCS.normal;
-        currentRuleLabel = isTaiman ? "タイマンモード" : isGrudge ? "遺恨ルール" : "通常ルール";
+        currentRuleLabel = isTaiman ? "タイマンルール" : isGrudge ? "遺恨ルール" : "通常ルール";
         if (ruleDisplayLabel) ruleDisplayLabel.textContent = currentRuleLabel;
         if (fighterSelectOpenBtn) fighterSelectOpenBtn.style.display = isTaiman ? "inline-block" : "none";
         if (ruleClassicBtn) ruleClassicBtn.classList.toggle("rule-select-btn-active", !isGrudge && !isTaiman);

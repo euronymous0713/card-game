@@ -2742,7 +2742,7 @@ body.battle-active .mobile-trap-waiting-notice.show {
 .bug-report-submit:disabled { background: #555; cursor: default; }
 
 /* =========================================================
-   タイマンモード
+   タイマンルール
    ========================================================= */
 
 #taimanModeBtn.rule-select-btn-active {
