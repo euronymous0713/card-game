@@ -221,6 +221,7 @@ function createGameState(players, drawRule = "classic", grudgeHate = {}, grudgeR
             followers: 10000,
             hate: grudgeRule ? clamp(Number((grudgeHate || {})[player.id] || 0), 0, 3) : 0,
             host: player.host,
+            isBot: Boolean(player.isBot),
             disconnected: Boolean(player.disconnected),
             hand: [],
             fieldCards: [],
@@ -260,6 +261,7 @@ function createTaimanGameState(players) {
             followers: 10000,
             hate: 0,
             host: player.host,
+            isBot: Boolean(player.isBot),
             disconnected: Boolean(player.disconnected),
             hand: [],
             fieldCards: [],
@@ -1344,6 +1346,11 @@ function emitDraftUpdate(roomId) {
         options: draft.options,
         picks: draft.picks
     });
+
+    const botWaiting = room.players.find(p => p.id === draft.waitingFor && p.isBot);
+    if (botWaiting) {
+        setTimeout(() => doBotDraftPick(roomId), 600);
+    }
 }
 
 function startTaimanGame(roomId) {
@@ -1391,6 +1398,8 @@ function emitGameUpdate(roomId) {
     if (room.game.deckRefillEvents && room.game.deckRefillEvents.length > 0) {
         room.game.deckRefillEvents = [];
     }
+
+    scheduleBotTick(roomId);
 }
 
 function finishGameIfNeeded(roomId) {
@@ -1411,6 +1420,54 @@ function finishGameIfNeeded(roomId) {
 
         io.to(roomId).emit("gameOver", room.game.winner);
     }
+}
+
+function scheduleBotTick(roomId) {
+    const room = rooms[roomId];
+    if (!room || !room.game || room.game.gameOver || room.game.waitingTrapChoice) return;
+    const current = getCurrentPlayer(room.game);
+    if (!current || !current.isBot) return;
+    if (room._botTurnTimer) return;
+    room._botTurnTimer = setTimeout(() => {
+        delete room._botTurnTimer;
+        doBotTurn(roomId);
+    }, 800);
+}
+
+function doBotTurn(roomId) {
+    const room = rooms[roomId];
+    if (!room || !room.game) return;
+    const game = room.game;
+    if (game.gameOver || game.waitingTrapChoice) return;
+    const current = getCurrentPlayer(game);
+    if (!current || !current.isBot) return;
+    moveToNextAliveTurn(game);
+    finishGameIfNeeded(roomId);
+}
+
+function doBotDraftPick(roomId) {
+    const room = rooms[roomId];
+    if (!room || !room.draft) return;
+    const draft = room.draft;
+    const botId = draft.waitingFor;
+    const botPlayer = room.players.find(p => p.id === botId && p.isBot);
+    if (!botPlayer) return;
+
+    const pickerIndex = draft.fighters.indexOf(botId);
+    const otherId = draft.fighters[1 - pickerIndex];
+
+    draft.picks[botId].push(...draft.options[0]);
+    draft.picks[otherId].push(...draft.options[1]);
+    draft.round += 1;
+
+    if (draft.round >= 10) {
+        startTaimanGame(roomId);
+        return;
+    }
+
+    draft.waitingFor = draft.fighters[draft.round % 2];
+    draft.options = generateTaimanDraftOptions();
+    emitDraftUpdate(roomId);
 }
 
 function requestTrapChoice({
@@ -2972,6 +3029,25 @@ io.on("connection", socket => {
 
         moveToNextAliveTurn(game);
         finishGameIfNeeded(roomId);
+    });
+
+    socket.on("devAddBot", () => {
+        if (!DEV_MODE) return;
+        const result = findRoomBySocketId(socket.id);
+        if (!result || result.room.game || result.room.draft) return;
+
+        const botId = `bot-${Date.now()}`;
+        result.room.players.push({
+            id: botId,
+            name: "🤖 BOT",
+            ready: true,
+            host: false,
+            isBot: true,
+            disconnected: false,
+            disconnectedAt: null
+        });
+
+        emitRoomUpdate(result.roomId);
     });
 
     socket.on("devSetFollowers", ({ playerId, followers }) => {

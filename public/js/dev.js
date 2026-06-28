@@ -19,6 +19,11 @@
         </div>
 
         <div id="devBody">
+            <div class="dev-section-label">ロビー</div>
+            <button id="devAddBotButton">🤖 ボット追加</button>
+
+            <div class="dev-divider"></div>
+
             <label>対象プレイヤー</label>
             <select id="devPlayerSelect"></select>
 
@@ -130,6 +135,19 @@
             line-height: 1.5;
             color: rgba(255,255,255,0.45);
         }
+
+        .dev-section-label {
+            font-size: 11px;
+            font-weight: bold;
+            color: #ffb000;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .dev-divider {
+            border-top: 1px solid rgba(255,255,255,0.15);
+            margin: 2px 0;
+        }
     `;
 
     document.head.appendChild(style);
@@ -142,6 +160,7 @@
     const devHateInput = document.getElementById("devHateInput");
     const devCardSelect = document.getElementById("devCardSelect");
 
+    const devAddBotButton = document.getElementById("devAddBotButton");
     const devSetFollowersButton = document.getElementById("devSetFollowersButton");
     const devSetHateButton = document.getElementById("devSetHateButton");
     const devAddCardButton = document.getElementById("devAddCardButton");
@@ -220,6 +239,10 @@
 
     devPlayerSelect.onchange = () => {
         renderDevPanel();
+    };
+
+    devAddBotButton.onclick = () => {
+        window.socket.emit("devAddBot");
     };
 
     devSetFollowersButton.onclick = () => {
