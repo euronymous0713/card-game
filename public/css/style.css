@@ -2856,3 +2856,159 @@ body.battle-active .mobile-trap-waiting-notice.show {
     .draft-picks-list { max-height: 30vh; }
 }
 
+/* ===== デッキ補充通知 ===== */
+.deck-refill-notification {
+    position: fixed;
+    top: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #6a3fd4, #9b5de5);
+    color: #fff;
+    padding: 10px 24px;
+    border-radius: 24px;
+    font-size: 0.95em;
+    font-weight: bold;
+    box-shadow: 0 4px 18px rgba(106, 63, 212, 0.6);
+    z-index: 3000;
+    pointer-events: none;
+    transition: opacity 0.4s;
+}
+
+/* ===== デッキ確認ボタン ===== */
+.deck-viewer-btn {
+    background: linear-gradient(135deg, #2c2f6b, #4a4e9e);
+    color: #c8caff;
+    border: 1px solid #6a6ec8;
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-size: 0.85em;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+.deck-viewer-btn:hover {
+    background: linear-gradient(135deg, #4a4e9e, #6a6ec8);
+    color: #fff;
+}
+
+/* ===== デッキ確認モーダル ===== */
+.deck-viewer-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    z-index: 2500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+}
+.deck-viewer-modal {
+    background: #1a1a2e;
+    border: 1px solid #3a3a6e;
+    border-radius: 12px;
+    width: min(900px, 96vw);
+    max-height: 88vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+.deck-viewer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 18px;
+    border-bottom: 1px solid #3a3a6e;
+    flex-shrink: 0;
+}
+.deck-viewer-header h3 {
+    margin: 0;
+    font-size: 1.1em;
+    color: #c8caff;
+}
+.deck-viewer-close {
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 1.2em;
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: color 0.2s;
+}
+.deck-viewer-close:hover { color: #fff; }
+.deck-viewer-body {
+    display: flex;
+    gap: 12px;
+    padding: 14px;
+    overflow-y: auto;
+    flex: 1;
+}
+.deck-viewer-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 0;
+}
+.deck-viewer-col-title {
+    font-size: 1em;
+    font-weight: bold;
+    color: #c8caff;
+    padding: 4px 8px;
+    background: rgba(106, 63, 212, 0.2);
+    border-radius: 6px;
+    text-align: center;
+}
+.deck-viewer-section {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 8px 10px;
+}
+.deck-viewer-section-label {
+    font-size: 0.75em;
+    color: #888;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.deck-viewer-next-card {
+    background: rgba(255, 200, 50, 0.08);
+    border-color: rgba(255, 200, 50, 0.25);
+}
+.deck-viewer-card-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+.dv-card-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 2px 7px;
+    border-radius: 12px;
+    font-size: 0.72em;
+    border: 1px solid transparent;
+    white-space: nowrap;
+}
+.dv-card-chip.rarity-c   { background: rgba(150,150,150,0.15); border-color: #555; color: #bbb; }
+.dv-card-chip.rarity-uc  { background: rgba(80,200,120,0.12);  border-color: #3a7a50; color: #6ddc8e; }
+.dv-card-chip.rarity-r   { background: rgba(60,130,255,0.12);  border-color: #2a5090; color: #7ab0ff; }
+.dv-card-chip.rarity-sr  { background: rgba(220,150,20,0.14);  border-color: #7a5510; color: #f0c040; }
+.dv-card-chip.rarity-ur  { background: rgba(200,60,200,0.14);  border-color: #702070; color: #e090e0; }
+.dv-card-empty {
+    color: #555;
+    font-size: 0.8em;
+    font-style: italic;
+    padding: 4px 0;
+}
+.deck-viewer-count {
+    font-size: 0.85em;
+    color: #aaa;
+}
+
+@media (max-width: 600px) {
+    .deck-viewer-body { flex-direction: column; }
+}
+

@@ -245,9 +245,22 @@
 
       <div class="battle-buttons">
         <button id="endTurnButton">ターン終了</button>
+        <button id="deckViewerBtn" type="button" class="deck-viewer-btn" style="display:none;">デッキ確認</button>
       </div>
 
       <div class="hand-area" id="handArea"></div>
+
+      <div class="deck-refill-notification" id="deckRefillNotification" style="display:none;"></div>
+
+      <div class="deck-viewer-overlay" id="deckViewerOverlay" style="display:none;">
+        <div class="deck-viewer-modal">
+          <div class="deck-viewer-header">
+            <h3>デッキ確認</h3>
+            <button id="deckViewerCloseBtn" type="button" class="deck-viewer-close">✕</button>
+          </div>
+          <div class="deck-viewer-body" id="deckViewerBody"></div>
+        </div>
+      </div>
 
       <div class="game-over-overlay" id="gameOverOverlay" style="display:none;">
         <div class="game-over-box">

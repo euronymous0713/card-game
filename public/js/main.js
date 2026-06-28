@@ -2544,6 +2544,13 @@ window.onload = () => {
 
         previousGame = cloneGame(latestGame);
 
+        const dvBtn = document.getElementById("deckViewerBtn");
+        if (dvBtn) dvBtn.style.display = game.taimanMode ? "inline-block" : "none";
+
+        if (Array.isArray(game.deckRefillEvents) && game.deckRefillEvents.length > 0) {
+            game.deckRefillEvents.forEach(ev => showDeckRefillNotification(ev.playerName));
+        }
+
         console.log("[updateGame] gameOver:", game.gameOver, "winner:", game.winner?.name);
         if (game.gameOver && game.winner) {
             showGameOver(game.winner);
@@ -3272,6 +3279,7 @@ window.onload = () => {
         if (draftScreen) draftScreen.style.display = "none";
         titleScreen.style.display = "flex";
         gameOverOverlay.style.display = "none";
+        if (deckViewerOverlay) deckViewerOverlay.style.display = "none";
         isTaimanMode = false;
         taimanFighters = [];
 
@@ -3330,6 +3338,110 @@ window.onload = () => {
 
     socket.on("errorMessage", message => {
         alert(message);
+    });
+
+    // ===== デッキ確認 (タイマンモード専用) =====
+    const deckViewerBtn = document.getElementById("deckViewerBtn");
+    const deckViewerOverlay = document.getElementById("deckViewerOverlay");
+    const deckViewerCloseBtn = document.getElementById("deckViewerCloseBtn");
+    const deckViewerBody = document.getElementById("deckViewerBody");
+    const deckRefillNotification = document.getElementById("deckRefillNotification");
+
+    let deckRefillNotifTimer = null;
+
+    function showDeckRefillNotification(playerName) {
+        if (!deckRefillNotification) return;
+        deckRefillNotification.textContent = `${playerName} のデッキが補充されました！`;
+        deckRefillNotification.style.display = "block";
+        deckRefillNotification.style.opacity = "1";
+        clearTimeout(deckRefillNotifTimer);
+        deckRefillNotifTimer = setTimeout(() => {
+            deckRefillNotification.style.opacity = "0";
+            setTimeout(() => { deckRefillNotification.style.display = "none"; }, 400);
+        }, 2800);
+    }
+
+    function dvCardChip(card) {
+        if (!card) return "";
+        const r = (card.rarity || "C").toLowerCase();
+        const name = card.name || "不明";
+        return `<span class="dv-card-chip rarity-${r}" title="${name}">${name}</span>`;
+    }
+
+    function renderDeckViewerCol(player, isMe) {
+        const deck = Array.isArray(player.deck) ? player.deck : [];
+        const used = Array.isArray(player.usedCards) ? player.usedCards : [];
+        const traps = Array.isArray(player.fieldCards) ? player.fieldCards.filter(c => !c.hidden) : [];
+        const hand = Array.isArray(player.hand) ? player.hand : [];
+
+        const nextCard = deck[0];
+        const nextHtml = nextCard
+            ? dvCardChip(nextCard)
+            : `<span class="dv-card-empty">なし</span>`;
+
+        const deckHtml = deck.length === 0
+            ? `<span class="dv-card-empty">デッキ切れ</span>`
+            : deck.map(dvCardChip).join("");
+
+        const usedHtml = used.length === 0
+            ? `<span class="dv-card-empty">なし</span>`
+            : used.map(dvCardChip).join("");
+
+        const trapsHtml = traps.length === 0
+            ? `<span class="dv-card-empty">なし</span>`
+            : traps.map(dvCardChip).join("");
+
+        const handSection = isMe
+            ? `<div class="deck-viewer-section">
+                <div class="deck-viewer-section-label">手札 (${hand.length}枚)</div>
+                <div class="deck-viewer-card-list">${hand.length === 0 ? '<span class="dv-card-empty">なし</span>' : hand.map(dvCardChip).join("")}</div>
+               </div>`
+            : "";
+
+        return `
+          <div class="deck-viewer-col">
+            <div class="deck-viewer-col-title">${player.name}${isMe ? "（自分）" : ""}</div>
+            <div class="deck-viewer-section deck-viewer-next-card">
+              <div class="deck-viewer-section-label">次のドロー</div>
+              <div>${nextHtml}</div>
+            </div>
+            <div class="deck-viewer-section">
+              <div class="deck-viewer-section-label">残りデッキ <span class="deck-viewer-count">(${deck.length}枚)</span></div>
+              <div class="deck-viewer-card-list">${deckHtml}</div>
+            </div>
+            ${handSection}
+            <div class="deck-viewer-section">
+              <div class="deck-viewer-section-label">伏せカード (場)</div>
+              <div class="deck-viewer-card-list">${trapsHtml}</div>
+            </div>
+            <div class="deck-viewer-section">
+              <div class="deck-viewer-section-label">使用済み <span class="deck-viewer-count">(${used.length}枚)</span></div>
+              <div class="deck-viewer-card-list">${usedHtml}</div>
+            </div>
+          </div>`;
+    }
+
+    function openDeckViewer() {
+        if (!latestGame || !latestGame.taimanMode) return;
+        const players = latestGame.turnOrder;
+        const myId = socket.id;
+        const me = players.find(p => p.id === myId);
+        const opponents = players.filter(p => p.id !== myId);
+
+        let html = "";
+        if (me) html += renderDeckViewerCol(me, true);
+        opponents.forEach(op => { html += renderDeckViewerCol(op, false); });
+
+        deckViewerBody.innerHTML = html;
+        deckViewerOverlay.style.display = "flex";
+    }
+
+    if (deckViewerBtn) deckViewerBtn.addEventListener("click", openDeckViewer);
+    if (deckViewerCloseBtn) deckViewerCloseBtn.addEventListener("click", () => {
+        deckViewerOverlay.style.display = "none";
+    });
+    if (deckViewerOverlay) deckViewerOverlay.addEventListener("click", e => {
+        if (e.target === deckViewerOverlay) deckViewerOverlay.style.display = "none";
     });
 
     window.addEventListener("resize", () => {

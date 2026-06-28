@@ -157,10 +157,14 @@ function generateCardInstance(cardId = null) {
     };
 }
 
-function drawCards(player, maxDraw = 4) {
+function drawCards(player, maxDraw = 4, game = null) {
     if (Array.isArray(player.deck)) {
         if (player.deck.length === 0) {
             player.deck = generateTaimanRefillDeck();
+            if (game && game.taimanMode) {
+                if (!Array.isArray(game.deckRefillEvents)) game.deckRefillEvents = [];
+                game.deckRefillEvents.push({ playerId: player.id, playerName: player.name });
+            }
         }
         let drawn = 0;
         while (player.hand.length < 4 && drawn < maxDraw && player.deck.length > 0) {
@@ -255,7 +259,8 @@ function createTaimanGameState(players) {
             statusEffects: [],
             cardsPlayedThisTurn: 0,
             totalDamageTaken: 0,
-            deck: shuffleArray([...(player.deck || [])])
+            deck: shuffleArray([...(player.deck || [])]),
+            usedCards: []
         };
         drawCards(gamePlayer);
         return gamePlayer;
@@ -273,7 +278,8 @@ function createTaimanGameState(players) {
         waitingTrapPlayerName: "",
         drawRule: "classic",
         grudgeRule: false,
-        taimanMode: true
+        taimanMode: true,
+        deckRefillEvents: []
     };
 }
 
@@ -514,7 +520,7 @@ function moveToNextAliveTurn(game) {
     ) {
         currentPlayer.extraTurns -= 1;
         const extraDrawLimit = hasStatusEffect(currentPlayer, "digitalDetox") ? 1 : 4;
-        drawCards(currentPlayer, extraDrawLimit);
+        drawCards(currentPlayer, extraDrawLimit, game);
 
         addLog(game, {
             actionType: "extraTurn",
@@ -582,7 +588,7 @@ function moveToNextAliveTurn(game) {
             nextPlayer.cardsPlayedThisTurn = 0;
             drawCardsHandManage(nextPlayer, drawCount);
         } else {
-            drawCards(nextPlayer, drawLimit);
+            drawCards(nextPlayer, drawLimit, game);
         }
         return;
     } while (guard < game.turnOrder.length * 3);
@@ -1191,6 +1197,8 @@ function removeTrapByFieldId(player, fieldId) {
     const trap = player.fieldCards[index];
     player.fieldCards.splice(index, 1);
 
+    if (Array.isArray(player.usedCards)) player.usedCards.push(trap);
+
     return trap;
 }
 
@@ -1369,6 +1377,10 @@ function emitGameUpdate(roomId) {
             clientSocket.emit("devGameState", view);
         }
     });
+
+    if (room.game.deckRefillEvents && room.game.deckRefillEvents.length > 0) {
+        room.game.deckRefillEvents = [];
+    }
 }
 
 function finishGameIfNeeded(roomId) {
@@ -2526,6 +2538,7 @@ io.on("connection", socket => {
         }
 
         caster.cardsPlayedThisTurn = (caster.cardsPlayedThisTurn || 0) + 1;
+        if (Array.isArray(caster.usedCards)) caster.usedCards.push(usedCard);
 
         const targetLabel = usedCard.targetType === "allEnemies"
             ? "敵全体"
@@ -2895,6 +2908,7 @@ io.on("connection", socket => {
         }
 
         player.cardsPlayedThisTurn = (player.cardsPlayedThisTurn || 0) + 1;
+        if (Array.isArray(player.usedCards) && discardedCard) player.usedCards.push(discardedCard);
 
         addLog(game, {
             actionType: "discard",
