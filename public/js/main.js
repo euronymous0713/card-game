@@ -122,6 +122,7 @@ window.onload = () => {
     let selectedMobileStatusKey = "";
     let endTurnRequestPending = false;
     let turnTimerRAF = null;
+    let turnTimerClientRef = null; // { serverStartedAt, clientReceivedAt, duration }
     let titleCardList = [];
     let currentCardListRarityFilter = "all";
     let currentCardListKindFilter = "all";
@@ -2540,13 +2541,14 @@ window.onload = () => {
     });
 
     function tickTurnTimer() {
-        if (!latestGame || !latestGame.turnStartedAt || !latestGame.turnDuration) {
+        if (!turnTimerClientRef) {
             turnTimerRAF = null;
             if (turnTimerWrap) turnTimerWrap.style.display = "none";
             return;
         }
-        const remaining = latestGame.turnStartedAt + latestGame.turnDuration - Date.now();
-        const pct = Math.max(0, Math.min(100, remaining / latestGame.turnDuration * 100));
+        const elapsed = Date.now() - turnTimerClientRef.clientReceivedAt;
+        const remaining = turnTimerClientRef.duration - elapsed;
+        const pct = Math.max(0, Math.min(100, remaining / turnTimerClientRef.duration * 100));
         const sec = Math.max(0, Math.ceil(remaining / 1000));
         const isWarning = sec <= 30 && sec > 10;
         const isCritical = sec <= 10;
@@ -2571,6 +2573,7 @@ window.onload = () => {
 
     function stopTurnTimerUI() {
         if (turnTimerRAF) { cancelAnimationFrame(turnTimerRAF); turnTimerRAF = null; }
+        turnTimerClientRef = null;
         if (turnTimerWrap) turnTimerWrap.style.display = "none";
     }
 
@@ -2637,8 +2640,16 @@ window.onload = () => {
         }
 
         if (game.turnStartedAt && game.turnDuration) {
+            if (!turnTimerClientRef || turnTimerClientRef.serverStartedAt !== game.turnStartedAt) {
+                turnTimerClientRef = {
+                    serverStartedAt: game.turnStartedAt,
+                    clientReceivedAt: Date.now(),
+                    duration: game.turnDuration
+                };
+            }
             startTurnTimerUI();
         } else {
+            turnTimerClientRef = null;
             stopTurnTimerUI();
         }
 
