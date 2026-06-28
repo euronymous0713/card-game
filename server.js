@@ -1485,7 +1485,7 @@ function setupTurnTimerIfNeeded(roomId) {
         clearTurnTimer(r);
         moveToNextAliveTurn(r.game);
         finishGameIfNeeded(roomId);
-    }, TURN_DURATION_MS);
+    }, TURN_DURATION_MS + 2000);
 }
 
 function finishGameIfNeeded(roomId) {

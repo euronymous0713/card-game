@@ -46,6 +46,7 @@ window.onload = () => {
     const endTurnButton = document.getElementById("endTurnButton");
     const turnTimerWrap = document.getElementById("turnTimerWrap");
     const turnTimerBar = document.getElementById("turnTimerBar");
+    const turnTimerSeconds = document.getElementById("turnTimerSeconds");
     const myFieldCards = document.getElementById("myFieldCards");
 
     const gameOverOverlay = document.getElementById("gameOverOverlay");
@@ -2546,12 +2547,19 @@ window.onload = () => {
         }
         const remaining = latestGame.turnStartedAt + latestGame.turnDuration - Date.now();
         const pct = Math.max(0, Math.min(100, remaining / latestGame.turnDuration * 100));
+        const sec = Math.max(0, Math.ceil(remaining / 1000));
+        const isWarning = sec <= 30 && sec > 10;
+        const isCritical = sec <= 10;
         if (turnTimerWrap) turnTimerWrap.style.display = "";
         if (turnTimerBar) {
-            turnTimerBar.style.width = pct + "%";
-            const sec = remaining / 1000;
-            turnTimerBar.classList.toggle("timer-warning", sec <= 30 && sec > 10);
-            turnTimerBar.classList.toggle("timer-critical", sec <= 10);
+            turnTimerBar.style.transform = "scaleX(" + (pct / 100) + ")";
+            turnTimerBar.classList.toggle("timer-warning", isWarning);
+            turnTimerBar.classList.toggle("timer-critical", isCritical);
+        }
+        if (turnTimerSeconds) {
+            turnTimerSeconds.textContent = sec + "秒";
+            turnTimerSeconds.classList.toggle("timer-warning", isWarning);
+            turnTimerSeconds.classList.toggle("timer-critical", isCritical);
         }
         turnTimerRAF = requestAnimationFrame(tickTurnTimer);
     }

@@ -702,6 +702,8 @@ button:disabled {
     width: 100%;
     background: #4ecca3;
     border-radius: 2px;
+    transform-origin: left center;
+    will-change: transform;
 }
 
 .turn-timer-bar.timer-warning {
@@ -717,6 +719,22 @@ button:disabled {
 @keyframes timerPulse {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.4; }
+}
+
+.turn-timer-seconds {
+    text-align: center;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.5);
+    margin-top: 3px;
+    letter-spacing: 0.03em;
+}
+
+.turn-timer-seconds.timer-warning {
+    color: #ff9900;
+}
+
+.turn-timer-seconds.timer-critical {
+    color: #ff3c00;
 }
 
 .settings-actions-divider {
