@@ -99,6 +99,22 @@ function getCardsByRarity(rarity) {
     return CARD_MASTER.filter(card => normalizeRarity(card.rarity) === rarity);
 }
 
+function generateTaimanRefillDeck() {
+    const deck = [];
+    for (let i = 0; i < 20; i++) {
+        const card = generateCardInstance();
+        if (card) deck.push(card);
+    }
+    return shuffleArray(deck);
+}
+
+function generateTaimanDraftOptions() {
+    return [
+        [generateCardInstance(), generateCardInstance()].filter(Boolean),
+        [generateCardInstance(), generateCardInstance()].filter(Boolean)
+    ];
+}
+
 function selectRandomCardByRarity() {
     const selectedRarity = selectRarityByWeight();
     const candidates = getCardsByRarity(selectedRarity);
@@ -142,6 +158,17 @@ function generateCardInstance(cardId = null) {
 }
 
 function drawCards(player, maxDraw = 4) {
+    if (Array.isArray(player.deck)) {
+        if (player.deck.length === 0) {
+            player.deck = generateTaimanRefillDeck();
+        }
+        let drawn = 0;
+        while (player.hand.length < 4 && drawn < maxDraw && player.deck.length > 0) {
+            player.hand.push(player.deck.shift());
+            drawn++;
+        }
+        return;
+    }
     let drawn = 0;
     while (player.hand.length < 4 && drawn < maxDraw) {
         const card = generateCardInstance();
@@ -207,6 +234,46 @@ function createGameState(players, drawRule = "classic", grudgeHate = {}, grudgeR
         waitingTrapPlayerName: "",
         drawRule,
         grudgeRule
+    };
+}
+
+function createTaimanGameState(players) {
+    const turnOrder = shuffleArray(players).map(player => {
+        const gamePlayer = {
+            id: player.id,
+            reconnectToken: player.reconnectToken || generateReconnectToken(),
+            name: player.name,
+            followers: 10000,
+            hate: 0,
+            host: player.host,
+            disconnected: Boolean(player.disconnected),
+            hand: [],
+            fieldCards: [],
+            defeated: false,
+            skipTurns: 0,
+            extraTurns: 0,
+            statusEffects: [],
+            cardsPlayedThisTurn: 0,
+            totalDamageTaken: 0,
+            deck: shuffleArray([...(player.deck || [])])
+        };
+        drawCards(gamePlayer);
+        return gamePlayer;
+    });
+
+    return {
+        turnOrder,
+        currentTurnIndex: 0,
+        playedCards: [],
+        phase: "battle",
+        winner: null,
+        gameOver: false,
+        waitingTrapChoice: false,
+        waitingTrapPlayerId: null,
+        waitingTrapPlayerName: "",
+        drawRule: "classic",
+        grudgeRule: false,
+        taimanMode: true
     };
 }
 
@@ -967,7 +1034,9 @@ function emitRoomUpdate(roomId) {
         players: room.players,
         drawRule: room.drawRule || "classic",
         grudgeRule: Boolean(room.grudgeRule),
-        grudgeHate: room.grudgeHate || {}
+        grudgeHate: room.grudgeHate || {},
+        taimanMode: Boolean(room.taimanMode),
+        taimanFighters: room.taimanFighters || []
     });
 }
 
@@ -1226,6 +1295,54 @@ function createGameViewForPlayer(game, viewerId) {
     });
 
     return view;
+}
+
+function startDraft(roomId) {
+    const room = rooms[roomId];
+    if (!room) return;
+    const [f1id, f2id] = room.taimanFighters;
+    room.draft = {
+        round: 0,
+        fighters: [f1id, f2id],
+        waitingFor: f1id,
+        options: generateTaimanDraftOptions(),
+        picks: { [f1id]: [], [f2id]: [] }
+    };
+    emitDraftUpdate(roomId);
+}
+
+function emitDraftUpdate(roomId) {
+    const room = rooms[roomId];
+    if (!room || !room.draft) return;
+    const draft = room.draft;
+    const fighters = draft.fighters.map(fid => {
+        const p = room.players.find(pl => pl.id === fid);
+        return { id: fid, name: p ? p.name : "" };
+    });
+    io.to(roomId).emit("draftUpdate", {
+        round: draft.round,
+        fighters,
+        waitingFor: draft.waitingFor,
+        options: draft.options,
+        picks: draft.picks
+    });
+}
+
+function startTaimanGame(roomId) {
+    const room = rooms[roomId];
+    if (!room || !room.draft) return;
+    const draft = room.draft;
+
+    const gamePlayers = draft.fighters.map(fid => {
+        const p = room.players.find(pl => pl.id === fid);
+        return { ...p, deck: draft.picks[fid] || [] };
+    });
+
+    room.game = createTaimanGameState(gamePlayers);
+    room.draft = null;
+
+    io.to(roomId).emit("gameStarted");
+    emitGameUpdate(roomId);
 }
 
 function emitGameUpdate(roomId) {
@@ -1961,14 +2078,19 @@ io.on("connection", socket => {
         socket.data.reconnectToken = reconnectToken;
 
         socket.emit("reconnectInfo", { roomId, reconnectToken });
+        const phase = room.game ? "battle" : room.draft ? "draft" : "lobby";
         socket.emit("reconnectSuccess", {
             roomId,
             isHost: Boolean(player.host),
             ready: Boolean(player.ready),
-            phase: room.game ? "battle" : "lobby"
+            phase
         });
 
         emitRoomUpdate(roomId);
+
+        if (room.draft) {
+            emitDraftUpdate(roomId);
+        }
 
         if (room.game) {
             emitGameUpdate(roomId);
@@ -1996,7 +2118,10 @@ io.on("connection", socket => {
             game: null,
             reconnectCleanupTimers: {},
             drawRule: "classic",
-            grudgeRule: false
+            grudgeRule: false,
+            taimanMode: false,
+            taimanFighters: [],
+            draft: null
         };
 
         socket.join(roomId);
@@ -2036,13 +2161,19 @@ io.on("connection", socket => {
         socket.data.reconnectToken = reconnectToken;
         socket.emit("reconnectInfo", { roomId, reconnectToken });
 
+        const phase = room.game ? "battle" : room.draft ? "draft" : "lobby";
         if (isSpectator) {
-            socket.emit("spectatorJoinSuccess", { roomId, phase: room.game ? "battle" : "lobby" });
+            socket.emit("spectatorJoinSuccess", { roomId, phase });
         } else {
             socket.emit("joinSuccess", roomId);
         }
 
         emitRoomUpdate(roomId);
+
+        if (room.draft) {
+            socket.emit("draftStarted");
+            emitDraftUpdate(roomId);
+        }
 
         if (isSpectator && room.game) {
             emitGameUpdate(roomId);
@@ -2085,6 +2216,54 @@ io.on("connection", socket => {
         emitRoomUpdate(roomId);
     });
 
+    socket.on("setTaimanMode", ({ roomId, taimanMode }) => {
+        const room = rooms[roomId];
+        if (!room || room.game) return;
+        const player = room.players.find(p => p.id === socket.id);
+        if (!player || !player.host) return;
+        room.taimanMode = Boolean(taimanMode);
+        if (!room.taimanMode) room.taimanFighters = [];
+        emitRoomUpdate(roomId);
+    });
+
+    socket.on("setTaimanFighters", ({ roomId, fighters }) => {
+        const room = rooms[roomId];
+        if (!room || room.game) return;
+        const player = room.players.find(p => p.id === socket.id);
+        if (!player || !player.host) return;
+        if (!room.taimanMode) return;
+        const validIds = (fighters || []).filter(fid =>
+            room.players.some(p => p.id === fid && !p.disconnected)
+        );
+        room.taimanFighters = validIds.slice(0, 2);
+        emitRoomUpdate(roomId);
+    });
+
+    socket.on("taimanDraftPick", ({ roomId, setIndex }) => {
+        const room = rooms[roomId];
+        if (!room || !room.draft) return;
+        const draft = room.draft;
+        if (socket.id !== draft.waitingFor) return;
+        if (setIndex !== 0 && setIndex !== 1) return;
+
+        const otherSetIndex = 1 - setIndex;
+        const pickerIndex = draft.fighters.indexOf(socket.id);
+        const otherId = draft.fighters[1 - pickerIndex];
+
+        draft.picks[socket.id].push(...draft.options[setIndex]);
+        draft.picks[otherId].push(...draft.options[otherSetIndex]);
+        draft.round += 1;
+
+        if (draft.round >= 10) {
+            startTaimanGame(roomId);
+            return;
+        }
+
+        draft.waitingFor = draft.fighters[draft.round % 2];
+        draft.options = generateTaimanDraftOptions();
+        emitDraftUpdate(roomId);
+    });
+
     socket.on("startGame", roomId => {
         const room = rooms[roomId];
         if (!room) return;
@@ -2093,6 +2272,30 @@ io.on("connection", socket => {
 
         if (!starter || !starter.host) {
             socket.emit("errorMessage", "ゲーム開始はルーム作成者のみ可能です");
+            return;
+        }
+
+        if (room.taimanMode) {
+            const fighters = (room.taimanFighters || [])
+                .map(fid => room.players.find(p => p.id === fid && !p.disconnected))
+                .filter(Boolean);
+
+            if (fighters.length !== 2) {
+                socket.emit("errorMessage", "タイマンモード：戦う2人を選択してください");
+                return;
+            }
+
+            if (!fighters.every(p => p.ready)) {
+                socket.emit("errorMessage", "タイマンモード：選手が準備完了していません");
+                return;
+            }
+
+            room.players.forEach(p => {
+                p.spectator = !room.taimanFighters.includes(p.id);
+            });
+            room.returnedToLobby = null;
+            startDraft(roomId);
+            io.to(roomId).emit("draftStarted");
             return;
         }
 

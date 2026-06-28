@@ -4,6 +4,7 @@ window.socket = socket;
 window.onload = () => {
     const titleScreen = document.getElementById("titleScreen");
     const lobbyScreen = document.getElementById("lobbyScreen");
+    const draftScreen = document.getElementById("draftScreen");
     const battleScreen = document.getElementById("battleScreen");
     const battleField = document.getElementById("battleField");
 
@@ -102,6 +103,8 @@ window.onload = () => {
     let currentRoomId = "";
     let isHost = false;
     let isReady = false;
+    let isTaimanMode = false;
+    let taimanFighters = [];
     let latestGame = null;
     let previousGame = null;
     let draggedCard = null;
@@ -125,7 +128,9 @@ window.onload = () => {
     function setScreenMode(mode) {
         document.body.classList.toggle("title-active", mode === "title");
         document.body.classList.toggle("lobby-active", mode === "lobby");
+        document.body.classList.toggle("draft-active", mode === "draft");
         document.body.classList.toggle("battle-active", mode === "battle");
+        if (draftScreen) draftScreen.style.display = mode === "draft" ? "flex" : "none";
     }
 
     function saveReconnectInfo(roomId, reconnectToken) {
@@ -227,6 +232,10 @@ window.onload = () => {
             lobbyScreen.style.display = "none";
             battleScreen.style.display = "block";
             gameOverOverlay.style.display = "none";
+        } else if (data.phase === "draft") {
+            setScreenMode("draft");
+            lobbyScreen.style.display = "none";
+            battleScreen.style.display = "none";
         } else {
             setScreenMode("lobby");
             lobbyScreen.style.display = "flex";
@@ -2185,6 +2194,10 @@ window.onload = () => {
             lobbyScreen.style.display = "none";
             battleScreen.style.display = "block";
             gameOverOverlay.style.display = "none";
+        } else if (phase === "draft") {
+            setScreenMode("draft");
+            lobbyScreen.style.display = "none";
+            battleScreen.style.display = "none";
         } else {
             setScreenMode("lobby");
             lobbyScreen.style.display = "flex";
@@ -2194,7 +2207,8 @@ window.onload = () => {
 
     const RULE_DESCS = {
         normal: "毎ターン手札が4枚になるよう補充されます。",
-        grudge: "プレイヤーを脱落させるとそのヘイト値が自分のヘイトに加算されます。ゲーム終了時のヘイトは次の試合の開始ヘイトに引き継がれます。"
+        grudge: "プレイヤーを脱落させるとそのヘイト値が自分のヘイトに加算されます。ゲーム終了時のヘイトは次の試合の開始ヘイトに引き継がれます。",
+        taiman: "1対1専用。ドラフトで20枚のデッキを組み戦います。他のプレイヤーは観戦できます。"
     };
 
     const ruleSelector = document.getElementById("ruleSelector");
@@ -2203,29 +2217,75 @@ window.onload = () => {
     const ruleSelectorDesc = document.getElementById("ruleSelectorDesc");
     const ruleClassicBtn = document.getElementById("ruleClassicBtn");
     const grudgeRuleBtn = document.getElementById("grudgeRuleBtn");
+    const taimanModeBtn = document.getElementById("taimanModeBtn");
+    const taimanFighterSelector = document.getElementById("taimanFighterSelector");
+    const taimanFighterList = document.getElementById("taimanFighterList");
 
-    function applyRuleUI(drawRule, grudgeRule) {
-        const isGrudge = Boolean(grudgeRule);
-        if (ruleDisplayLabel) ruleDisplayLabel.textContent = isGrudge ? "遺恨ルール" : "通常ルール";
-        if (ruleSelectorDesc) ruleSelectorDesc.textContent = isGrudge ? RULE_DESCS.grudge : RULE_DESCS.normal;
-        if (ruleClassicBtn) ruleClassicBtn.classList.toggle("rule-select-btn-active", !isGrudge);
+    function applyRuleUI(drawRule, grudgeRule, taimanMode) {
+        const isTaiman = Boolean(taimanMode);
+        const isGrudge = !isTaiman && Boolean(grudgeRule);
+        if (ruleDisplayLabel) {
+            if (isTaiman) ruleDisplayLabel.textContent = "タイマンモード";
+            else if (isGrudge) ruleDisplayLabel.textContent = "遺恨ルール";
+            else ruleDisplayLabel.textContent = "通常ルール";
+        }
+        if (ruleSelectorDesc) {
+            if (isTaiman) ruleSelectorDesc.textContent = RULE_DESCS.taiman;
+            else if (isGrudge) ruleSelectorDesc.textContent = RULE_DESCS.grudge;
+            else ruleSelectorDesc.textContent = RULE_DESCS.normal;
+        }
+        if (ruleClassicBtn) ruleClassicBtn.classList.toggle("rule-select-btn-active", !isGrudge && !isTaiman);
         if (grudgeRuleBtn) grudgeRuleBtn.classList.toggle("rule-select-btn-active", isGrudge);
+        if (taimanModeBtn) taimanModeBtn.classList.toggle("rule-select-btn-active", isTaiman);
     }
 
     if (ruleClassicBtn) {
         ruleClassicBtn.onclick = () => {
+            socket.emit("setTaimanMode", { roomId: currentRoomId, taimanMode: false });
             socket.emit("setGrudgeRule", { roomId: currentRoomId, grudgeRule: false });
         };
     }
 
     if (grudgeRuleBtn) {
         grudgeRuleBtn.onclick = () => {
+            socket.emit("setTaimanMode", { roomId: currentRoomId, taimanMode: false });
             socket.emit("setGrudgeRule", { roomId: currentRoomId, grudgeRule: true });
         };
     }
 
-    socket.on("updateRoom", ({ players, drawRule, grudgeRule, grudgeHate }) => {
+    if (taimanModeBtn) {
+        taimanModeBtn.onclick = () => {
+            socket.emit("setTaimanMode", { roomId: currentRoomId, taimanMode: true });
+        };
+    }
+
+    function renderTaimanFighterSelector(players, fighters) {
+        if (!taimanFighterList) return;
+        taimanFighterList.innerHTML = "";
+        players.filter(p => !p.disconnected).forEach(p => {
+            const isFighter = fighters.includes(p.id);
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "taiman-fighter-btn" + (isFighter ? " taiman-fighter-selected" : "");
+            btn.textContent = (isFighter ? "⚔ " : "") + p.name;
+            btn.onclick = () => {
+                let next = [...fighters];
+                if (isFighter) {
+                    next = next.filter(id => id !== p.id);
+                } else {
+                    if (next.length >= 2) next.shift();
+                    next.push(p.id);
+                }
+                socket.emit("setTaimanFighters", { roomId: currentRoomId, fighters: next });
+            };
+            taimanFighterList.appendChild(btn);
+        });
+    }
+
+    socket.on("updateRoom", ({ players, drawRule, grudgeRule, grudgeHate, taimanMode: tm, taimanFighters: tf }) => {
         drawRule = drawRule || "classic";
+        isTaimanMode = Boolean(tm);
+        taimanFighters = tf || [];
         playerList.innerHTML = "";
 
         const me = players.find(player => player.id === socket.id);
@@ -2255,9 +2315,10 @@ window.onload = () => {
                 ? `<span class="grudge-hate" title="遺恨ヘイト（次の試合の開始ヘイト）">${"🔴".repeat(hate)}</span>`
                 : "";
 
+            const isFighterPlayer = isTaimanMode && taimanFighters.includes(player.id);
             playerList.innerHTML += `
                 <div class="player-card ${!isSpectatorPlayer && player.ready ? "ready" : "not-ready"} ${player.disconnected ? "disconnected-player-card" : ""} ${isSpectatorPlayer ? "spectator-player-card" : ""}">
-                    <span class="player-name">${player.host ? "👑 " : ""}${isSpectatorPlayer ? "👁 " : ""}${player.name}${disconnectedLabel(player)}</span>
+                    <span class="player-name">${player.host ? "👑 " : ""}${isSpectatorPlayer ? "👁 " : ""}${isFighterPlayer ? "⚔ " : ""}${player.name}${disconnectedLabel(player)}</span>
                     <span class="player-status">${statusText}${grudgeHateHtml}</span>
                 </div>
             `;
@@ -2265,20 +2326,32 @@ window.onload = () => {
 
         const activePlayers = players.filter(p => !p.spectator && !p.disconnected);
         const allReady = activePlayers.every(player => player.ready);
-        const canStart = activePlayers.length >= 2 && allReady;
+
+        let canStart;
+        if (isTaimanMode) {
+            const fighterObjs = taimanFighters.map(fid => players.find(p => p.id === fid)).filter(Boolean);
+            canStart = fighterObjs.length === 2 && fighterObjs.every(p => p.ready && !p.disconnected);
+        } else {
+            canStart = activePlayers.length >= 2 && allReady;
+        }
 
         if (isHost) {
             startGameButton.style.display = "block";
             startGameButton.disabled = !canStart;
             if (ruleSelector) ruleSelector.style.display = "block";
             if (ruleDisplay) ruleDisplay.style.display = "none";
+            if (taimanFighterSelector) {
+                taimanFighterSelector.style.display = isTaimanMode ? "block" : "none";
+                if (isTaimanMode) renderTaimanFighterSelector(players, taimanFighters);
+            }
         } else {
             startGameButton.style.display = "none";
             if (ruleSelector) ruleSelector.style.display = "none";
             if (ruleDisplay) ruleDisplay.style.display = "block";
+            if (taimanFighterSelector) taimanFighterSelector.style.display = "none";
         }
 
-        applyRuleUI(drawRule, grudgeRule);
+        applyRuleUI(drawRule, grudgeRule, isTaimanMode);
     });
 
     readyButton.onclick = () => {
@@ -2300,6 +2373,64 @@ window.onload = () => {
     startGameButton.onclick = () => {
         socket.emit("startGame", currentRoomId);
     };
+
+    socket.on("draftStarted", () => {
+        setScreenMode("draft");
+        titleScreen.style.display = "none";
+        lobbyScreen.style.display = "none";
+        battleScreen.style.display = "none";
+    });
+
+    socket.on("draftUpdate", data => {
+        renderDraft(data);
+    });
+
+    function draftCardHtml(card) {
+        const r = (card.rarity || "C").toLowerCase();
+        return `<div class="draft-mini-card rarity-${r}">
+            <span class="draft-mini-rarity">${card.rarity || "C"}</span>
+            <span class="draft-mini-name">${card.name || ""}</span>
+        </div>`;
+    }
+
+    function renderDraft(data) {
+        const roundText = document.getElementById("draftRoundText");
+        const statusText = document.getElementById("draftStatusText");
+        if (roundText) roundText.textContent = `ラウンド ${data.round + 1} / 10`;
+
+        const isMyTurn = data.waitingFor === socket.id;
+        const waitingFighter = data.fighters.find(f => f.id === data.waitingFor);
+        if (statusText) {
+            statusText.textContent = isMyTurn
+                ? "あなたのピック番です！"
+                : `${waitingFighter ? waitingFighter.name : ""}のピック番です...`;
+        }
+
+        data.fighters.forEach((fighter, i) => {
+            const nameEl = document.getElementById(`draftPicksName${i}`);
+            const listEl = document.getElementById(`draftPicksList${i}`);
+            if (nameEl) nameEl.textContent = fighter.name;
+            if (listEl) {
+                const picks = data.picks[fighter.id] || [];
+                listEl.innerHTML = picks.map(draftCardHtml).join("");
+            }
+        });
+
+        [0, 1].forEach(i => {
+            const cards = document.getElementById(`draftOptionCards${i}`);
+            const btn = document.getElementById(`draftPickBtn${i}`);
+            const set = data.options[i] || [];
+            if (cards) cards.innerHTML = set.map(draftCardHtml).join("");
+            if (btn) {
+                btn.disabled = !isMyTurn;
+                btn.style.opacity = isMyTurn ? "1" : "0.3";
+                btn.onclick = isMyTurn ? () => {
+                    socket.emit("taimanDraftPick", { roomId: currentRoomId, setIndex: i });
+                    btn.disabled = true;
+                } : null;
+            }
+        });
+    }
 
     socket.on("gameStarted", () => {
         document.body.classList.remove("game-over-active");
@@ -3102,8 +3233,11 @@ window.onload = () => {
         setScreenMode("title");
         lobbyScreen.style.display = "none";
         battleScreen.style.display = "none";
+        if (draftScreen) draftScreen.style.display = "none";
         titleScreen.style.display = "flex";
         gameOverOverlay.style.display = "none";
+        isTaimanMode = false;
+        taimanFighters = [];
 
         readyButton.innerText = "準備完了";
         readyButton.classList.remove("cancel-ready");

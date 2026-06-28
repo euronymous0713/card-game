@@ -12,6 +12,16 @@ node server.js
 npm install
 ```
 
+## デプロイ
+
+「デプロイして」と言われたら以下のコマンドを順番に実行する：
+
+```bash
+git add .
+git commit -m "title screen"
+git push
+```
+
 テストフレームワークは未導入。動作確認はブラウザで `http://localhost:3000` にアクセスして行う。
 
 開発用デバッグパネルは URL に `?dev=1` を付けると表示される。

@@ -122,8 +122,14 @@
       <div class="rule-selector-buttons">
         <button class="rule-select-btn" id="ruleClassicBtn">通常ルール</button>
         <button class="rule-select-btn" id="grudgeRuleBtn">遺恨ルール</button>
+        <button class="rule-select-btn" id="taimanModeBtn">タイマンモード</button>
       </div>
       <p class="rule-selector-desc" id="ruleSelectorDesc"></p>
+    </div>
+
+    <div id="taimanFighterSelector" style="display:none;">
+      <p class="taiman-fighter-label">⚔ 戦う2人を選択</p>
+      <div id="taimanFighterList"></div>
     </div>
 
     <div id="ruleDisplay" style="display:none;">
@@ -136,6 +142,42 @@
     </div>
 
     <button id="startGameButton">ゲーム開始</button>
+  </div>
+
+  <div id="draftScreen" style="display:none;">
+    <div class="draft-container">
+      <div class="draft-header">
+        <h2 class="draft-title">ドラフトフェーズ</h2>
+        <p class="draft-round-text" id="draftRoundText">ラウンド 1 / 10</p>
+        <p class="draft-status-text" id="draftStatusText"></p>
+      </div>
+
+      <div class="draft-main">
+        <div class="draft-player-col" id="draftPlayerCol0">
+          <h3 class="draft-player-name" id="draftPicksName0"></h3>
+          <div class="draft-picks-list" id="draftPicksList0"></div>
+        </div>
+
+        <div class="draft-center-col">
+          <div class="draft-option-set" id="draftOptionSet0">
+            <div class="draft-option-label">セット A</div>
+            <div class="draft-option-cards" id="draftOptionCards0"></div>
+            <button class="draft-pick-btn" id="draftPickBtn0" type="button">A を選ぶ</button>
+          </div>
+          <div class="draft-option-divider">VS</div>
+          <div class="draft-option-set" id="draftOptionSet1">
+            <div class="draft-option-label">セット B</div>
+            <div class="draft-option-cards" id="draftOptionCards1"></div>
+            <button class="draft-pick-btn" id="draftPickBtn1" type="button">B を選ぶ</button>
+          </div>
+        </div>
+
+        <div class="draft-player-col" id="draftPlayerCol1">
+          <h3 class="draft-player-name" id="draftPicksName1"></h3>
+          <div class="draft-picks-list" id="draftPicksList1"></div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div id="battleScreen" style="display:none;">
