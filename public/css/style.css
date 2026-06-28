@@ -2820,6 +2820,35 @@ body.battle-active .mobile-trap-waiting-notice.show {
 .draft-mini-card.rarity-sr .draft-mini-rarity { color: #dd88ff; }
 .draft-mini-card.rarity-ur .draft-mini-rarity { color: #ffd040; }
 
+.draft-card-detail {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 14px 18px;
+    min-height: 80px;
+    font-size: 0.9em;
+    line-height: 1.6;
+}
+
+.draft-card-detail h3 {
+    font-size: 1em;
+    margin-bottom: 4px;
+}
+
+.draft-card-detail-hint {
+    color: rgba(255, 255, 255, 0.35);
+    font-size: 0.85em;
+}
+
+.draft-mini-card {
+    cursor: pointer;
+}
+
+.draft-mini-card:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
 @media (max-width: 700px) {
     .draft-main { flex-direction: column; }
     .draft-center-col { flex: none; width: 100%; order: -1; }

@@ -2385,9 +2385,45 @@ window.onload = () => {
         renderDraft(data);
     });
 
+    const draftCardDetailEl = document.getElementById("draftCardDetail");
+
+    function showDraftCardDetail(card) {
+        if (!draftCardDetailEl) return;
+        draftCardDetailEl.innerHTML = cardDetailHtml(card);
+    }
+
+    function resetDraftCardDetail() {
+        if (!draftCardDetailEl) return;
+        draftCardDetailEl.innerHTML = `<p class="draft-card-detail-hint">カードにカーソルを合わせると効果が表示されます</p>`;
+    }
+
+    if (draftScreen) {
+        draftScreen.addEventListener("mouseover", e => {
+            const el = e.target.closest("[data-draft-card]");
+            if (!el) return;
+            showDraftCardDetail(JSON.parse(el.dataset.draftCard));
+        });
+        draftScreen.addEventListener("mouseout", e => {
+            const el = e.target.closest("[data-draft-card]");
+            if (el && !el.contains(e.relatedTarget)) resetDraftCardDetail();
+        });
+        draftScreen.addEventListener("click", e => {
+            const el = e.target.closest("[data-draft-card]");
+            if (!el) return;
+            showDraftCardDetail(JSON.parse(el.dataset.draftCard));
+        });
+    }
+
     function draftCardHtml(card) {
         const r = (card.rarity || "C").toLowerCase();
-        return `<div class="draft-mini-card rarity-${r}">
+        const encoded = JSON.stringify({
+            name: card.name || "",
+            rarity: card.rarity || "C",
+            type: card.type || "",
+            effect: card.effect || "",
+            hateText: card.hateText || ""
+        }).replace(/'/g, "&#39;");
+        return `<div class="draft-mini-card rarity-${r}" data-draft-card='${encoded}'>
             <span class="draft-mini-rarity">${card.rarity || "C"}</span>
             <span class="draft-mini-name">${card.name || ""}</span>
         </div>`;
