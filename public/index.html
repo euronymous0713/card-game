@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>インターネット世紀末</title>
   <link rel="icon" href="data:,">
-  <link rel="stylesheet" href="css/style.css?v=6">
+  <link rel="stylesheet" href="css/style.css?v=7">
   <link rel="stylesheet" href="css/pc.css?v=5">
   <link rel="stylesheet" href="css/mobile.css?v=5">
   <link rel="stylesheet" href="css/mac.css">
@@ -281,8 +281,10 @@
       <div class="battle-buttons">
         <button id="endTurnButton">ターン終了</button>
         <button id="deckViewerBtn" type="button" class="deck-viewer-btn" style="display:none;">デッキ確認</button>
-        <div class="turn-timer-wrap" id="turnTimerWrap" style="display:none;">
-          <div class="turn-timer-bar" id="turnTimerBar"></div>
+        <div class="turn-timer-outer" id="turnTimerWrap" style="display:none;">
+          <div class="turn-timer-track">
+            <div class="turn-timer-bar" id="turnTimerBar"></div>
+          </div>
           <div class="turn-timer-seconds" id="turnTimerSeconds"></div>
         </div>
       </div>
@@ -337,7 +339,7 @@
 
   <script src="/socket.io/socket.io.js"></script>
   <script src="js/soundManager.js?v=4"></script>
-  <script src="js/main.js?v=4"></script>
+  <script src="js/main.js?v=5"></script>
   <script src="js/dev.js?v=4"></script>
   <script src="js/trapCutin.js?v=4"></script>
 
