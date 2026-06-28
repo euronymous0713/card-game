@@ -3345,6 +3345,7 @@ window.onload = () => {
     const deckViewerOverlay = document.getElementById("deckViewerOverlay");
     const deckViewerCloseBtn = document.getElementById("deckViewerCloseBtn");
     const deckViewerBody = document.getElementById("deckViewerBody");
+    const deckViewerCardDetailEl = document.getElementById("deckViewerCardDetail");
     const deckRefillNotification = document.getElementById("deckRefillNotification");
 
     let deckRefillNotifTimer = null;
@@ -3365,7 +3366,14 @@ window.onload = () => {
         if (!card) return "";
         const r = (card.rarity || "C").toLowerCase();
         const name = card.name || "不明";
-        return `<span class="dv-card-chip rarity-${r}" title="${name}">${name}</span>`;
+        const encoded = JSON.stringify({
+            name: card.name || "",
+            rarity: card.rarity || "C",
+            type: card.type || "",
+            effect: card.effect || "",
+            hateText: card.hateText || ""
+        }).replace(/'/g, "&#39;");
+        return `<span class="dv-card-chip rarity-${r}" title="${name}" data-dv-card='${encoded}'>${name}</span>`;
     }
 
     function renderDeckViewerCol(player, isMe) {
@@ -3374,10 +3382,15 @@ window.onload = () => {
         const traps = Array.isArray(player.fieldCards) ? player.fieldCards.filter(c => !c.hidden) : [];
         const hand = Array.isArray(player.hand) ? player.hand : [];
 
-        const nextCard = deck[0];
-        const nextHtml = nextCard
-            ? dvCardChip(nextCard)
-            : `<span class="dv-card-empty">なし</span>`;
+        const drawCount = Math.max(0, 4 - hand.length);
+        const nextCards = deck.slice(0, drawCount);
+
+        const nextSection = isMe
+            ? `<div class="deck-viewer-section deck-viewer-next-card">
+                <div class="deck-viewer-section-label">次のドロー (${nextCards.length}枚)</div>
+                <div class="deck-viewer-card-list">${nextCards.length === 0 ? '<span class="dv-card-empty">なし</span>' : nextCards.map(dvCardChip).join("")}</div>
+               </div>`
+            : "";
 
         const deckHtml = deck.length === 0
             ? `<span class="dv-card-empty">デッキ切れ</span>`
@@ -3401,10 +3414,7 @@ window.onload = () => {
         return `
           <div class="deck-viewer-col">
             <div class="deck-viewer-col-title">${player.name}${isMe ? "（自分）" : ""}</div>
-            <div class="deck-viewer-section deck-viewer-next-card">
-              <div class="deck-viewer-section-label">次のドロー</div>
-              <div>${nextHtml}</div>
-            </div>
+            ${nextSection}
             <div class="deck-viewer-section">
               <div class="deck-viewer-section-label">残りデッキ <span class="deck-viewer-count">(${deck.length}枚)</span></div>
               <div class="deck-viewer-card-list">${deckHtml}</div>
@@ -3433,7 +3443,21 @@ window.onload = () => {
         opponents.forEach(op => { html += renderDeckViewerCol(op, false); });
 
         deckViewerBody.innerHTML = html;
+        if (deckViewerCardDetailEl) {
+            deckViewerCardDetailEl.innerHTML = `<p class="deck-viewer-card-detail-hint">カードをタップすると効果が表示されます</p>`;
+        }
         deckViewerOverlay.style.display = "flex";
+    }
+
+    if (deckViewerBody) {
+        deckViewerBody.addEventListener("click", e => {
+            const chip = e.target.closest("[data-dv-card]");
+            if (!chip || !deckViewerCardDetailEl) return;
+            try {
+                const card = JSON.parse(chip.dataset.dvCard);
+                deckViewerCardDetailEl.innerHTML = cardDetailHtml(card);
+            } catch (_) {}
+        });
     }
 
     if (deckViewerBtn) deckViewerBtn.addEventListener("click", openDeckViewer);
