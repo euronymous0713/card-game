@@ -200,6 +200,9 @@ window.onload = () => {
     document.addEventListener("keydown", unlockSoundOnce, { once: true });
 
     socket.on("connect", () => {
+        const connectingScreen = document.getElementById("connectingScreen");
+        if (connectingScreen) connectingScreen.style.display = "none";
+        titleScreen.style.display = "";
         attemptReconnect();
     });
 
