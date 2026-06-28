@@ -1701,6 +1701,7 @@ window.onload = () => {
                     ${spectatorHtml}
                 </div>
                 <div class="settings-actions-divider" role="separator"></div>
+                ${latestGame && latestGame.taimanMode ? `<button id="settingsDeckViewerButton" class="settings-deck-viewer-button" type="button">デッキ確認</button>` : ""}
                 <button id="mobileCardListButton" class="mobile-card-list-button" type="button">
                     カード一覧
                 </button>
@@ -1718,10 +1719,18 @@ window.onload = () => {
         const closeButton = document.getElementById("mobileSettingsCloseButton");
         const cardListBtn = document.getElementById("mobileCardListButton");
         const leaveButton = document.getElementById("mobileBattleLeaveButton");
+        const settingsDeckViewerBtn = document.getElementById("settingsDeckViewerButton");
 
         if (closeButton) {
             closeButton.onclick = () => {
                 closeMobileSettings();
+            };
+        }
+
+        if (settingsDeckViewerBtn) {
+            settingsDeckViewerBtn.onclick = () => {
+                closeMobileSettings();
+                openDeckViewer();
             };
         }
 
@@ -2559,9 +2568,6 @@ window.onload = () => {
 
         previousGame = cloneGame(latestGame);
 
-        const dvBtn = document.getElementById("deckViewerBtn");
-        if (dvBtn) dvBtn.style.display = game.taimanMode ? "inline-block" : "none";
-
         if (Array.isArray(game.deckRefillEvents) && game.deckRefillEvents.length > 0) {
             game.deckRefillEvents.forEach(ev => showDeckRefillNotification(ev.playerName));
         }
@@ -3367,7 +3373,6 @@ window.onload = () => {
     });
 
     // ===== デッキ確認 (タイマンモード専用) =====
-    const deckViewerBtn = document.getElementById("deckViewerBtn");
     const deckViewerOverlay = document.getElementById("deckViewerOverlay");
     const deckViewerCloseBtn = document.getElementById("deckViewerCloseBtn");
     const deckViewerBody = document.getElementById("deckViewerBody");
@@ -3481,7 +3486,6 @@ window.onload = () => {
         });
     }
 
-    if (deckViewerBtn) deckViewerBtn.addEventListener("click", openDeckViewer);
     if (deckViewerCloseBtn) deckViewerCloseBtn.addEventListener("click", () => {
         deckViewerOverlay.style.display = "none";
     });

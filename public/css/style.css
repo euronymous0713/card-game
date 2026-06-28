@@ -2891,18 +2891,21 @@ body.battle-active .mobile-trap-waiting-notice.show {
     transition: opacity 0.4s;
 }
 
-/* ===== デッキ確認ボタン ===== */
-.deck-viewer-btn {
+/* ===== 設定パネル内デッキ確認ボタン ===== */
+.settings-deck-viewer-button {
+    display: block;
+    width: 100%;
+    padding: 10px 14px;
     background: linear-gradient(135deg, #2c2f6b, #4a4e9e);
     color: #c8caff;
     border: 1px solid #6a6ec8;
-    border-radius: 6px;
-    padding: 6px 14px;
-    font-size: 0.85em;
+    border-radius: 8px;
+    font-size: 0.95em;
     cursor: pointer;
+    text-align: center;
     transition: background 0.2s, color 0.2s;
 }
-.deck-viewer-btn:hover {
+.settings-deck-viewer-button:hover {
     background: linear-gradient(135deg, #4a4e9e, #6a6ec8);
     color: #fff;
 }
