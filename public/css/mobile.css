@@ -4475,15 +4475,4 @@
     }
 }
 
-@media (max-width: 768px) {
-    .deck-viewer-btn {
-        position: fixed !important;
-        left: 8px !important;
-        top: 264px !important;
-        bottom: auto !important;
-        font-size: 0.72em !important;
-        padding: 5px 10px !important;
-        z-index: 9700 !important;
-    }
-}
 }
