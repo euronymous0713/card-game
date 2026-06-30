@@ -1,6 +1,7 @@
 const express = require("express");
 const http = require("http");
 const https = require("https");
+const crypto = require("crypto");
 const { Server } = require("socket.io");
 
 const CARD_MASTER = require("./data/cards");
@@ -51,6 +52,10 @@ app.get("/api/cards", (req, res) => {
 });
 
 app.post("/api/bug-report", (req, res) => {
+    const ip = req.ip || req.socket?.remoteAddress || "unknown";
+    if (isRateLimited(ip)) {
+        return res.status(429).json({ error: "送信が多すぎます。しばらく待ってから再試行してください。" });
+    }
     const { name, summary, detail, roomId } = req.body || {};
     if (!summary || !summary.trim()) {
         return res.status(400).json({ error: "件名は必須です" });
@@ -76,6 +81,26 @@ const pendingTrapChoices = {};
 const pendingOverwriteChoices = {};
 const DEV_MODE = true;
 const TURN_DURATION_MS = 60 * 1000;
+const MAX_ROOMS = 100;
+
+// バグ報告レート制限（IPごとに1分間5件まで）
+const bugReportRateMap = new Map();
+function isRateLimited(ip) {
+    const now = Date.now();
+    const entry = bugReportRateMap.get(ip);
+    if (!entry || now > entry.resetAt) {
+        bugReportRateMap.set(ip, { count: 1, resetAt: now + 60_000 });
+        return false;
+    }
+    entry.count++;
+    return entry.count > 5;
+}
+
+// プレイヤー名からHTMLタグ等を除去して安全な文字列にする
+function sanitizeName(name) {
+    if (typeof name !== "string") return "名無し";
+    return name.replace(/[<>&"'`]/g, "").trim().slice(0, 12) || "名無し";
+}
 const RECONNECT_TIMEOUT_MS = 5 * 60 * 1000;
 
 const RARITY_INFO = {
@@ -187,7 +212,12 @@ function normalizeCard(baseCard) {
 }
 
 function generateRoomId() {
-    return Math.floor(1000 + Math.random() * 9000).toString();
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    let id;
+    do {
+        id = Array.from({ length: 6 }, () => chars[crypto.randomInt(chars.length)]).join("");
+    } while (rooms[id]);
+    return id;
 }
 
 function generateChoiceId() {
@@ -195,7 +225,7 @@ function generateChoiceId() {
 }
 
 function generateReconnectToken() {
-    return `reconnect-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    return crypto.randomBytes(24).toString("hex");
 }
 
 function generateCardInstance(cardId = null) {
@@ -2276,15 +2306,20 @@ io.on("connection", socket => {
     });
 
     socket.on("createRoom", playerName => {
-        const roomId = generateRoomId();
+        if (Object.keys(rooms).length >= MAX_ROOMS) {
+            socket.emit("errorMessage", "サーバーが混雑しています。しばらく待ってから試してください。");
+            return;
+        }
 
+        const sanitized = sanitizeName(playerName);
+        const roomId = generateRoomId();
         const reconnectToken = generateReconnectToken();
 
         rooms[roomId] = {
             players: [{
                 id: socket.id,
                 reconnectToken,
-                name: playerName,
+                name: sanitized,
                 ready: false,
                 host: true,
                 disconnected: false,
@@ -2315,6 +2350,7 @@ io.on("connection", socket => {
             return;
         }
 
+        const sanitized = sanitizeName(playerName);
         const activePlayers = room.players.filter(p => !p.spectator);
         const isSpectator = activePlayers.length >= 4 || Boolean(room.game);
 
@@ -2323,7 +2359,7 @@ io.on("connection", socket => {
         room.players.push({
             id: socket.id,
             reconnectToken,
-            name: playerName,
+            name: sanitized,
             ready: isSpectator ? true : false,
             host: false,
             spectator: isSpectator,

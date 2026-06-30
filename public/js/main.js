@@ -108,6 +108,15 @@ window.onload = () => {
     // 使用履歴はPCで謎の「×」が出ないよう、閉じるボタンを生成しません。
     // スマホでは履歴見出しタップ、または履歴背景タップで閉じます。
 
+    function escapeHtml(str) {
+        return String(str ?? "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#39;");
+    }
+
     let currentRoomId = "";
     let isHost = false;
     let isReady = false;
@@ -1826,7 +1835,7 @@ window.onload = () => {
                 historyModalBody.innerHTML += `
                     <div class="played-card">
                         <strong>${logWithCardLink(logText, card.cardName)}</strong><br>
-                        ${card.hateText || ""}
+                        ${card.hateText ? escapeHtml(card.hateText) : ""}
                         ${playedCardExtraText(card)}
                     </div>
                 `;
@@ -1888,7 +1897,7 @@ window.onload = () => {
         mobileActionPanel.innerHTML = `
             <div class="mobile-selected-card-name">
                 ${card.name}
-                ${needsEnemyTarget && selectedEnemy ? ` / 対象：${selectedEnemy.name}` : ""}
+                ${needsEnemyTarget && selectedEnemy ? ` / 対象：${escapeHtml(selectedEnemy.name)}` : ""}
                 ${needsEnemyTarget && !selectedEnemy ? " / 対象を選択してください" : ""}
             </div>
             <div class="mobile-action-buttons">
@@ -2373,7 +2382,7 @@ window.onload = () => {
             const isFighterPlayer = isTaimanMode && taimanFighters.includes(player.id);
             playerList.innerHTML += `
                 <div class="player-card ${!isSpectatorPlayer && player.ready ? "ready" : "not-ready"} ${player.disconnected ? "disconnected-player-card" : ""} ${isSpectatorPlayer ? "spectator-player-card" : ""}">
-                    <span class="player-name">${player.host ? "👑 " : ""}${isSpectatorPlayer ? "👁 " : ""}${isFighterPlayer ? "⚔ " : ""}${player.name}${disconnectedLabel(player)}</span>
+                    <span class="player-name">${player.host ? "👑 " : ""}${isSpectatorPlayer ? "👁 " : ""}${isFighterPlayer ? "⚔ " : ""}${escapeHtml(player.name)}${disconnectedLabel(player)}</span>
                     <span class="player-status">${statusText}${grudgeHateHtml}</span>
                 </div>
             `;
@@ -2706,7 +2715,7 @@ window.onload = () => {
             if (selectedPlayer) {
                 myPanel.innerHTML = `
                     <div class="spectator-watching-label">👁 観戦中</div>
-                    <div class="my-name">${selectedPlayer.defeated ? "💀 " : ""}${selectedPlayer.hate >= 3 ? "🔥 " : ""}${selectedPlayer.name}${disconnectedLabel(selectedPlayer)}</div>
+                    <div class="my-name">${selectedPlayer.defeated ? "💀 " : ""}${selectedPlayer.hate >= 3 ? "🔥 " : ""}${escapeHtml(selectedPlayer.name)}${disconnectedLabel(selectedPlayer)}</div>
                     <div class="follower-line ${selectedPlayer.defeated ? "owakon-text" : ""}">
                         ${followerText(selectedPlayer)}
                     </div>
@@ -2734,7 +2743,7 @@ window.onload = () => {
 
                     slot.innerHTML = `
                         <div class="enemy-hand-badge">🂠 ${player.handCount ?? player.hand.length}</div>
-                        <div class="enemy-name">${player.defeated ? "💀 " : ""}${player.hate >= 3 ? "🔥 " : ""}${player.name}${disconnectedLabel(player)}</div>
+                        <div class="enemy-name">${player.defeated ? "💀 " : ""}${player.hate >= 3 ? "🔥 " : ""}${escapeHtml(player.name)}${disconnectedLabel(player)}</div>
                         <div class="follower-line ${player.defeated ? "owakon-text" : ""}">
                             ${followerText(player)}
                         </div>
@@ -2783,7 +2792,7 @@ window.onload = () => {
             myPanel.classList.toggle("choosing-trap-player", Boolean(latestGame.waitingTrapChoice && me.id === latestGame.waitingTrapPlayerId));
 
             myPanel.innerHTML = `
-                <div class="my-name">${me.defeated ? "💀 " : ""}${me.hate >= 3 ? "🔥 " : ""}${me.name}${disconnectedLabel(me)}</div>
+                <div class="my-name">${me.defeated ? "💀 " : ""}${me.hate >= 3 ? "🔥 " : ""}${escapeHtml(me.name)}${disconnectedLabel(me)}</div>
                 <div class="follower-line ${me.defeated ? "owakon-text" : ""}">
                     ${followerText(me)}
                 </div>
@@ -2881,7 +2890,7 @@ window.onload = () => {
 
         turnPanel.innerHTML = `
             現在のターン<br>
-            <span>${currentPlayer.name}</span>
+            <span>${escapeHtml(currentPlayer.name)}</span>
         `;
 
         battleMessage.innerText = isMyTurn
@@ -2941,13 +2950,15 @@ window.onload = () => {
     }
 
     function logWithCardLink(log, cardName) {
-        if (!cardName || !cardMasterMap[cardName]) return log;
-        const idx = log.indexOf(cardName);
-        if (idx === -1) return log;
-        const escaped = cardName.replace(/"/g, "&quot;");
-        return log.slice(0, idx)
-            + `<button class="history-card-link" data-card-name="${escaped}">${cardName}</button>`
-            + log.slice(idx + cardName.length);
+        const escapedLog = escapeHtml(log);
+        if (!cardName || !cardMasterMap[cardName]) return escapedLog;
+        const escapedCardName = escapeHtml(cardName);
+        const idx = escapedLog.indexOf(escapedCardName);
+        if (idx === -1) return escapedLog;
+        const attrEscaped = escapeHtml(cardName);
+        return escapedLog.slice(0, idx)
+            + `<button class="history-card-link" data-card-name="${attrEscaped}">${escapedCardName}</button>`
+            + escapedLog.slice(idx + escapedCardName.length);
     }
 
     function renderPlayedCards() {
@@ -2960,7 +2971,7 @@ window.onload = () => {
             playedCardList.innerHTML += `
                 <div class="played-card">
                     <strong>${logWithCardLink(logText, card.cardName)}</strong><br>
-                    ${card.hateText || ""}
+                    ${card.hateText ? escapeHtml(card.hateText) : ""}
                     ${playedCardExtraText(card)}
                 </div>
             `;
