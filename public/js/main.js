@@ -117,6 +117,22 @@ window.onload = () => {
             .replace(/'/g, "&#39;");
     }
 
+    function setRoomIdDisplay(roomId) {
+        roomIdText.innerHTML = `ルームID : <span class="room-id-code">${escapeHtml(roomId)}</span><button class="room-id-copy-btn" type="button">コピー</button>`;
+        roomIdText.querySelector(".room-id-copy-btn").onclick = () => {
+            navigator.clipboard.writeText(roomId).then(() => {
+                const btn = roomIdText.querySelector(".room-id-copy-btn");
+                if (!btn) return;
+                btn.textContent = "コピー済み";
+                btn.classList.add("room-id-copied");
+                setTimeout(() => {
+                    btn.textContent = "コピー";
+                    btn.classList.remove("room-id-copied");
+                }, 1500);
+            });
+        };
+    }
+
     let currentRoomId = "";
     let isHost = false;
     let isReady = false;
@@ -241,7 +257,7 @@ window.onload = () => {
         previousGame = null;
         gameOverSoundPlayed = false;
 
-        roomIdText.innerText = `ルームID : ${currentRoomId}`;
+        setRoomIdDisplay(currentRoomId);
         leaveRoomButton.innerText = isHost ? "ルーム解散" : "退出";
         readyButton.innerText = isReady ? "準備解除" : "準備完了";
         readyButton.classList.toggle("cancel-ready", isReady);
@@ -2176,7 +2192,7 @@ window.onload = () => {
         lobbyScreen.style.display = "flex";
         battleScreen.style.display = "none";
 
-        roomIdText.innerText = `ルームID : ${roomId}`;
+        setRoomIdDisplay(roomId);
 
         leaveRoomButton.innerText = "ルーム解散";
         readyButton.innerText = "準備完了";
@@ -2196,7 +2212,7 @@ window.onload = () => {
         lobbyScreen.style.display = "flex";
         battleScreen.style.display = "none";
 
-        roomIdText.innerText = `ルームID : ${roomId}`;
+        setRoomIdDisplay(roomId);
 
         leaveRoomButton.innerText = "退出";
         readyButton.style.display = "";
@@ -2214,7 +2230,7 @@ window.onload = () => {
         previousGame = null;
         gameOverSoundPlayed = false;
 
-        roomIdText.innerText = `ルームID : ${roomId}`;
+        setRoomIdDisplay(roomId);
         leaveRoomButton.innerText = "退出";
         readyButton.style.display = "none";
         startGameButton.style.display = "none";

@@ -194,6 +194,36 @@ button:disabled {
     margin-bottom: 20px;
     font-size: 20px;
     font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.room-id-code {
+    letter-spacing: 0.1em;
+    font-family: monospace;
+}
+
+.room-id-copy-btn {
+    padding: 4px 12px;
+    font-size: 13px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.room-id-copy-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.room-id-copy-btn.room-id-copied {
+    background: rgba(78, 204, 163, 0.3);
+    border-color: #4ecca3;
+    color: #4ecca3;
 }
 
 #playerList {
