@@ -1194,8 +1194,21 @@ window.onload = () => {
             return myPanel;
         }
 
-        const enemies = latestGame?.turnOrder.filter(player => player.id !== socket.id) || [];
-        const index = enemies.findIndex(player => player.id === playerId);
+        const allOthers = latestGame?.turnOrder.filter(player => player.id !== socket.id) || [];
+
+        if (latestGame?.teamMode && me) {
+            const isAlly = allOthers.some(player => player.id === playerId && player.team === me.team);
+            if (isAlly) {
+                return allyPanel;
+            }
+
+            const enemies = allOthers.filter(player => player.team !== me.team);
+            const index = enemies.findIndex(player => player.id === playerId);
+
+            return index >= 0 ? enemySlots[index] : battleField;
+        }
+
+        const index = allOthers.findIndex(player => player.id === playerId);
 
         if (index >= 0) {
             return enemySlots[index];
