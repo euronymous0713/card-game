@@ -288,8 +288,10 @@ function clamp(value, min, max) {
     return Math.max(min, Math.min(max, value));
 }
 
-function createGameState(players, drawRule = "classic", grudgeHate = {}, grudgeRule = false) {
-    const turnOrder = shuffleArray(players).map(player => {
+function createGameState(players, drawRule = "classic", grudgeHate = {}, grudgeRule = false, teamAssignments = {}) {
+    const isTeamMode = Object.keys(teamAssignments).length > 0;
+
+    let shuffled = shuffleArray(players).map(player => {
         const gamePlayer = {
             id: player.id,
             reconnectToken: player.reconnectToken || generateReconnectToken(),
@@ -306,12 +308,28 @@ function createGameState(players, drawRule = "classic", grudgeHate = {}, grudgeR
             extraTurns: 0,
             statusEffects: [],
             cardsPlayedThisTurn: 0,
-            totalDamageTaken: 0
+            totalDamageTaken: 0,
+            team: isTeamMode ? (teamAssignments[player.id] ?? null) : null
         };
 
         drawCards(gamePlayer);
         return gamePlayer;
     });
+
+    // チームモード時はターン順をチーム交互（A1→B1→A2→B2）に並べ替え
+    if (isTeamMode) {
+        const teamA = shuffled.filter(p => p.team === 0);
+        const teamB = shuffled.filter(p => p.team === 1);
+        const interleaved = [];
+        const maxLen = Math.max(teamA.length, teamB.length);
+        for (let i = 0; i < maxLen; i++) {
+            if (teamA[i]) interleaved.push(teamA[i]);
+            if (teamB[i]) interleaved.push(teamB[i]);
+        }
+        shuffled = interleaved;
+    }
+
+    const turnOrder = shuffled;
 
     return {
         turnOrder,
@@ -319,12 +337,14 @@ function createGameState(players, drawRule = "classic", grudgeHate = {}, grudgeR
         playedCards: [],
         phase: "battle",
         winner: null,
+        winnerTeam: null,
         gameOver: false,
         waitingTrapChoice: false,
         waitingTrapPlayerId: null,
         waitingTrapPlayerName: "",
         drawRule,
-        grudgeRule
+        grudgeRule,
+        teamMode: isTeamMode
     };
 }
 
@@ -684,6 +704,17 @@ function moveToNextAliveTurn(game) {
 
 function checkGameOver(game) {
     const alivePlayers = getAlivePlayers(game);
+
+    if (game.teamMode) {
+        const aliveTeams = [...new Set(alivePlayers.map(p => p.team).filter(t => t !== null))];
+        if (aliveTeams.length <= 1) {
+            game.gameOver = true;
+            game.winnerTeam = aliveTeams.length === 1 ? aliveTeams[0] : null;
+            // winner は勝利チームの最初の生き残りプレイヤー
+            game.winner = alivePlayers.find(p => p.team === game.winnerTeam) || alivePlayers[0] || null;
+        }
+        return;
+    }
 
     if (alivePlayers.length === 1) {
         game.gameOver = true;
@@ -1130,7 +1161,9 @@ function emitRoomUpdate(roomId) {
         grudgeRule: Boolean(room.grudgeRule),
         grudgeHate: room.grudgeHate || {},
         taimanMode: Boolean(room.taimanMode),
-        taimanFighters: room.taimanFighters || []
+        taimanFighters: room.taimanFighters || [],
+        teamMode: Boolean(room.teamMode),
+        teamAssignments: room.teamAssignments || {}
     });
 }
 
@@ -2331,6 +2364,8 @@ io.on("connection", socket => {
             grudgeRule: false,
             taimanMode: false,
             taimanFighters: [],
+            teamMode: false,
+            teamAssignments: {},
             draft: null
         };
 
@@ -2450,6 +2485,36 @@ io.on("connection", socket => {
         emitRoomUpdate(roomId);
     });
 
+    socket.on("setTeamMode", ({ roomId, teamMode }) => {
+        const room = rooms[roomId];
+        if (!room || room.game) return;
+        const player = room.players.find(p => p.id === socket.id);
+        if (!player || !player.host) return;
+        room.teamMode = Boolean(teamMode);
+        if (room.teamMode) {
+            room.taimanMode = false;
+            room.taimanFighters = [];
+        }
+        if (!room.teamMode) room.teamAssignments = {};
+        emitRoomUpdate(roomId);
+    });
+
+    socket.on("setTeamAssignments", ({ roomId, assignments }) => {
+        const room = rooms[roomId];
+        if (!room || room.game) return;
+        const player = room.players.find(p => p.id === socket.id);
+        if (!player || !player.host) return;
+        if (!room.teamMode) return;
+        const valid = {};
+        Object.entries(assignments || {}).forEach(([pid, team]) => {
+            if (room.players.some(p => p.id === pid && !p.disconnected) && (team === 0 || team === 1)) {
+                valid[pid] = team;
+            }
+        });
+        room.teamAssignments = valid;
+        emitRoomUpdate(roomId);
+    });
+
     socket.on("taimanDraftPick", ({ roomId, setIndex }) => {
         const room = rooms[roomId];
         if (!room || !room.draft) return;
@@ -2483,6 +2548,30 @@ io.on("connection", socket => {
 
         if (!starter || !starter.host) {
             socket.emit("errorMessage", "ゲーム開始はルーム作成者のみ可能です");
+            return;
+        }
+
+        if (room.teamMode) {
+            const assignments = room.teamAssignments || {};
+            const activePlayers = room.players.filter(p => !p.spectator && !p.disconnected);
+            const team0 = activePlayers.filter(p => assignments[p.id] === 0);
+            const team1 = activePlayers.filter(p => assignments[p.id] === 1);
+            if (team0.length === 0 || team1.length === 0) {
+                socket.emit("errorMessage", "チームバトル：両チームに1人以上必要です");
+                return;
+            }
+            if (team0.length !== team1.length) {
+                socket.emit("errorMessage", "チームバトル：両チームの人数を揃えてください");
+                return;
+            }
+            if (!activePlayers.every(p => p.ready)) {
+                socket.emit("errorMessage", "全員が準備完了していません");
+                return;
+            }
+            room.game = createGameState(activePlayers, room.drawRule || "classic", room.grudgeHate || {}, Boolean(room.grudgeRule), assignments);
+            room.returnedToLobby = null;
+            io.to(roomId).emit("gameStarted");
+            finishGameIfNeeded(roomId);
             return;
         }
 
@@ -2722,6 +2811,12 @@ io.on("connection", socket => {
                 socket.emit("errorMessage", `${target.name} は鍵垢中のため対象にできません`);
                 return;
             }
+
+            if (game.teamMode && caster.team !== null && target && target.team === caster.team) {
+                caster.hand.push(usedCard);
+                socket.emit("errorMessage", "チームメイトは対象にできません");
+                return;
+            }
         }
 
         const finalTarget =
@@ -2763,7 +2858,9 @@ io.on("connection", socket => {
         if (usedCard.kind === "attack") {
             if (usedCard.targetType === "allEnemies") {
                 const targets = game.turnOrder.filter(player => {
-                    return player.id !== caster.id && !player.defeated;
+                    if (player.id === caster.id || player.defeated) return false;
+                    if (game.teamMode && caster.team !== null && player.team === caster.team) return false;
+                    return true;
                 });
 
                 const damageDetails = [];

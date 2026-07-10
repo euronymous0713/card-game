@@ -138,6 +138,8 @@ window.onload = () => {
     let isReady = false;
     let isTaimanMode = false;
     let taimanFighters = [];
+    let isTeamMode = false;
+    let teamAssignments = {};
     let latestGame = null;
     let previousGame = null;
     let draggedCard = null;
@@ -2266,10 +2268,18 @@ window.onload = () => {
     const ruleClassicBtn = document.getElementById("ruleClassicBtn");
     const grudgeRuleBtn = document.getElementById("grudgeRuleBtn");
     const taimanModeBtn = document.getElementById("taimanModeBtn");
+    const teamModeBtn = document.getElementById("teamModeBtn");
     const taimanFighterList = document.getElementById("taimanFighterList");
     const fighterSelectOpenBtn = document.getElementById("fighterSelectOpenBtn");
     const fighterModalOverlay = document.getElementById("fighterModalOverlay");
     const fighterModalCloseBtn = document.getElementById("fighterModalCloseBtn");
+    const teamAssignOpenBtn = document.getElementById("teamAssignOpenBtn");
+    const teamAssignModalOverlay = document.getElementById("teamAssignModalOverlay");
+    const teamAssignModalCloseBtn = document.getElementById("teamAssignModalCloseBtn");
+    const teamAList = document.getElementById("teamAList");
+    const teamBList = document.getElementById("teamBList");
+    const teamUnassignedList = document.getElementById("teamUnassignedList");
+    const allyPanel = document.getElementById("allyPanel");
 
     const hostRuleDescToggleBtn = document.getElementById("hostRuleDescToggleBtn");
     const guestRuleDescToggleBtn = document.getElementById("guestRuleDescToggleBtn");
@@ -2307,20 +2317,23 @@ window.onload = () => {
         if (e.target === fighterModalOverlay) fighterModalOverlay.style.display = "none";
     });
 
-    function applyRuleUI(drawRule, grudgeRule, taimanMode) {
+    function applyRuleUI(drawRule, grudgeRule, taimanMode, teamMode) {
         const isTaiman = Boolean(taimanMode);
-        const isGrudge = !isTaiman && Boolean(grudgeRule);
+        const isTeam = Boolean(teamMode);
+        const isGrudge = !isTaiman && !isTeam && Boolean(grudgeRule);
         currentRuleDesc = isTaiman ? RULE_DESCS.taiman : isGrudge ? RULE_DESCS.grudge : RULE_DESCS.normal;
-        currentRuleLabel = isTaiman ? "タイマンルール" : isGrudge ? "遺恨ルール" : "通常ルール";
+        currentRuleLabel = isTeam ? "チームバトル" : isTaiman ? "タイマンルール" : isGrudge ? "遺恨ルール" : "通常ルール";
         if (ruleDisplayLabel) ruleDisplayLabel.textContent = currentRuleLabel;
         if (fighterSelectOpenBtn) fighterSelectOpenBtn.style.display = isTaiman ? "inline-block" : "none";
-        if (ruleClassicBtn) ruleClassicBtn.classList.toggle("rule-select-btn-active", !isGrudge && !isTaiman);
+        if (ruleClassicBtn) ruleClassicBtn.classList.toggle("rule-select-btn-active", !isGrudge && !isTaiman && !isTeam);
         if (grudgeRuleBtn) grudgeRuleBtn.classList.toggle("rule-select-btn-active", isGrudge);
         if (taimanModeBtn) taimanModeBtn.classList.toggle("rule-select-btn-active", isTaiman);
+        if (teamModeBtn) teamModeBtn.classList.toggle("rule-select-btn-active", isTeam);
     }
 
     if (ruleClassicBtn) {
         ruleClassicBtn.onclick = () => {
+            socket.emit("setTeamMode", { roomId: currentRoomId, teamMode: false });
             socket.emit("setTaimanMode", { roomId: currentRoomId, taimanMode: false });
             socket.emit("setGrudgeRule", { roomId: currentRoomId, grudgeRule: false });
         };
@@ -2328,6 +2341,7 @@ window.onload = () => {
 
     if (grudgeRuleBtn) {
         grudgeRuleBtn.onclick = () => {
+            socket.emit("setTeamMode", { roomId: currentRoomId, teamMode: false });
             socket.emit("setTaimanMode", { roomId: currentRoomId, taimanMode: false });
             socket.emit("setGrudgeRule", { roomId: currentRoomId, grudgeRule: true });
         };
@@ -2335,8 +2349,71 @@ window.onload = () => {
 
     if (taimanModeBtn) {
         taimanModeBtn.onclick = () => {
+            socket.emit("setTeamMode", { roomId: currentRoomId, teamMode: false });
             socket.emit("setTaimanMode", { roomId: currentRoomId, taimanMode: true });
         };
+    }
+
+    if (teamModeBtn) {
+        teamModeBtn.onclick = () => {
+            socket.emit("setTeamMode", { roomId: currentRoomId, teamMode: true });
+            socket.emit("setGrudgeRule", { roomId: currentRoomId, grudgeRule: false });
+        };
+    }
+
+    if (teamAssignOpenBtn) {
+        teamAssignOpenBtn.addEventListener("click", () => {
+            if (teamAssignModalOverlay) {
+                renderTeamAssignModal(window._latestRoomPlayers || []);
+                teamAssignModalOverlay.style.display = "flex";
+            }
+        });
+    }
+    if (teamAssignModalCloseBtn) {
+        teamAssignModalCloseBtn.addEventListener("click", () => {
+            if (teamAssignModalOverlay) teamAssignModalOverlay.style.display = "none";
+        });
+    }
+    if (teamAssignModalOverlay) {
+        teamAssignModalOverlay.addEventListener("click", e => {
+            if (e.target === teamAssignModalOverlay) teamAssignModalOverlay.style.display = "none";
+        });
+    }
+
+    function renderTeamAssignModal(players) {
+        if (!teamAList || !teamBList || !teamUnassignedList) return;
+        teamAList.innerHTML = "";
+        teamBList.innerHTML = "";
+        teamUnassignedList.innerHTML = "";
+
+        const activePlayers = players.filter(p => !p.disconnected && !p.spectator);
+
+        activePlayers.forEach(p => {
+            const currentTeam = teamAssignments[p.id];
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "team-assign-player-btn" + (currentTeam === 0 ? " team-a-player" : currentTeam === 1 ? " team-b-player" : "");
+            btn.textContent = escapeHtml(p.name);
+            btn.onclick = () => {
+                // サイクル：未割り当て→A(0)→B(1)→未割り当て
+                if (currentTeam === undefined || currentTeam === null) {
+                    teamAssignments[p.id] = 0;
+                } else if (currentTeam === 0) {
+                    teamAssignments[p.id] = 1;
+                } else {
+                    delete teamAssignments[p.id];
+                }
+                socket.emit("setTeamAssignments", { roomId: currentRoomId, assignments: teamAssignments });
+            };
+
+            if (currentTeam === 0) {
+                teamAList.appendChild(btn);
+            } else if (currentTeam === 1) {
+                teamBList.appendChild(btn);
+            } else {
+                teamUnassignedList.appendChild(btn);
+            }
+        });
     }
 
     function renderTaimanFighterSelector(players, fighters) {
@@ -2362,10 +2439,13 @@ window.onload = () => {
         });
     }
 
-    socket.on("updateRoom", ({ players, drawRule, grudgeRule, grudgeHate, taimanMode: tm, taimanFighters: tf }) => {
+    socket.on("updateRoom", ({ players, drawRule, grudgeRule, grudgeHate, taimanMode: tm, taimanFighters: tf, teamMode: team, teamAssignments: ta }) => {
         drawRule = drawRule || "classic";
         isTaimanMode = Boolean(tm);
         taimanFighters = tf || [];
+        isTeamMode = Boolean(team);
+        teamAssignments = ta || {};
+        window._latestRoomPlayers = players;
         playerList.innerHTML = "";
 
         const me = players.find(player => player.id === socket.id);
@@ -2396,9 +2476,11 @@ window.onload = () => {
                 : "";
 
             const isFighterPlayer = isTaimanMode && taimanFighters.includes(player.id);
+            const playerTeam = isTeamMode ? (teamAssignments[player.id] !== undefined ? teamAssignments[player.id] : null) : null;
+            const teamLabel = isTeamMode && playerTeam !== null ? ` <span style="font-size:11px;color:${playerTeam === 0 ? '#4ecca3' : '#ff6363'}">[${playerTeam === 0 ? 'A' : 'B'}]</span>` : "";
             playerList.innerHTML += `
                 <div class="player-card ${!isSpectatorPlayer && player.ready ? "ready" : "not-ready"} ${player.disconnected ? "disconnected-player-card" : ""} ${isSpectatorPlayer ? "spectator-player-card" : ""}">
-                    <span class="player-name">${player.host ? "👑 " : ""}${isSpectatorPlayer ? "👁 " : ""}${isFighterPlayer ? "⚔ " : ""}${escapeHtml(player.name)}${disconnectedLabel(player)}</span>
+                    <span class="player-name">${player.host ? "👑 " : ""}${isSpectatorPlayer ? "👁 " : ""}${isFighterPlayer ? "⚔ " : ""}${escapeHtml(player.name)}${teamLabel}${disconnectedLabel(player)}</span>
                     <span class="player-status">${statusText}${grudgeHateHtml}</span>
                 </div>
             `;
@@ -2408,7 +2490,11 @@ window.onload = () => {
         const allReady = activePlayers.every(player => player.ready);
 
         let canStart;
-        if (isTaimanMode) {
+        if (isTeamMode) {
+            const team0 = activePlayers.filter(p => teamAssignments[p.id] === 0);
+            const team1 = activePlayers.filter(p => teamAssignments[p.id] === 1);
+            canStart = team0.length > 0 && team1.length > 0 && team0.length === team1.length && allReady;
+        } else if (isTaimanMode) {
             const fighterObjs = taimanFighters.map(fid => players.find(p => p.id === fid)).filter(Boolean);
             canStart = fighterObjs.length === 2 && fighterObjs.every(p => p.ready && !p.disconnected);
         } else {
@@ -2421,13 +2507,21 @@ window.onload = () => {
             if (ruleSelector) ruleSelector.style.display = "block";
             if (ruleDisplay) ruleDisplay.style.display = "none";
             if (isTaimanMode) renderTaimanFighterSelector(players, taimanFighters);
+            if (teamAssignOpenBtn) {
+                teamAssignOpenBtn.style.display = isTeamMode ? "inline-block" : "none";
+            }
+            // チーム設定モーダルが開いていたら再レンダリング
+            if (isTeamMode && teamAssignModalOverlay && teamAssignModalOverlay.style.display !== "none") {
+                renderTeamAssignModal(players);
+            }
         } else {
             startGameButton.style.display = "none";
             if (ruleSelector) ruleSelector.style.display = "none";
             if (ruleDisplay) ruleDisplay.style.display = "block";
+            if (teamAssignOpenBtn) teamAssignOpenBtn.style.display = "none";
         }
 
-        applyRuleUI(drawRule, grudgeRule, isTaimanMode);
+        applyRuleUI(drawRule, grudgeRule, isTaimanMode, isTeamMode);
     });
 
     readyButton.onclick = () => {
@@ -2821,7 +2915,36 @@ window.onload = () => {
             bindStatusEffectEvents(myPanel);
         }
 
-        const enemies = latestGame.turnOrder.filter(player => player.id !== socket.id);
+        const allOthers = latestGame.turnOrder.filter(player => player.id !== socket.id);
+
+        // チームバトル時: チームメイトはアリーパネルへ、敵チームのみをenemySlotsへ
+        let enemies;
+        if (latestGame.teamMode && me) {
+            enemies = allOthers.filter(p => p.team !== me.team);
+            const allies = allOthers.filter(p => p.team === me.team);
+            if (allyPanel) {
+                if (allies.length > 0) {
+                    allyPanel.style.display = "";
+                    allyPanel.innerHTML = allies.map(ally => `
+                        <div class="${ally.team === 0 ? 'team-a-indicator' : 'team-b-indicator'}">チームメイト [${ally.team === 0 ? 'A' : 'B'}]</div>
+                        <div class="my-name">${ally.defeated ? "💀 " : ""}${escapeHtml(ally.name)}${disconnectedLabel(ally)}</div>
+                        <div class="follower-line ${ally.defeated ? "owakon-text" : ""}">${followerText(ally)}</div>
+                        <div class="panel-hate">${hateIcons(ally.hate)}</div>
+                        ${statusEffectsHtml(ally)}
+                    `).join("<hr style='border-color:rgba(78,204,163,0.2);margin:6px 0;'>");
+                    bindStatusEffectEvents(allyPanel);
+                } else {
+                    allyPanel.style.display = "none";
+                    allyPanel.innerHTML = "";
+                }
+            }
+        } else {
+            enemies = allOthers;
+            if (allyPanel) {
+                allyPanel.style.display = "none";
+                allyPanel.innerHTML = "";
+            }
+        }
 
         const activeEnemies = enemies.filter(e => !e.defeated);
         const allEnemiesKaikakou = activeEnemies.length > 0 && activeEnemies.every(e =>
@@ -2829,6 +2952,7 @@ window.onload = () => {
         );
 
         battleField.classList.toggle("taiman-battle", Boolean(latestGame.taimanMode));
+        battleField.classList.toggle("team-battle", Boolean(latestGame.teamMode));
 
         enemySlots.forEach((slot, index) => {
             const enemy = enemies[index];
@@ -3382,9 +3506,17 @@ window.onload = () => {
         document.body.classList.remove("mobile-card-action-open");
         updateMobileActionPanel();
 
-        gameOverText.innerText = isWinner
-            ? "勝利！最後まで生き残った"
-            : `${winner.name} の勝利`;
+        if (latestGame && latestGame.teamMode && latestGame.winnerTeam !== null && latestGame.winnerTeam !== undefined) {
+            const me = latestGame.turnOrder.find(p => p.id === socket.id);
+            const myTeam = me ? me.team : null;
+            const isTeamWinner = myTeam === latestGame.winnerTeam;
+            const teamLabel = latestGame.winnerTeam === 0 ? "チーム A" : "チーム B";
+            gameOverText.innerText = isTeamWinner ? `勝利！${teamLabel} の勝利` : `${teamLabel} の勝利`;
+        } else {
+            gameOverText.innerText = isWinner
+                ? "勝利！最後まで生き残った"
+                : `${winner.name} の勝利`;
+        }
 
         renderGameOverKime(winner.id);
         renderGameOverResults(winner.id);
@@ -3439,6 +3571,8 @@ window.onload = () => {
         if (deckViewerOverlay) deckViewerOverlay.style.display = "none";
         isTaimanMode = false;
         taimanFighters = [];
+        isTeamMode = false;
+        teamAssignments = {};
 
         readyButton.innerText = "準備完了";
         readyButton.classList.remove("cancel-ready");

@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>インターネット世紀末</title>
   <link rel="icon" href="data:,">
-  <link rel="stylesheet" href="css/style.css?v=8">
+  <link rel="stylesheet" href="css/style.css?v=9">
   <link rel="stylesheet" href="css/pc.css?v=5">
   <link rel="stylesheet" href="css/mobile.css?v=5">
   <link rel="stylesheet" href="css/mac.css">
@@ -136,11 +136,13 @@
           <button class="rule-select-btn" id="ruleClassicBtn">通常ルール</button>
           <button class="rule-select-btn" id="grudgeRuleBtn">遺恨ルール</button>
           <button class="rule-select-btn" id="taimanModeBtn">タイマンルール</button>
+          <button class="rule-select-btn" id="teamModeBtn">チームバトル</button>
         </div>
         <div class="rule-selector-sub-row">
           <button type="button" class="rule-desc-toggle-btn" id="hostRuleDescToggleBtn">？ ルール説明</button>
           <button type="button" class="fighter-select-open-btn" id="fighterSelectOpenBtn" style="display:none;">⚔
             ファイター選択</button>
+          <button type="button" class="fighter-select-open-btn" id="teamAssignOpenBtn" style="display:none;">👥 チーム設定</button>
         </div>
       </div>
 
@@ -169,6 +171,29 @@
           <button type="button" id="fighterModalCloseBtn" class="rule-desc-modal-close">✕</button>
         </div>
         <div id="taimanFighterList" class="fighter-modal-list"></div>
+      </div>
+    </div>
+
+    <div class="rule-desc-modal-overlay" id="teamAssignModalOverlay" style="display:none;">
+      <div class="rule-desc-modal team-assign-modal">
+        <div class="rule-desc-modal-header">
+          <strong>👥 チーム設定</strong>
+          <button type="button" id="teamAssignModalCloseBtn" class="rule-desc-modal-close">✕</button>
+        </div>
+        <div class="team-assign-body">
+          <div class="team-assign-col" id="teamACol">
+            <div class="team-assign-label team-a-label">チーム A</div>
+            <div class="team-assign-list" id="teamAList"></div>
+          </div>
+          <div class="team-assign-col" id="teamBCol">
+            <div class="team-assign-label team-b-label">チーム B</div>
+            <div class="team-assign-list" id="teamBList"></div>
+          </div>
+        </div>
+        <div class="team-assign-unassigned">
+          <div class="team-assign-unassigned-label">未割り当て</div>
+          <div id="teamUnassignedList"></div>
+        </div>
       </div>
     </div>
 
@@ -274,6 +299,8 @@
 
       <div class="my-panel" id="myPanel"></div>
 
+      <div class="ally-panel" id="allyPanel" style="display:none;"></div>
+
       <div class="card-detail" id="cardDetail">
         <h3>カード効果</h3>
         <p>カードにカーソルを合わせると効果が表示されます。</p>
@@ -341,7 +368,7 @@
 
   <script src="/socket.io/socket.io.js"></script>
   <script src="js/soundManager.js?v=4"></script>
-  <script src="js/main.js?v=9"></script>
+  <script src="js/main.js?v=10"></script>
   <script src="js/dev.js?v=4"></script>
   <script src="js/trapCutin.js?v=4"></script>
 

@@ -3421,3 +3421,125 @@ body.battle-active .mobile-trap-waiting-notice.show {
         flex-direction: column;
     }
 }
+
+/* =========================================================
+   チームバトルモード
+   ========================================================= */
+
+.team-assign-modal {
+    min-width: 320px;
+}
+
+.team-assign-body {
+    display: flex;
+    gap: 12px;
+    padding: 12px 0;
+}
+
+.team-assign-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.team-assign-label {
+    font-size: 13px;
+    font-weight: bold;
+    padding: 4px 8px;
+    border-radius: 6px;
+    text-align: center;
+}
+
+.team-a-label {
+    background: rgba(78, 204, 163, 0.25);
+    color: #4ecca3;
+}
+
+.team-b-label {
+    background: rgba(255, 99, 99, 0.25);
+    color: #ff6363;
+}
+
+.team-assign-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-height: 40px;
+}
+
+.team-assign-unassigned {
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding-top: 10px;
+    margin-top: 4px;
+}
+
+.team-assign-unassigned-label {
+    font-size: 11px;
+    color: rgba(255,255,255,0.45);
+    margin-bottom: 6px;
+}
+
+.team-assign-player-btn {
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    text-align: left;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: white;
+    cursor: pointer;
+    width: 100%;
+}
+
+.team-assign-player-btn:hover {
+    background: rgba(255,255,255,0.15);
+}
+
+.team-a-player {
+    background: rgba(78, 204, 163, 0.15);
+    border-color: rgba(78, 204, 163, 0.4);
+}
+
+.team-b-player {
+    background: rgba(255, 99, 99, 0.15);
+    border-color: rgba(255, 99, 99, 0.4);
+}
+
+/* アリーパネル */
+.ally-panel {
+    background: rgba(78, 204, 163, 0.08);
+    border: 1px solid rgba(78, 204, 163, 0.3);
+    border-radius: 10px;
+    padding: 10px;
+    font-size: 13px;
+}
+
+.team-battle .ally-panel {
+    display: block !important;
+}
+
+/* チームインジケーター */
+.team-a-indicator {
+    color: #4ecca3;
+    font-size: 10px;
+    margin-bottom: 2px;
+}
+
+.team-b-indicator {
+    color: #ff6363;
+    font-size: 10px;
+    margin-bottom: 2px;
+}
+
+.enemy-team-a-indicator {
+    color: #4ecca3;
+    font-size: 10px;
+    margin-bottom: 2px;
+}
+
+.enemy-team-b-indicator {
+    color: #ff6363;
+    font-size: 10px;
+    margin-bottom: 2px;
+}
