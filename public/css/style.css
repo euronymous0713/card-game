@@ -320,6 +320,10 @@ button:disabled {
     display: none;
 }
 
+.team-battle .enemy-panel.empty-enemy {
+    display: none;
+}
+
 .taiman-battle .enemy-panel {
     width: 420px;
     flex-shrink: 0;
@@ -3513,17 +3517,11 @@ body.battle-active .mobile-trap-waiting-notice.show {
     border-color: rgba(255, 99, 99, 0.4);
 }
 
-/* アリーパネル */
+/* アリーパネル（enemy-panel と同じグリッドセルに配置し、色味だけ差別化） */
 .ally-panel {
-    background: rgba(78, 204, 163, 0.08);
-    border: 1px solid rgba(78, 204, 163, 0.3);
-    border-radius: 10px;
-    padding: 10px;
-    font-size: 13px;
-}
-
-.team-battle .ally-panel {
-    display: block !important;
+    background: rgba(78, 204, 163, 0.12);
+    border-color: rgba(78, 204, 163, 0.45);
+    box-shadow: 0 0 16px rgba(78, 204, 163, 0.2);
 }
 
 /* チームインジケーター */
