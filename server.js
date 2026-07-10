@@ -47,7 +47,8 @@ app.get("/api/cards", (req, res) => {
         rarity: c.rarity,
         type: c.type,
         effect: c.effect,
-        hateText: c.hateText
+        hateText: c.hateText,
+        teamOnly: Boolean(c.teamOnly)
     })));
 });
 
@@ -131,8 +132,10 @@ function selectRarityByWeight() {
     return "C";
 }
 
-function getCardsByRarity(rarity) {
-    return CARD_MASTER.filter(card => normalizeRarity(card.rarity) === rarity);
+function getCardsByRarity(rarity, includeTeamOnly = false) {
+    return CARD_MASTER.filter(card =>
+        normalizeRarity(card.rarity) === rarity && (includeTeamOnly || !card.teamOnly)
+    );
 }
 
 function generateTaimanRefillDeck() {
@@ -196,10 +199,12 @@ function generateTaimanDraftOptionsFromPool(rarityPool, kindPool, round) {
     return [setA, setB];
 }
 
-function selectRandomCardByRarity() {
+function selectRandomCardByRarity(teamMode = false) {
     const selectedRarity = selectRarityByWeight();
-    const candidates = getCardsByRarity(selectedRarity);
-    const cardPool = candidates.length > 0 ? candidates : CARD_MASTER;
+    const candidates = getCardsByRarity(selectedRarity, teamMode);
+    const cardPool = candidates.length > 0
+        ? candidates
+        : CARD_MASTER.filter(card => teamMode || !card.teamOnly);
 
     return cardPool[Math.floor(Math.random() * cardPool.length)];
 }
@@ -228,10 +233,10 @@ function generateReconnectToken() {
     return crypto.randomBytes(24).toString("hex");
 }
 
-function generateCardInstance(cardId = null) {
+function generateCardInstance(cardId = null, teamMode = false) {
     const baseCard = cardId
         ? CARD_MASTER.find(card => card.id === cardId)
-        : selectRandomCardByRarity();
+        : selectRandomCardByRarity(teamMode);
 
     if (!baseCard) return null;
 
@@ -244,6 +249,7 @@ function generateCardInstance(cardId = null) {
 }
 
 function drawCards(player, maxDraw = 4, game = null) {
+    const teamMode = Boolean(game && game.teamMode);
     if (Array.isArray(player.deck)) {
         if (player.deck.length === 0) {
             player.deck = generateTaimanRefillDeck();
@@ -261,7 +267,7 @@ function drawCards(player, maxDraw = 4, game = null) {
     }
     let drawn = 0;
     while (player.hand.length < 4 && drawn < maxDraw) {
-        const card = generateCardInstance();
+        const card = generateCardInstance(null, teamMode);
         if (card) {
             player.hand.push(card);
             drawn++;
@@ -269,10 +275,11 @@ function drawCards(player, maxDraw = 4, game = null) {
     }
 }
 
-function drawCardsHandManage(player, drawCount, maxHand = 4) {
+function drawCardsHandManage(player, drawCount, maxHand = 4, game = null) {
+    const teamMode = Boolean(game && game.teamMode);
     let drawn = 0;
     while (player.hand.length < maxHand && drawn < drawCount) {
-        const card = generateCardInstance();
+        const card = generateCardInstance(null, teamMode);
         if (card) {
             player.hand.push(card);
             drawn++;
@@ -312,7 +319,7 @@ function createGameState(players, drawRule = "classic", grudgeHate = {}, grudgeR
             team: isTeamMode ? (teamAssignments[player.id] ?? null) : null
         };
 
-        drawCards(gamePlayer);
+        drawCards(gamePlayer, 4, { teamMode: isTeamMode });
         return gamePlayer;
     });
 
@@ -694,7 +701,7 @@ function moveToNextAliveTurn(game) {
                 ? Math.min(1, baseCount)
                 : baseCount;
             nextPlayer.cardsPlayedThisTurn = 0;
-            drawCardsHandManage(nextPlayer, drawCount);
+            drawCardsHandManage(nextPlayer, drawCount, 4, game);
         } else {
             drawCards(nextPlayer, drawLimit, game);
         }
@@ -2819,12 +2826,33 @@ io.on("connection", socket => {
             }
         }
 
+        let resolvedAllyTarget = null;
+        if (usedCard.targetType === "ally") {
+            if (!game.teamMode || caster.team === null || caster.team === undefined) {
+                caster.hand.push(usedCard);
+                socket.emit("errorMessage", "このカードはチーム戦専用です");
+                return;
+            }
+
+            resolvedAllyTarget = game.turnOrder.find(player =>
+                player.team === caster.team && player.id !== caster.id && !player.defeated
+            );
+
+            if (!resolvedAllyTarget) {
+                caster.hand.push(usedCard);
+                socket.emit("errorMessage", "対象にできるチームメイトがいません");
+                return;
+            }
+        }
+
         const finalTarget =
             usedCard.targetType === "self"
                 ? caster
                 : usedCard.targetType === "allEnemies"
                     ? null
-                    : target;
+                    : usedCard.targetType === "ally"
+                        ? resolvedAllyTarget
+                        : target;
 
         if (usedCard.targetType !== "allEnemies" && !finalTarget) {
             caster.hand.push(usedCard);
@@ -3067,13 +3095,13 @@ io.on("connection", socket => {
             const selfHateBonusResult = applySelfHateBonus(usedCard, caster, 0, usedCard.heal);
             const totalHeal = selfHateBonusResult.heal;
 
-            const beforeFollowers = caster.followers;
-            caster.followers = Math.min(10000, caster.followers + totalHeal);
-            const healAmount = Math.max(0, caster.followers - beforeFollowers);
+            const beforeFollowers = finalTarget.followers;
+            finalTarget.followers = Math.min(10000, finalTarget.followers + totalHeal);
+            const healAmount = Math.max(0, finalTarget.followers - beforeFollowers);
 
             if (usedCard.clearStatus) {
-                caster.statusEffects = [];
-                caster.skipTurns = 0;
+                finalTarget.statusEffects = [];
+                finalTarget.skipTurns = 0;
             }
 
             if (usedCard.hateTarget === "self") {
@@ -3086,7 +3114,7 @@ io.on("connection", socket => {
 
             if (usedCard.statusType) {
                 const sInfo = statusInfo(usedCard.statusType);
-                addStatusEffect(caster, {
+                addStatusEffect(finalTarget, {
                     type: usedCard.statusType,
                     remainingTurns: Number(usedCard.durationTurns || 1),
                     sourcePlayerId: caster.id,
@@ -3352,7 +3380,7 @@ io.on("connection", socket => {
         const player = result.room.game.turnOrder.find(p => p.id === playerId);
         if (!player) return;
 
-        drawCards(player);
+        drawCards(player, 4, result.room.game);
         emitGameUpdate(result.roomId);
     });
 

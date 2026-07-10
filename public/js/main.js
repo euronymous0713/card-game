@@ -1117,6 +1117,7 @@ window.onload = () => {
                             <div class="card-list-item-head">
                                 <span class="card-list-rarity ${rarityClass(rarity)}">${rarity}</span>
                                 <strong>${card.name}</strong>
+                                ${card.teamOnly ? `<span class="card-list-team-only">チーム戦専用</span>` : ""}
                             </div>
                             <div class="card-list-meta">
                                 ${card.type || cardKindLabel(card.kind)} / ${cardKindLabel(card.kind)}

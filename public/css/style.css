@@ -1902,6 +1902,17 @@ body.battle-active .mobile-trap-waiting-notice.show {
     text-align: center;
 }
 
+.card-list-team-only {
+    flex: 0 0 auto;
+    padding: 2px 7px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 700;
+    background: rgba(78, 204, 163, 0.18);
+    border: 1px solid rgba(78, 204, 163, 0.5);
+    color: #4ecca3;
+}
+
 .card-list-meta {
     margin-bottom: 8px;
     color: #00ffe1;
