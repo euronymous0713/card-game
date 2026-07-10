@@ -2513,9 +2513,15 @@ io.on("connection", socket => {
         if (!player || !player.host) return;
         if (!room.teamMode) return;
         const valid = {};
+        const teamCounts = [0, 0];
         Object.entries(assignments || {}).forEach(([pid, team]) => {
-            if (room.players.some(p => p.id === pid && !p.disconnected) && (team === 0 || team === 1)) {
+            if (
+                room.players.some(p => p.id === pid && !p.disconnected && !p.spectator) &&
+                (team === 0 || team === 1) &&
+                teamCounts[team] < 2
+            ) {
                 valid[pid] = team;
+                teamCounts[team]++;
             }
         });
         room.teamAssignments = valid;
@@ -2569,6 +2575,10 @@ io.on("connection", socket => {
             }
             if (team0.length !== team1.length) {
                 socket.emit("errorMessage", "チームバトル：両チームの人数を揃えてください");
+                return;
+            }
+            if (team0.length > 2 || team1.length > 2) {
+                socket.emit("errorMessage", "チームバトル：1チーム最大2人までです");
                 return;
             }
             if (!activePlayers.every(p => p.ready)) {

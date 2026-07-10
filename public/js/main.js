@@ -2273,7 +2273,7 @@ window.onload = () => {
         normal: "インターネット世紀末の通常ルールです。",
         grudge: "プレイヤーを脱落させるとそのヘイト値が自分のヘイトに加算されます。ゲーム終了時のヘイトは次の試合の開始ヘイトに引き継がれます。",
         taiman: "1対1専用。ドラフトで20枚のデッキを組み戦います。",
-        team: "2チームに分かれて戦うルールです。チーム同士の人数を揃える必要があります。ターンはチーム交互（A→B→A→B…）に進行し、チームメイトを攻撃対象に選ぶことはできません。相手チームを全滅させたチームの勝利です。"
+        team: "2チームに分かれて戦うルールです（1チーム最大2人、最大2vs2）。チーム同士の人数を揃える必要があります。ターンはチーム交互（A→B→A→B…）に進行し、チームメイトを攻撃対象に選ぶことはできません。相手チームを全滅させたチームの勝利です。"
     };
 
     const ruleSelector = document.getElementById("ruleSelector");
@@ -2410,11 +2410,23 @@ window.onload = () => {
             btn.className = "team-assign-player-btn" + (currentTeam === 0 ? " team-a-player" : currentTeam === 1 ? " team-b-player" : "");
             btn.textContent = escapeHtml(p.name);
             btn.onclick = () => {
-                // サイクル：未割り当て→A(0)→B(1)→未割り当て
+                const teamSize = team => Object.entries(teamAssignments).filter(([pid, t]) => t === team && pid !== p.id).length;
+
+                // サイクル：未割り当て→A(0)→B(1)→未割り当て（満員のチームはスキップ、1チーム最大2人）
                 if (currentTeam === undefined || currentTeam === null) {
-                    teamAssignments[p.id] = 0;
+                    if (teamSize(0) < 2) {
+                        teamAssignments[p.id] = 0;
+                    } else if (teamSize(1) < 2) {
+                        teamAssignments[p.id] = 1;
+                    } else {
+                        return;
+                    }
                 } else if (currentTeam === 0) {
-                    teamAssignments[p.id] = 1;
+                    if (teamSize(1) < 2) {
+                        teamAssignments[p.id] = 1;
+                    } else {
+                        delete teamAssignments[p.id];
+                    }
                 } else {
                     delete teamAssignments[p.id];
                 }
