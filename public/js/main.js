@@ -2258,7 +2258,8 @@ window.onload = () => {
     const RULE_DESCS = {
         normal: "インターネット世紀末の通常ルールです。",
         grudge: "プレイヤーを脱落させるとそのヘイト値が自分のヘイトに加算されます。ゲーム終了時のヘイトは次の試合の開始ヘイトに引き継がれます。",
-        taiman: "1対1専用。ドラフトで20枚のデッキを組み戦います。"
+        taiman: "1対1専用。ドラフトで20枚のデッキを組み戦います。",
+        team: "2チームに分かれて戦うルールです。チーム同士の人数を揃える必要があります。ターンはチーム交互（A→B→A→B…）に進行し、チームメイトを攻撃対象に選ぶことはできません。相手チームを全滅させたチームの勝利です。"
     };
 
     const ruleSelector = document.getElementById("ruleSelector");
@@ -2321,7 +2322,7 @@ window.onload = () => {
         const isTaiman = Boolean(taimanMode);
         const isTeam = Boolean(teamMode);
         const isGrudge = !isTaiman && !isTeam && Boolean(grudgeRule);
-        currentRuleDesc = isTaiman ? RULE_DESCS.taiman : isGrudge ? RULE_DESCS.grudge : RULE_DESCS.normal;
+        currentRuleDesc = isTeam ? RULE_DESCS.team : isTaiman ? RULE_DESCS.taiman : isGrudge ? RULE_DESCS.grudge : RULE_DESCS.normal;
         currentRuleLabel = isTeam ? "チームバトル" : isTaiman ? "タイマンルール" : isGrudge ? "遺恨ルール" : "通常ルール";
         if (ruleDisplayLabel) ruleDisplayLabel.textContent = currentRuleLabel;
         if (fighterSelectOpenBtn) fighterSelectOpenBtn.style.display = isTaiman ? "inline-block" : "none";

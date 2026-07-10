@@ -2883,6 +2883,13 @@ body.battle-active .mobile-trap-waiting-notice.show {
     text-shadow: none;
 }
 
+#teamModeBtn.rule-select-btn-active {
+    background: rgba(255, 209, 102, 0.2);
+    color: #ffd166;
+    box-shadow: none;
+    text-shadow: none;
+}
+
 .taiman-fighter-label {
     font-size: 0.85em;
     color: #cc88ff;
