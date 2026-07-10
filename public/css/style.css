@@ -317,11 +317,11 @@ button:disabled {
 }
 
 .taiman-battle .enemy-panel.empty-enemy {
-    display: none;
+    display: none !important;
 }
 
 .team-battle .enemy-panel.empty-enemy {
-    display: none;
+    display: none !important;
 }
 
 .taiman-battle .enemy-panel {

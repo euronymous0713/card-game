@@ -65,6 +65,26 @@
         padding: 12px;
     }
 
+    .rule-selector-buttons {
+        width: 100%;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 4px;
+    }
+
+    .rule-select-btn {
+        flex: 1 1 auto;
+        padding: 8px 6px;
+        font-size: 12px;
+        white-space: nowrap;
+    }
+
+    .rule-selector-sub-row {
+        width: 100%;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
     .player-card {
         max-width: none;
         font-size: 15px;
@@ -2355,7 +2375,7 @@
         font-size: clamp(30px, 10vw, 52px) !important;
         line-height: 1.15 !important;
         margin-bottom: 18px !important;
-        white-space: nowrap !important;
+        white-space: normal !important;
     }
 
     body:not(.battle-active) .subtitle {
@@ -4473,6 +4493,4 @@
         padding: 14px 12px;
         gap: 10px;
     }
-}
-
 }
